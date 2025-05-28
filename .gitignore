@@ -1,0 +1,19 @@
+# Developer Folders
+dist/
+build/
+node_modules/
+
+# Logs and temp files
+*.log
+tmp/
+
+# Environment variables
+.env
+.env.*
+
+# IDE specific files
+.idea/
+.vscode/
+
+# System files
+.DS_Store

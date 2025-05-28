@@ -1,0 +1,116 @@
+import { Tool } from "@modelcontextprotocol/sdk/types.js";
+import { z } from "zod";
+import { BaseTool } from "./base.js";
+
+export class FetchDatasetTool extends BaseTool {
+  name = "fetch-dataset";
+  description = "Fetch a dataset from the Census Bureau’s API";
+  
+  inputSchema: Tool["inputSchema"] = {
+    type: "object",
+    properties: {
+      dataset: {
+        type: "string",
+        description: "The dataset identifier (e.g., 'acs/acs1')",
+      },
+      year: {
+        type: "number",
+        description: "The year of the data",
+      },
+      variables: {
+        type: "array",
+        items: { type: "string" },
+        description: "Array of variable codes to fetch",
+      },
+      for: {
+        type: "array",
+        items: { type: "string" },
+        description: "Restricts geography to various levels and is required in most datasets (optional)",
+      },
+      in: {
+        type: "array",
+        items: { type: "string" },
+        description: "Restricts geography to smaller areas than state level (optional)",
+      },
+      predicates: {
+        type: "object",
+        additionalProperties: { type: "string" },
+        description: "Used to filter variable values, e.g. AGEGROUP=29, PAYANN=100000, time=2015 (optional)",
+      },
+      outputFormat: {
+      	type: "string",
+      	description: "Used to specify the output format, e.g. csv, json (optional)"
+      }
+    },
+    required: ["dataset", "year", "variables"],
+  };
+
+  argsSchema = z.object({
+    dataset: z.string(),
+    year: z.number(),
+    variables: z.array(z.string()),
+    for: z.record(z.string(), z.string()).optional(),
+  	in: z.record(z.string(), z.string()).optional(),
+  	predicates: z.record(z.string(), z.string()).optional(),
+  	outputFormat: z.string().optional()
+  });
+
+  async handler(args: z.infer<typeof this.argsSchema>) {
+    console.log("fetch-dataset tool called");
+
+    const apiKey = process.env.CENSUS_API_KEY;
+    if (!apiKey) {
+      return this.createErrorResponse("Error: CENSUS_API_KEY is not set.");
+    }
+
+    const baseUrl = `https://api.census.gov/data/${args.year}/${args.dataset}`;
+    const query = new URLSearchParams({
+      get: args.variables.join(","),
+      ...(args.outputFormat ? { outputFormat: args.outputFormat } : {})
+    });
+
+    if (args.for) {
+		  query.append("for", Object.entries(args.for).map(([k, v]) => `${k}:${v}`).join(" "));
+		}
+		
+		if (args.in) {
+		  query.append("in", Object.entries(args.in).map(([k, v]) => `${k}:${v}`).join(" "));
+		}
+
+		if (args.predicates) {
+		  for (const [key, value] of Object.entries(args.predicates)) {
+		    query.append(key, value);
+		  }
+		}
+
+    query.append("key", apiKey);
+
+    const url = `${baseUrl}?${query.toString()}`;
+
+    try {
+      const fetch = (await import("node-fetch")).default;
+      const res = await fetch(url);
+      console.log(`URL Attempted: ${url}`);
+      
+      if (!res.ok) {
+        return this.createErrorResponse(
+          `Census API error: ${res.status} ${res.statusText}`
+        );
+      }
+
+      const data = (await res.json()) as string[][];
+      const [headers, ...rows] = data;
+      const output = rows
+        .map((row) => headers.map((h, i) => `${h}: ${row[i]}`).join(", "))
+        .join("\n");
+
+      return this.createSuccessResponse(
+        `Response from ${args.dataset}:\n${output}`
+      );
+    } catch (err) {
+      return this.createErrorResponse(
+        `Fetch failed: ${(err as Error).message}`
+      );
+    }
+  }
+}
