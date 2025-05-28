@@ -23,14 +23,14 @@ export class FetchDatasetTool extends BaseTool {
         description: "Array of variable codes to fetch",
       },
       for: {
-        type: "array",
+        type: "object",
         items: { type: "string" },
-        description: "Restricts geography to various levels and is required in most datasets (optional)",
+        description: "Restricts geography to various levels and is required in most datasets, e.g. state: 01,02, county: 001 (optional)",
       },
       in: {
-        type: "array",
+        type: "object",
         items: { type: "string" },
-        description: "Restricts geography to smaller areas than state level (optional)",
+        description: "Restricts geography to areas state and smaller, e.g. state: 01  (optional)",
       },
       predicates: {
         type: "object",
@@ -49,8 +49,8 @@ export class FetchDatasetTool extends BaseTool {
     dataset: z.string(),
     year: z.number(),
     variables: z.array(z.string()),
-    for: z.record(z.string(), z.string()).optional(),
-  	in: z.record(z.string(), z.string()).optional(),
+    for: z.string().optional(),
+  	in: z.string().optional(),
   	predicates: z.record(z.string(), z.string()).optional(),
   	outputFormat: z.string().optional()
   });
@@ -70,12 +70,12 @@ export class FetchDatasetTool extends BaseTool {
     });
 
     if (args.for) {
-		  query.append("for", Object.entries(args.for).map(([k, v]) => `${k}:${v}`).join(" "));
-		}
-		
-		if (args.in) {
-		  query.append("in", Object.entries(args.in).map(([k, v]) => `${k}:${v}`).join(" "));
-		}
+      query.append("for", args.for);
+    }
+
+    if (args.in) {
+      query.append("in", args.in);
+    }
 
 		if (args.predicates) {
 		  for (const [key, value] of Object.entries(args.predicates)) {
