@@ -4,7 +4,9 @@
   "type": "module",
   "scripts": {
     "build": "tsc && shx chmod +x dist/*.js",
+    "docker-build": "docker build -t census-api .",
     "prepare": "npm run build",
+    "test": "vitest --silent=false",
     "watch": "tsc --watch"
   },
   "dependencies": {
@@ -15,6 +17,7 @@
   "devDependencies": {
     "@types/node": "^22.15.23",
     "shx": "^0.4.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.4"
   }
 }

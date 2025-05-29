@@ -40,7 +40,7 @@ export class FetchDatasetTool extends BaseTool {
       descriptive: {
         type: "boolean",
         description: "Add variable labels to the second row of the API results"
-      }
+      },
       outputFormat: {
       	type: "string",
       	description: "Used to specify the output format, e.g. csv, json (optional)"
@@ -74,7 +74,7 @@ export class FetchDatasetTool extends BaseTool {
       ...(args.outputFormat ? { outputFormat: args.outputFormat } : {})
     });
 
-    const descriptive = args.descriptive || false;
+    const descriptive = args.descriptive?.toString() ?? "false";
 
     if (args.for) {
       query.append("for", args.for);
