@@ -20,7 +20,7 @@ With Docker desktop running, run `docker build -t census-api` to build the proje
 
 ### Testing
 
-This project uses (Vitest)[https://vitest.dev/] to test the functionality of the server.
+This project uses [Vitest](https://vitest.dev/) to test the functionality of the server.
 
 To run tests, run `npm run test`. 
 
