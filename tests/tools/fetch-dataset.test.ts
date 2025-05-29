@@ -153,6 +153,21 @@ describe('FetchDatasetTool', () => {
       );
     });
 
+    it('should handle group variable', async () => {
+      const args = {
+        dataset: 'acs/acs1',
+        year: 2019,
+        variables: ['group(B02015)'],
+        for: 'state:*',
+      };
+
+      await tool.handler(args);
+
+      const calledUrl = mockFetch.mock.calls[0][0];
+      expect(calledUrl).toContain('get=group%28B02015%29');
+
+    });
+
     it('should include optional parameters in URL', async () => {
       const args = {
         dataset: 'acs/acs1',
