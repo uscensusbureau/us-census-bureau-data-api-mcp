@@ -37,6 +37,10 @@ export class FetchDatasetTool extends BaseTool {
         additionalProperties: { type: "string" },
         description: "Used to filter variable values, e.g. AGEGROUP=29, PAYANN=100000, time=2015 (optional)",
       },
+      descriptive: {
+        type: "boolean",
+        description: "Add variable labels to the second row of the API results"
+      }
       outputFormat: {
       	type: "string",
       	description: "Used to specify the output format, e.g. csv, json (optional)"
@@ -52,6 +56,7 @@ export class FetchDatasetTool extends BaseTool {
     for: z.string().optional(),
   	in: z.string().optional(),
   	predicates: z.record(z.string(), z.string()).optional(),
+    descriptive: z.boolean().optional(),
   	outputFormat: z.string().optional()
   });
 
@@ -69,6 +74,8 @@ export class FetchDatasetTool extends BaseTool {
       ...(args.outputFormat ? { outputFormat: args.outputFormat } : {})
     });
 
+    const descriptive = args.descriptive || false;
+
     if (args.for) {
       query.append("for", args.for);
     }
@@ -82,6 +89,8 @@ export class FetchDatasetTool extends BaseTool {
 		    query.append(key, value);
 		  }
 		}
+
+    query.append("descriptive", descriptive)
 
     query.append("key", apiKey);
 
