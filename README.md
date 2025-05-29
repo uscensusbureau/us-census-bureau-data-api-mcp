@@ -29,12 +29,13 @@ This section covers available tools in this MCP Server.
 
 ### Fetch Dataset
 A tool for fetching a dataset from the Census Bureau API. Accepts the following parameters:
-* Year (Required) - The vintage of the dataset, e.g. 1987.
+* Year (Required) - The vintage of the dataset, e.g. 1987
 * Dataset (Required) - The identifier of the dataset, e.g. "acs/acs1"
 * Variables (Required) - The required variables for returning a valid response, e.g. "NAME", "B01001_001E"
 * For (Optional) - Restricts geography to various levels and is required in most datasets
 * In (Optional) - Restricts geography to smaller areas than state level
 * Predicates (Optional) - Filter options for the dataset, e.g. "for": "state*"
+* Descriptive (Optional) - Add variable labels to API response
 * Output Format (Optional) - Specificies CSV or JSON output
 
 #### Example
