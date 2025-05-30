@@ -16,7 +16,7 @@ Run `npm install` to install the project’s dependencies.
 
 Then run `npm run build` to build the project.
 
-With Docker desktop running, run `docker build -t census-api` to build the project in Docker.
+With Docker desktop running, run `npm run docker-build` to build the project in Docker.
 
 ### Testing
 
