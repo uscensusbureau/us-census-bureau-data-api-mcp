@@ -24,8 +24,23 @@ This project uses [Vitest](https://vitest.dev/) to test the functionality of the
 
 To run tests, run `npm run test`. 
 
+## Available Methods
+
+The MCP server exposes two methods: `tools/list` and `tools/call`.
+
+## List Tools
+
+To list available tools, use the `tools/list` method with no arguments.
+
+### Example
+```
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' \
+| docker run --rm -i census-api
+```
+
 ## Available Tools
 This section covers available tools in this MCP Server.
+
 
 ### Fetch Summary Table
 The `fetch-summary-table` tool is for fetching a summary table from the Census Bureau API. It accepts the following arguments:
