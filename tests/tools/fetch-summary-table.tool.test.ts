@@ -5,7 +5,7 @@ vi.mock('node-fetch', () => ({
 }));
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { FetchDatasetTool } from '../../tools/fetch-dataset';
+import { FetchSummaryTableTool } from '../../tools/fetch-summary-table.tool';
 import { 
   validateToolStructure, 
   validateResponseStructure,
@@ -15,11 +15,11 @@ import {
   sampleCensusError
 } from '../helpers/test-utils.js';
 
-describe('FetchDatasetTool', () => {
-  let tool: FetchDatasetTool;
+describe('FetchSummaryTableTool', () => {
+  let tool: FetchSummaryTableTool;
 
   beforeEach(() => {
-    tool = new FetchDatasetTool();
+    tool = new FetchSummaryTableTool();
     mockFetch.mockClear();
   });
 
@@ -31,8 +31,8 @@ describe('FetchDatasetTool', () => {
   describe('Tool Configuration', () => {
     it('should have correct tool metadata', () => {
       validateToolStructure(tool);
-      expect(tool.name).toBe('fetch-dataset');
-      expect(tool.description).toBe('Fetch a dataset from the Census Bureau’s API');
+      expect(tool.name).toBe('fetch-summary-table');
+      expect(tool.description).toBe('Fetch a summary table from the Census Bureau’s API');
     });
 
     it('should have valid input schema', () => {

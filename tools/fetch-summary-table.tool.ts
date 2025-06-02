@@ -2,9 +2,9 @@ import { Tool } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
 import { BaseTool } from "./base.js";
 
-export class FetchDatasetTool extends BaseTool {
-  name = "fetch-dataset";
-  description = "Fetch a dataset from the Census Bureau’s API";
+export class FetchSummaryTableTool extends BaseTool {
+  name = "fetch-summary-table";
+  description = "Fetch a summary table from the Census Bureau’s API";
   
   inputSchema: Tool["inputSchema"] = {
     type: "object",
@@ -61,7 +61,6 @@ export class FetchDatasetTool extends BaseTool {
   });
 
   async handler(args: z.infer<typeof this.argsSchema>) {
-    console.log("fetch-dataset tool called");
 
     const apiKey = process.env.CENSUS_API_KEY;
     if (!apiKey) {

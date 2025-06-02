@@ -12,7 +12,7 @@ import { z } from "zod";
 import { MCPTool, ToolRegistry } from "./tools/base.js";
 
 // Import specific tools
-import { FetchDatasetTool } from "./tools/fetch-dataset.js";
+import { FetchSummaryTableTool } from "./tools/fetch-summary-table.tool.js";
 
 // MCP Server class
 class MCPServer {
@@ -84,7 +84,7 @@ async function main() {
   const mcpServer = new MCPServer("census-api", "0.1.0");
 
   // Register tools here
-  mcpServer.registerTool(new FetchDatasetTool());
+  mcpServer.registerTool(new FetchSummaryTableTool());
 
   const transport = new StdioServerTransport();
   await mcpServer.connect(transport);

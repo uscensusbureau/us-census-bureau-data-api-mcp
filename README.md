@@ -27,8 +27,8 @@ To run tests, run `npm run test`.
 ## Available Tools
 This section covers available tools in this MCP Server.
 
-### Fetch Dataset
-A tool for fetching a dataset from the Census Bureau API. Accepts the following parameters:
+### Fetch Summary Table
+The `fetch-summary-table` tool is for fetching a summary table from the Census Bureau API. It accepts the following arguments:
 * Year (Required) - The vintage of the dataset, e.g. 1987
 * Dataset (Required) - The identifier of the dataset, e.g. "acs/acs1"
 * Variables (Required) - The required variables for returning a valid response, e.g. "NAME", "B01001_001E"
@@ -40,7 +40,7 @@ A tool for fetching a dataset from the Census Bureau API. Accepts the following 
 
 #### Example
 ```
-echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"fetch-dataset","arguments":{"dataset":"acs/acs1","year":2022,"variables":["NAME","B01001_001E"],"for":"state:01,13"}}}' \
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"fetch-summary-table","arguments":{"dataset":"acs/acs1","year":2022,"variables":["NAME","B01001_001E"],"for":"state:01,13"}}}' \
 | docker run --rm -i -e CENSUS_API_KEY=YOUR_API_KEY census-api
 ```
 For more information about the parameters above and all available predicates, review the Census Bureau’s [API documentation](https://www.census.gov/data/developers/guidance/api-user-guide.Core_Concepts.html#list-tab-559651575).
