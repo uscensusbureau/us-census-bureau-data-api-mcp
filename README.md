@@ -24,11 +24,18 @@ This project uses [Vitest](https://vitest.dev/) to test the functionality of the
 
 To run tests, run `npm run test`. 
 
+## Key Concepts
+
+* `index.ts` - Starts the MCP Server and registers tools.
+* `server.ts` - Defines the `McpServer` class that handles calls to the server, e.g. how `tools/list` and `tools/calls` respond to requests
+* `tools/` - Includes tool definitions and shared classes, e.g. `BaseTool` and `ToolRegistry`, to reduce repetition and exposes the tools list to the server
+* `schema/` - Houses each tool’s schema and is used to validate schemas in tests
+
 ## Available Methods
 
 The MCP server exposes two methods: `tools/list` and `tools/call`.
 
-## List Tools
+## Listing Tools
 
 To list available tools, use the `tools/list` method with no arguments.
 
@@ -39,8 +46,7 @@ echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' \
 ```
 
 ## Available Tools
-This section covers available tools in this MCP Server.
-
+This section covers tools that can be called.
 
 ### Fetch Summary Table
 The `fetch-summary-table` tool is for fetching a summary table from the Census Bureau API. It accepts the following arguments:
