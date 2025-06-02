@@ -17,10 +17,10 @@ jobs:
         with:
           node-version: 18
 
-    - name: Install modules
-      run: npm install
+      - name: Install modules
+        run: npm install
 
-    - name: Run ESLint
-      run: npx run eslint
- 
+      - name: Run ESLint
+        run: npm run lint
+   
  
