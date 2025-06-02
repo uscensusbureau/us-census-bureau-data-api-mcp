@@ -1,0 +1,25 @@
+name: ESLint Check
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - closed
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+    - name: Install modules
+      run: npm install
+
+    - name: Run ESLint
+      run: npx run eslint
+ 
+ 

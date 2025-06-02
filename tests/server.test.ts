@@ -1,6 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
+import { describe, it, expect, beforeEach } from 'vitest';
 import { z } from "zod";
 import { BaseTool } from "./tools/base.js";
 import { MockMCPServer } from "./mocks/server.mock.js";
@@ -130,10 +128,6 @@ describe("MCP Server ListTools Handler", () => {
             nested: z.array(z.string()),
           }),
         });
-
-        async handler(args: any) {
-          return this.createSuccessResponse("OK");
-        }
       })();
 
       mcpServer.registerTool(complexTool);

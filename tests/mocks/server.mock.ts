@@ -2,10 +2,16 @@ import { ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { MCPTool, ToolRegistry } from "../../tools/base.js";
 
+type Tool = {
+  name: string,
+  description: string,
+  inputSchema: Tool["inputSchema"]
+}
+
 export class MockMCPServer {
   private server: Server;
   private registry = new ToolRegistry();
-  private listToolsHandler: (() => Promise<{ tools: any[] }>) | null = null;
+  private listToolsHandler: (() => Promise<{ tools: Tool[] }>) | null = null;
 
   constructor(name: string, version: string) {
     this.server = new Server(

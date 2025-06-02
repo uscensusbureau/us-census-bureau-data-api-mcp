@@ -3,25 +3,34 @@ import { z } from "zod";
 import { BaseTool } from "./base.js";
 import { SummaryTableSchema } from '../schema/summary-table.schema.js';
 
-export class FetchSummaryTableTool extends BaseTool {
+type SummaryArgs = {
+  dataset: string;
+  year: number;
+  variables: string[];
+  for?: string;
+  in?: string;
+  predicates?: Record<string, string>;
+  descriptive?: boolean;
+  outputFormat?: string;
+}
+
+export class FetchSummaryTableTool extends BaseTool<SummaryArgs> {
   name = "fetch-summary-table";
   description = "Fetch a summary table from the Census Bureau’s API";
-  
   inputSchema: Tool["inputSchema"] = SummaryTableSchema as Tool["inputSchema"];
-
+  
   argsSchema = z.object({
     dataset: z.string(),
     year: z.number(),
     variables: z.array(z.string()),
     for: z.string().optional(),
-  	in: z.string().optional(),
-  	predicates: z.record(z.string(), z.string()).optional(),
+    in: z.string().optional(),
+    predicates: z.record(z.string(), z.string()).optional(),
     descriptive: z.boolean().optional(),
-  	outputFormat: z.string().optional()
+    outputFormat: z.string().optional()
   });
 
-  async handler(args: z.infer<typeof this.argsSchema>) {
-
+  async handler(args: SummaryArgs) {
     const apiKey = process.env.CENSUS_API_KEY;
     if (!apiKey) {
       return this.createErrorResponse("Error: CENSUS_API_KEY is not set.");
@@ -38,19 +47,16 @@ export class FetchSummaryTableTool extends BaseTool {
     if (args.for) {
       query.append("for", args.for);
     }
-
     if (args.in) {
       query.append("in", args.in);
     }
-
-		if (args.predicates) {
-		  for (const [key, value] of Object.entries(args.predicates)) {
-		    query.append(key, value);
-		  }
-		}
+    if (args.predicates) {
+      for (const [key, value] of Object.entries(args.predicates)) {
+        query.append(key, value);
+      }
+    }
 
     query.append("descriptive", descriptive)
-
     query.append("key", apiKey);
 
     const url = `${baseUrl}?${query.toString()}`;
@@ -58,6 +64,7 @@ export class FetchSummaryTableTool extends BaseTool {
     try {
       const fetch = (await import("node-fetch")).default;
       const res = await fetch(url);
+      
       console.log(`URL Attempted: ${url}`);
       
       if (!res.ok) {
@@ -68,6 +75,7 @@ export class FetchSummaryTableTool extends BaseTool {
 
       const data = (await res.json()) as string[][];
       const [headers, ...rows] = data;
+      
       const output = rows
         .map((row) => headers.map((h, i) => `${h}: ${row[i]}`).join(", "))
         .join("\n");

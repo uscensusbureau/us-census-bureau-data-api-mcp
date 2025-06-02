@@ -7,11 +7,9 @@ import {
   McpError,
 } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
-
-// Import tool infrastructure
 import { MCPTool, ToolRegistry } from "./tools/base.js";
 
-// MCP Server class
+
 export class MCPServer {
   private server: Server;
   private registry = new ToolRegistry();
@@ -21,7 +19,6 @@ export class MCPServer {
       { name, version },
       { capabilities: { tools: {} } }
     );
-
     this.setupHandlers();
   }
 
@@ -41,7 +38,7 @@ export class MCPServer {
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const toolName = request.params.name;
       const tool = this.registry.get(toolName);
-
+      
       if (!tool) {
         throw new McpError(
           ErrorCode.MethodNotFound,
@@ -52,7 +49,6 @@ export class MCPServer {
       try {
         // Validate arguments using the tool's schema
         const validatedArgs = tool.argsSchema.parse(request.params.arguments);
-        
         // Call the tool handler
         return await tool.handler(validatedArgs);
       } catch (err) {
@@ -67,7 +63,7 @@ export class MCPServer {
     });
   }
 
-  registerTool(tool: MCPTool) {
+  registerTool<T extends object>(tool: MCPTool<T>) {
     this.registry.register(tool);
   }
 
