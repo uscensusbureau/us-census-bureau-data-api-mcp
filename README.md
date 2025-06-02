@@ -23,7 +23,7 @@ With Docker desktop running, run `npm run docker-build` to build the project in 
 
 This project uses [Vitest](https://vitest.dev/) to test the functionality of the server.
 
-To run tests, run `npm run test`. 
+To run tests, run `npm run test`. To run ESLint, run `npm run lint`.
 
 ## Key Concepts
 
