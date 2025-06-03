@@ -93,6 +93,29 @@ describe('FetchSummaryTableTool', () => {
       };
       expect(() => tool.argsSchema.parse(validArgs)).not.toThrow();
     });
+
+    it('should accept dataset if tool match', () => {
+      const validArgs = {
+        dataset: "acs/acs1", // should be string
+        year: 2022, // should be number
+        variables: ['B01001_001E']
+      }
+
+      expect(() => tool.argsSchema.parse(validArgs)).not.toThrow();
+    });
+
+    it('should reject dataset if tool mismatch', () => {
+      const invalidArgs = {
+        dataset: "timeseries/data/set", // should be string
+        year: 2022, // should be number
+        variables: ['B01001_001E']
+      }
+
+      const result = tool.validateArgs(invalidArgs);
+
+      expect(() => tool.argsSchema.parse(invalidArgs)).toThrow();
+      expect(result.error.issues[0].message).toContain("Incompatible dataset");
+    });
   });
 
   describe('API Key Handling', () => {

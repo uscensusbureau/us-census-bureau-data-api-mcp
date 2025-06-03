@@ -2,6 +2,7 @@ import { Tool } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
 import { BaseTool } from "./base.js";
 import { SummaryTableSchema } from '../schema/summary-table.schema.js';
+import { datasetValidator } from '../schema/validators.js';
 
 type SummaryArgs = {
   dataset: string;
@@ -28,7 +29,21 @@ export class FetchSummaryTableTool extends BaseTool<SummaryArgs> {
     predicates: z.record(z.string(), z.string()).optional(),
     descriptive: z.boolean().optional(),
     outputFormat: z.string().optional()
+  }).superRefine((args, ctx) => {
+    const identfiedDataset = datasetValidator(args.dataset);
+
+    if(identfiedDataset.tool !== this.name) {
+      ctx.addIssue({
+        path: ["dataset"],
+        code: z.ZodIssueCode.custom,
+        message: identfiedDataset.message
+      })
+    }
   });
+
+  validateArgs(input: unknown) {
+    return this.argsSchema.safeParse(input);
+  }
 
   async handler(args: SummaryArgs) {
     const apiKey = process.env.CENSUS_API_KEY;
