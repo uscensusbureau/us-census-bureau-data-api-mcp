@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc && shx chmod +x dist/*.js",
+    "deploy": "npm run build && npm run docker-build",
     "docker-build": "docker build -t census-api .",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "prepare": "npm run build",

@@ -38,8 +38,17 @@ export function validateResponseStructure(response: object) {
   expect(typeof response.content[0].text).toBe('string');
 }
 
+export function validateJsonResponseStructure(response: object) {
+  expect(response).toHaveProperty('content');
+  expect(Array.isArray(response.content)).toBe(true);
+  expect(response.content.length).toBeGreaterThan(0);
+  expect(response.content[0]).toHaveProperty('type', 'json');
+  expect(response.content[0]).toHaveProperty('json');
+  expect(typeof response.content[0].json).toBe('object');
+}
+
 // Sample Census API response data
-export const sampleCensusData = [
+export const sampleSummaryTableData= [
   ['NAME', 'B01001_001E', 'state'],
   ['Alabama', '4903185', '01'],
   ['Alaska', '731158', '02'],

@@ -11,7 +11,7 @@ import {
   validateResponseStructure,
   createMockResponse,
   createMockFetchError,
-  sampleCensusData,
+  sampleSummaryTableData,
   sampleCensusError
 } from '../helpers/test-utils.js';
 
@@ -21,6 +21,8 @@ describe('FetchSummaryTableTool', () => {
   beforeEach(() => {
     tool = new FetchSummaryTableTool();
     mockFetch.mockClear();
+
+    process.env.CENSUS_API_KEY="test-api-key-12345"
   });
 
   afterEach(() => {
@@ -138,7 +140,7 @@ describe('FetchSummaryTableTool', () => {
     });
 
     it('should use API key when available', async () => {
-      mockFetch.mockResolvedValue(createMockResponse(sampleCensusData));
+      mockFetch.mockResolvedValue(createMockResponse(sampleSummaryTableData));
 
       const args = {
         dataset: 'acs/acs1',
@@ -156,7 +158,7 @@ describe('FetchSummaryTableTool', () => {
 
   describe('URL Construction', () => {
     beforeEach(() => {
-      mockFetch.mockResolvedValue(createMockResponse(sampleCensusData));
+      mockFetch.mockResolvedValue(createMockResponse(sampleSummaryTableData));
     });
 
     it('should construct basic URL correctly', async () => {
@@ -232,7 +234,7 @@ describe('FetchSummaryTableTool', () => {
 
   describe('API Response Handling', () => {
     it('should handle successful API response', async () => {
-      mockFetch.mockResolvedValue(createMockResponse(sampleCensusData));
+      mockFetch.mockResolvedValue(createMockResponse(sampleSummaryTableData));
 
       const args = {
         dataset: 'acs/acs1',
@@ -336,8 +338,9 @@ describe('FetchSummaryTableTool', () => {
   });
 
   describe('Integration Tests', () => {
+
     it('should perform complete successful request flow', async () => {
-      mockFetch.mockResolvedValue(createMockResponse(sampleCensusData));
+      mockFetch.mockResolvedValue(createMockResponse(sampleSummaryTableData));
 
       const args = {
         dataset: 'acs/acs1',
@@ -362,7 +365,7 @@ describe('FetchSummaryTableTool', () => {
     });
 
     it('should handle complex query with all parameters', async () => {
-      mockFetch.mockResolvedValue(createMockResponse(sampleCensusData));
+      mockFetch.mockResolvedValue(createMockResponse(sampleSummaryTableData));
 
       const args = {
         dataset: 'acs/acs5',

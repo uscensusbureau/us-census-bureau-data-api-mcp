@@ -49,8 +49,20 @@ echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' \
 ## Available Tools
 This section covers tools that can be called.
 
+### Describe Dataset
+The `describe-dataset` tool is used for fetching metadata about a given dataset in the Census Bureau’s API. It accepts the following arguments:
+* Year (Required) - The vintage of the dataset, e.g. 1987
+* Dataset (Required) - The identifier of the dataset, e.g. "acs/acs1"
+* Type (Optional) - The type of metadata to fetch, e.g. "geography", "variables", "sorts", "groups", "tags", and "examples". Leaving this blank will return generalized metadata about the dataset.
+
+#### Example
+```
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"describe-dataset","arguments":{"dataset":"acs/acs1","year":2022}}}' \
+| docker run --rm -i -e CENSUS_API_KEY=YOUR_API_KEY census-api
+```
+
 ### Fetch Summary Table
-The `fetch-summary-table` tool is for fetching a summary table from the Census Bureau API. It accepts the following arguments:
+The `fetch-summary-table` tool is used for fetching a summary table from the Census Bureau’s API. It accepts the following arguments:
 * Year (Required) - The vintage of the dataset, e.g. 1987
 * Dataset (Required) - The identifier of the dataset, e.g. "acs/acs1"
 * Variables (Required) - The required variables for returning a valid response, e.g. "NAME", "B01001_001E"

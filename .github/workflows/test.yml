@@ -23,4 +23,6 @@ jobs:
       - name: Install dependencies
         run: npm install
       - name: Run tests
+        env:
+          CENSUS_API_KEY: ${{ secrets.CENSUS_API_KEY }}
         run: npm test

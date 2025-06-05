@@ -20,26 +20,33 @@ export class FetchSummaryTableTool extends BaseTool<SummaryArgs> {
   description = "Fetch a summary table from the Census Bureau’s API";
   inputSchema: Tool["inputSchema"] = SummaryTableSchema as Tool["inputSchema"];
   
-  argsSchema = z.object({
-    dataset: z.string(),
-    year: z.number(),
-    variables: z.array(z.string()),
-    for: z.string().optional(),
-    in: z.string().optional(),
-    predicates: z.record(z.string(), z.string()).optional(),
-    descriptive: z.boolean().optional(),
-    outputFormat: z.string().optional()
-  }).superRefine((args, ctx) => {
-    const identfiedDataset = datasetValidator(args.dataset);
+  get argsSchema() {
+    return z.object({
+      dataset: z.string(),
+      year: z.number(),
+      variables: z.array(z.string()),
+      for: z.string().optional(),
+      in: z.string().optional(),
+      predicates: z.record(z.string(), z.string()).optional(),
+      descriptive: z.boolean().optional(),
+      outputFormat: z.string().optional()
+    }).superRefine((args, ctx) => {
+      const identifiedDataset = datasetValidator(args.dataset);
 
-    if(identfiedDataset.tool !== this.name) {
-      ctx.addIssue({
-        path: ["dataset"],
-        code: z.ZodIssueCode.custom,
-        message: identfiedDataset.message
-      })
-    }
-  });
+      if(identifiedDataset.tool !== this.name) {
+        ctx.addIssue({
+          path: ["dataset"],
+          code: z.ZodIssueCode.custom,
+          message: identifiedDataset.message
+        });
+      }
+    });
+  }
+
+  constructor() {
+    super();
+    this.handler = this.handler.bind(this);
+  }
 
   validateArgs(input: unknown) {
     return this.argsSchema.safeParse(input);

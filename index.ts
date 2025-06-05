@@ -1,6 +1,7 @@
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { MCPServer } from "./server.js";
 
+import { DescribeDatasetTool } from "./tools/describe-dataset.tool.js";
 import { FetchSummaryTableTool } from "./tools/fetch-summary-table.tool.js";
 
 // MCP Server Setup
@@ -8,6 +9,7 @@ async function main() {
   const mcpServer = new MCPServer("census-api", "0.1.0");
 
   // Register tools here
+  mcpServer.registerTool(new DescribeDatasetTool());
   mcpServer.registerTool(new FetchSummaryTableTool());
 
   const transport = new StdioServerTransport();
