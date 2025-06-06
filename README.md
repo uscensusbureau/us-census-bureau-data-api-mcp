@@ -51,9 +51,8 @@ This section covers tools that can be called.
 
 ### Describe Dataset
 The `describe-dataset` tool is used for fetching metadata about a given dataset in the Census Bureau’s API. It accepts the following arguments:
-* Year (Required) - The vintage of the dataset, e.g. 1987
 * Dataset (Required) - The identifier of the dataset, e.g. "acs/acs1"
-* Type (Optional) - The type of metadata to fetch, e.g. "geography", "variables", "sorts", "groups", "tags", and "examples". Leaving this blank will return generalized metadata about the dataset.
+* Year (Optional) - The vintage of the dataset, e.g. 1987
 
 #### Example
 ```
