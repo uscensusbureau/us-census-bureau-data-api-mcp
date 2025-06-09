@@ -3,7 +3,7 @@ import { z } from "zod";
 // Input schema for the tool
 export const DescribeDatasetInputSchema = z.object({
   dataset: z.string().describe("Dataset identifier (e.g., 'acs/acs1')"),
-  year: z.number().describe("Data vintage year").optional()
+  year: z.number().describe("Data vintage, e.g. 1987").optional()
 });
 
 // Contact point schema

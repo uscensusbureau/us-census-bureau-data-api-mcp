@@ -7,7 +7,7 @@ export const SummaryTableSchema = {
     },
     year: {
       type: "number",
-      description: "The year of the data",
+      description: "The year or vintage of the data, e.g. 1987",
     },
     variables: {
       type: "array",

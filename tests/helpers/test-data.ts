@@ -1,3 +1,205 @@
+export const sampleGeographyResponse = {
+  "fips": [
+    {
+      "name": "us",
+      "geoLevelDisplay": "010",
+      "referenceDate": "2022-01-01"
+    },
+    {
+      "name": "region",
+      "geoLevelDisplay": "020",
+      "referenceDate": "2022-01-01"
+    },
+    {
+      "name": "division",
+      "geoLevelDisplay": "030",
+      "referenceDate": "2022-01-01"
+    },
+    {
+      "name": "state",
+      "geoLevelDisplay": "040",
+      "referenceDate": "2022-01-01"
+    },
+    {
+      "name": "county",
+      "geoLevelDisplay": "050",
+      "referenceDate": "2022-01-01",
+      "requires": [
+        "state"
+      ],
+      "wildcard": [
+        "state"
+      ],
+      "optionalWithWCFor": "state"
+    },
+    {
+      "name": "county subdivision",
+      "geoLevelDisplay": "060",
+      "referenceDate": "2022-01-01",
+      "requires": [
+        "state",
+        "county"
+      ],
+      "wildcard": [
+        "county"
+      ],
+      "optionalWithWCFor": "county"
+    },
+    {
+      "name": "place",
+      "geoLevelDisplay": "160",
+      "referenceDate": "2022-01-01",
+      "requires": [
+        "state"
+      ],
+      "wildcard": [
+        "state"
+      ],
+      "optionalWithWCFor": "state"
+    },
+    {
+      "name": "alaska native regional corporation",
+      "geoLevelDisplay": "230",
+      "referenceDate": "2022-01-01",
+      "requires": [
+        "state"
+      ],
+      "wildcard": [
+        "state"
+      ],
+      "optionalWithWCFor": "state"
+    },
+    {
+      "name": "american indian area/alaska native area/hawaiian home land",
+      "geoLevelDisplay": "250",
+      "referenceDate": "2022-01-01"
+    },
+    {
+      "name": "metropolitan statistical area/micropolitan statistical area",
+      "geoLevelDisplay": "310",
+      "referenceDate": "2022-01-01"
+    },
+    {
+      "name": "principal city (or part)",
+      "geoLevelDisplay": "312",
+      "referenceDate": "2022-01-01",
+      "requires": [
+        "metropolitan statistical area/micropolitan statistical area",
+        "state (or part)"
+      ]
+    },
+    {
+      "name": "metropolitan division",
+      "geoLevelDisplay": "314",
+      "referenceDate": "2022-01-01",
+      "requires": [
+        "metropolitan statistical area/micropolitan statistical area"
+      ]
+    },
+    {
+      "name": "combined statistical area",
+      "geoLevelDisplay": "330",
+      "referenceDate": "2022-01-01"
+    },
+    {
+      "name": "combined new england city and town area",
+      "geoLevelDisplay": "335",
+      "referenceDate": "2022-01-01"
+    },
+    {
+      "name": "new england city and town area",
+      "geoLevelDisplay": "350",
+      "referenceDate": "2022-01-01"
+    },
+    {
+      "name": "principal city",
+      "geoLevelDisplay": "352",
+      "referenceDate": "2022-01-01",
+      "requires": [
+        "new england city and town area",
+        "state (or part)"
+      ],
+      "wildcard": [
+        "state (or part)"
+      ],
+      "optionalWithWCFor": "state (or part)"
+    },
+    {
+      "name": "necta division",
+      "geoLevelDisplay": "355",
+      "referenceDate": "2022-01-01",
+      "requires": [
+        "new england city and town area"
+      ]
+    },
+    {
+      "name": "urban area",
+      "geoLevelDisplay": "400",
+      "referenceDate": "2022-01-01"
+    },
+    {
+      "name": "congressional district",
+      "geoLevelDisplay": "500",
+      "referenceDate": "2022-01-01",
+      "requires": [
+        "state"
+      ],
+      "wildcard": [
+        "state"
+      ],
+      "optionalWithWCFor": "state"
+    },
+    {
+      "name": "public use microdata area",
+      "geoLevelDisplay": "795",
+      "referenceDate": "2022-01-01",
+      "requires": [
+        "state"
+      ],
+      "wildcard": [
+        "state"
+      ],
+      "optionalWithWCFor": "state"
+    },
+    {
+      "name": "school district (elementary)",
+      "geoLevelDisplay": "950",
+      "referenceDate": "2022-01-01",
+      "requires": [
+        "state"
+      ],
+      "wildcard": [
+        "state"
+      ],
+      "optionalWithWCFor": "state"
+    },
+    {
+      "name": "school district (secondary)",
+      "geoLevelDisplay": "960",
+      "referenceDate": "2022-01-01",
+      "requires": [
+        "state"
+      ],
+      "wildcard": [
+        "state"
+      ],
+      "optionalWithWCFor": "state"
+    },
+    {
+      "name": "school district (unified)",
+      "geoLevelDisplay": "970",
+      "referenceDate": "2022-01-01",
+      "requires": [
+        "state"
+      ],
+      "wildcard": [
+        "state"
+      ],
+      "optionalWithWCFor": "state"
+    }
+  ]
+};
+
 export const mockMetadataResponse = {
   "@context": "https://project-open-data.cio.gov/v1.1/schema/catalog.jsonld",
   "@id": "http://api.census.gov/data/2022/acs/acs1.json",

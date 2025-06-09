@@ -60,6 +60,17 @@ echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"describe-d
 | docker run --rm -i -e CENSUS_API_KEY=YOUR_API_KEY census-api
 ```
 
+### Fetch Dataset Geography
+The `fetch-dataset-geography` tool is used for fetching available geography levels for filtering a given dataset. It accepts the following arguments:
+* Dataset (Required) - The identifier of the dataset, e.g. "acs/acs1"
+* Year (Optional) - The vintage of the dataset, e.g. 1987
+
+#### Example
+```
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"fetch-dataset-geography","arguments":{"dataset":"acs/acs1","year":2022}}}' \
+| docker run --rm -i -e CENSUS_API_KEY=YOUR_API_KEY census-api
+```
+
 ### Fetch Summary Table
 The `fetch-summary-table` tool is used for fetching a summary table from the Census Bureau’s API. It accepts the following arguments:
 * Year (Required) - The vintage of the dataset, e.g. 1987
