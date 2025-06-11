@@ -19,9 +19,15 @@ Then run `npm run build` to build the project.
 
 With Docker desktop running, run `npm run docker-build` to build the project in Docker.
 
+## Development
+
+By default, all logging functions are disabled to prevent `json` validation errors when interacting with the MCP server through MCP clients. To enable logging for development purposes, set `DEBUG_LOGS=true` when running the server in Docker, e.g. `-e DEBUG_LOGS=true`. 
+
 ### Testing
 
 This project uses [Vitest](https://vitest.dev/) to test the functionality of the server.
+
+Prior to running tests, a valid Census Bureau [API key](https://api.census.gov/data/key_signup.html) is required. This key should be defined in the `.env` file of the root directory of the project. The `sample.env` offers an example of how this `.env` file should look. Note that the `.env` is unique 
 
 To run tests, run `npm run test`. To run ESLint, run `npm run lint`.
 

@@ -1,3 +1,11 @@
+const enableDebugLogs = process.env.DEBUG_LOGS === 'true';
+
+if(!enableDebugLogs) {
+  console.log = () => {};
+  console.info = () => {};
+  console.warn = () => {};
+}
+
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { MCPServer } from "./server.js";
 
