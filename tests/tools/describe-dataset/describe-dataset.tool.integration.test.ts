@@ -12,12 +12,12 @@ describe('DescribeDatasetTool - Integration Tests', () => {
       year: 2022
     });
 
-    expect(response.content[0].type).toBe('json');
-    const data = response.content[0].json;
-    expect(data).toHaveProperty('@type', 'DatasetMetadata');
-    expect(data.dataset.title).toContain('American Community Survey');
-    expect(data.dataset.api.endpoint).toBe(`http://api.census.gov/data/2022/${datasetName}`);
-    expect(data.source).toBe('dataset endpoint');
+    expect(response.content[0].type).toBe('text');
+    const responseText = response.content[0].text;
+    expect(responseText).toContain('"@type": "DatasetMetadata"');
+    expect(responseText).toContain('American Community Survey');
+    expect(responseText).toContain(`http://api.census.gov/data/2022/${datasetName}`);
+    expect(responseText).toContain('dataset endpoint');
   }, 10000); // Longer timeout for real API calls
 
   it('should handle real API errors gracefully', async () => {
@@ -39,9 +39,9 @@ describe('DescribeDatasetTool - Integration Tests', () => {
       dataset: datasetName
     });
 
-    expect(response.content[0].type).toBe('json');
-    const data = response.content[0].json;
-    expect(data).toHaveProperty('@type', 'DatasetMetadata');
-    expect(data.dataset.api.endpoint).toBe(`http://api.census.gov/data/${datasetName}`);
+    expect(response.content[0].type).toBe('text');
+    const responseText = response.content[0].text;
+    expect(responseText).toContain('"@type": "DatasetMetadata"');
+    expect(responseText).toContain(`http://api.census.gov/data/${datasetName}`);
   }, 10000);
 });

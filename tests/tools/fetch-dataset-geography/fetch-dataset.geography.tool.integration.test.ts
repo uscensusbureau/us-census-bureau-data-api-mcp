@@ -12,14 +12,13 @@ describe('FetchDatasetGeographyTool - Integration Tests', () => {
       year: 2022
     });
 
-    expect(response.content[0].type).toBe('json');
-    const data = response.content[0].json;
+    expect(response.content[0].type).toBe('text');
+    const responseText = response.content[0].text;
 
-    const firstGeography = data[0];
-	  expect(firstGeography.vintage).toBe('2022-01-01'); // or whatever properties your geography objects have
-	  expect(firstGeography.displayName).toBe('United States'); // adjust to match your actual structure
-	  expect(firstGeography.querySyntax).toBe('us'); // adjust to match your actual structure
-	  expect(firstGeography.queryExample).toBe('for=us:*');
+	  expect(responseText).toContain('"vintage": "2022-01-01"'); // or whatever properties your geography objects have
+	  expect(responseText).toContain('"displayName": "United States"'); // adjust to match your actual structure
+	  expect(responseText).toContain('"querySyntax": "us"'); // adjust to match your actual structure
+	  expect(responseText).toContain('"queryExample": "for=us:*"');
   }, 10000); // Longer timeout for real API calls
 
   it('should handle real API errors gracefully', async () => {
@@ -41,6 +40,6 @@ describe('FetchDatasetGeographyTool - Integration Tests', () => {
       dataset: datasetName
     });
 
-    expect(response.content[0].type).toBe('json');
+    expect(response.content[0].type).toBe('text');
   });
 });

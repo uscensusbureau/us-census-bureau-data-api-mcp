@@ -7,7 +7,7 @@ vi.mock('node-fetch', () => ({
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { DescribeDatasetTool } from '../../../tools/describe-dataset.tool';
 import { 
-  validateJsonResponseStructure,
+  validateResponseStructure,
   validateToolStructure, 
   validateResponseStructure,
   createMockResponse,
@@ -158,14 +158,13 @@ describe('DescribeDatasetTool', () => {
       };
 
       const response = await tool.handler(args);
-      validateJsonResponseStructure(response);
+      validateResponseStructure(response);
       
       // Since you changed to JSON response, check for JSON content
-      expect(response.content[0].type).toBe('json');
-      const responseData = response.content[0].json;
-      expect(responseData).toHaveProperty('@type', 'DatasetMetadata');
-      expect(responseData.dataset).toHaveProperty('title');
-      expect(responseData.dataset.title).toContain('American Community Survey');
+      expect(response.content[0].type).toBe('text');
+      const responseText = response.content[0].text;
+      expect(responseText).toContain('"@type": "DatasetMetadata"');
+      expect(responseText).toContain('"title": "American Community Survey: 1-Year Estimates: Detailed Tables"');
     });
 
     it('should handle API error responses', async () => {

@@ -54,8 +54,8 @@ export class FetchDatasetGeographyTool extends BaseTool<FetchDatasetGeographyArg
 		    	return {
             content: [
               {
-                type: "json" as const,
-                json: parsedGeographyData
+                type: "text",
+                text: `Available geographies for ${args.dataset}${args.year ? ` (${args.year})` : ''}:\n\n${JSON.stringify(parsedGeographyData, null, 2)}`
               }
             ]
           };

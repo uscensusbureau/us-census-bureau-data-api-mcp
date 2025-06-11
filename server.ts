@@ -17,7 +17,9 @@ export class MCPServer {
   constructor(name: string, version: string) {
     this.server = new Server(
       { name, version },
-      { capabilities: { tools: {} } }
+      { capabilities: { tools: {
+
+      } } }
     );
     this.setupHandlers();
   }

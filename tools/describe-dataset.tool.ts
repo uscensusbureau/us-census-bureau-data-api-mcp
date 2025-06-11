@@ -272,8 +272,8 @@ export class DescribeDatasetTool extends BaseTool<DescribeDatasetArgs> {
           return {
             content: [
               {
-                type: "json" as const,
-                json: validatedResponse
+                type: "text",
+                text: `Metadata for ${args.dataset}${args.year ? ` (${args.year})` : ''}:\n\n${JSON.stringify(validatedResponse, null, 2)}`
               }
             ]
           };

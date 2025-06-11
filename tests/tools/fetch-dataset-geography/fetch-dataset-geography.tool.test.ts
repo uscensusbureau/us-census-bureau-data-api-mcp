@@ -7,7 +7,7 @@ vi.mock('node-fetch', () => ({
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { FetchDatasetGeographyTool } from '../../../tools/fetch-dataset-geography.tool';
 import { 
-  validateJsonResponseStructure,
+  validateResponseStructure,
   validateToolStructure, 
   validateResponseStructure,
   createMockResponse,
@@ -150,20 +150,16 @@ describe('FetchGeographyDatasetTool', () => {
       };
 
       const response = await tool.handler(args);
-      validateJsonResponseStructure(response);
+      validateResponseStructure(response);
       
       // Since you changed to JSON response, check for JSON content
-      expect(response.content[0].type).toBe('json');
+      expect(response.content[0].type).toBe('text');
 
-      const responseData = response.content[0].json;
-	 
-		  expect(Array.isArray(responseData)).toBe(true);
-		  expect(responseData.length).toBeGreaterThan(0);
+      const responseText = response.content[0].text;
 		  
-		  const firstGeography = responseData[0];
-		  expect(firstGeography).toHaveProperty('code'); // or whatever properties your geography objects have
-		  expect(firstGeography).toHaveProperty('name'); // adjust to match your actual structure
-		  expect(firstGeography).toHaveProperty('displayName'); // adjust to match your actual structure
+		  expect(responseText).toContain('code'); // or whatever properties your geography objects have
+		  expect(responseText).toContain('name'); // adjust to match your actual structure
+		  expect(responseText).toContain('displayName'); // adjust to match your actual structure
  
     });
 
