@@ -46,6 +46,19 @@ describe('FetchSummaryTableTool', () => {
       expect(schema.required).toEqual(['dataset', 'year', 'variables']);
     });
 
+    it('should catch invalid geography level definitions', () => {
+      const invalidArgs = {
+        dataset: 'acs/acs1',
+        year: 2022,
+        variables: ['B01001_001E'],
+        for:['state=*'],
+        in:['county=01']
+      };
+
+      expect(() => tool.argsSchema.parse(invalidArgs)).toThrow();
+
+    });
+
     it('should have matching args schema', () => {
       // Test required fields
       const validArgs = {

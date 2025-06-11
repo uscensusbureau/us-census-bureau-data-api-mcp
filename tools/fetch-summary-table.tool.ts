@@ -25,8 +25,22 @@ export class FetchSummaryTableTool extends BaseTool<SummaryArgs> {
       dataset: z.string(),
       year: z.number(),
       variables: z.array(z.string()),
-      for: z.string().optional(),
-      in: z.string().optional(),
+      for: z.string()
+        .optional()
+        .refine((val) => {
+          if (!val) return true;
+          return /^[a-zA-Z+\s]+:[*\d,]+$/.test(val);
+        }, {
+          message: "for parameter must be in format 'geography-level:value1,value2' or 'geography:*', e.g. 'state:01,02' or 'county:*'"
+      }),
+      in: z.string()
+        .optional()
+        .refine((val) => {
+          if (!val) return true;
+          return /^[a-zA-Z+\s]+:[*\d,]+$/.test(val);
+        }, {
+          message: "in parameter must be in format 'geography-level:value1,value2', e.g. 'state:01' or 'state:01,02'"
+      }),
       predicates: z.record(z.string(), z.string()).optional(),
       descriptive: z.boolean().optional(),
       outputFormat: z.string().optional()

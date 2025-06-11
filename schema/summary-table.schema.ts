@@ -15,14 +15,24 @@ export const SummaryTableSchema = {
       description: "Array of variable codes to fetch",
     },
     for: {
-      type: "object",
-      items: { type: "string" },
-      description: "Restricts geography to various levels and is required in most datasets, e.g. state: 01,02, county: 001 (optional)",
+      type: "string",
+      description: "Geography restriction as comma-separated values, e.g. 'state:01,02' or 'county:001' or 'state:*' (optional)",
+      examples: [
+        "state:*",
+        "state:01,02,06", 
+        "county:001",
+        "county:*",
+        "place:12345"
+      ]
     },
     in: {
-      type: "object",
-      items: { type: "string" },
-      description: "Restricts geography to areas state and smaller, e.g. state: 01  (optional)",
+      type: "string", 
+      description: "Parent geography restriction as comma-separated values, e.g. 'state:01' or 'state:01,02' (optional)",
+      examples: [
+        "state:01",
+        "state:01,02",
+        "county:075"
+      ]
     },
     predicates: {
       type: "object",
