@@ -27,7 +27,7 @@ By default, all logging functions are disabled to prevent `json` validation erro
 
 This project uses [Vitest](https://vitest.dev/) to test the functionality of the server.
 
-Prior to running tests, a valid Census Bureau [API key](https://api.census.gov/data/key_signup.html) is required. This key should be defined in the `.env` file of the root directory of the project. The `sample.env` offers an example of how this `.env` file should look. Note that the `.env` is unique 
+Prior to running tests, a valid Census Bureau [API key](https://api.census.gov/data/key_signup.html) is required. This key should be defined in the `.env` file of the root directory of the project. The `sample.env` offers an example of how this `.env` file should look.
 
 To run tests, run `npm run test`. To run ESLint, run `npm run lint`.
 
