@@ -1,6 +1,6 @@
 import { Tool } from "@modelcontextprotocol/sdk/types.js";
 import { SummaryTableSchema } from '../../schema/summary-table.schema.js'
-import { BaseTool } from "../../tools/base.js";
+import { BaseTool } from "../../tools/base.tool.js";
 import { z } from "zod";
 
 export class MockFetchSummaryTableTool extends BaseTool {

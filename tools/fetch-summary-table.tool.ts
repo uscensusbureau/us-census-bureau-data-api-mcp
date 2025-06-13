@@ -1,6 +1,6 @@
 import { Tool } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
-import { BaseTool } from "./base.js";
+import { BaseTool } from "./base.tool.js";
 import { SummaryTableSchema } from '../schema/summary-table.schema.js';
 import { datasetValidator } from '../schema/validators.js';
 

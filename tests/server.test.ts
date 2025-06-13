@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { z } from "zod";
-import { BaseTool } from "./tools/base.js";
+import { BaseTool } from "./tools/base.tool.js";
 import { MockMCPServer } from "./mocks/server.mock.js";
 import { MockFetchSummaryTableTool } from "./mocks/fetch-summary-table.mock.js";
 import { SummaryTableSchema } from '../schema/summary-table.schema.js'

@@ -7,7 +7,7 @@ import {
   McpError,
 } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
-import { MCPTool, ToolRegistry } from "./tools/base.js";
+import { MCPTool, ToolRegistry } from "./tools/base.tool.js";
 
 
 export class MCPServer {
