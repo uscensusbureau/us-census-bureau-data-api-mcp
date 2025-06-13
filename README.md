@@ -4,11 +4,11 @@
 [![Test](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/test.yml/badge.svg)](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/test.yml)
 [![ESLint Check](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/lint.yml/badge.svg)](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/lint.yml)
 
-A model context protocol (MCP) server for interacting with the Census Bureau API. This library uses stdio for connections to the server.
+A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) server for interacting with the Census Bureau API. This project is built in the [MCP Typescript SDK](https://github.com/modelcontextprotocol/typescript-sdk).
 
 ## Requirements
 * A valid Census Bureau [API key](https://api.census.gov/data/key_signup.html)
-* Docker
+* Docker (e.g. Docker Desktop)
 * Node 16+
 
 ## Setup
@@ -44,7 +44,7 @@ The MCP server exposes two methods: `tools/list` and `tools/call`.
 
 ## Listing Tools
 
-To list available tools, use the `tools/list` method with no arguments.
+To list available tools, use the `tools/list` method with no arguments. `tools/list` is a standard method that is often called by LLMs when the client is initialized.
 
 ### Example
 ```
