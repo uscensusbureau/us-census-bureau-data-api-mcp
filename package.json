@@ -8,7 +8,7 @@
     "docker-build": "docker build -t census-api .",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "prepare": "npm run build",
-    "test": "vitest --silent=false",
+    "test": "vitest --printConsoleTrace=true --silent=false",
     "watch": "tsc --watch"
   },
   "dependencies": {

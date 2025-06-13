@@ -6,7 +6,7 @@ import {
 	FetchDatasetGeographyInputSchema,
 	GeographyJsonSchema,
 	parseGeographyJson
-} from '../schema/geography.schema.js';
+} from '../schema/dataset-geography.schema.js';
 
 import { FetchDatasetGeographyArgs } from '../types/fetch-dataset-geography.types.js';
 import { ToolContent } from '../types/base.types.js';
@@ -78,7 +78,7 @@ export class FetchDatasetGeographyTool extends BaseTool<FetchDatasetGeographyArg
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       
       return this.createErrorResponse(
-        `Failed to fetch dataset metadata: ${errorMessage}`
+        `Failed to fetch dataset geography levels: ${errorMessage}`
       );
     }
   }
