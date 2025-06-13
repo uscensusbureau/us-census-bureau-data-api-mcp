@@ -3,15 +3,12 @@ import { Tool } from "@modelcontextprotocol/sdk/types.js";
 import { BaseTool } from "./base.tool.js";
 
 import { 
-  DatasetType,
-  DescribeDatasetArgs,
-  MetadataResponseType 
-} from '../types/describe-dataset.types.js';
-
-import { 
+  DatasetType, 
   DatasetMetadataJsonSchema,
+  DescribeDatasetArgs,
   DescribeDatasetInputSchema,
-  MetadataResponseSchema
+  MetadataResponseSchema,
+  MetadataResponseType
 } from '../schema/describe-dataset.schema.js';
 
 import { ToolContent } from '../types/base.types.js';

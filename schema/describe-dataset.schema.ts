@@ -128,3 +128,8 @@ export const DatasetMetadataJsonSchema = z.object({
   fetchedAt: z.string(),
   note: z.string().optional()
 });
+
+export type DatasetMetadataJson = z.infer<typeof DatasetMetadataJsonSchema>;
+export type DatasetType = z.infer<typeof DatasetSchema>;
+export type DescribeDatasetArgs = z.infer<typeof DescribeDatasetInputSchema>;
+export type MetadataResponseType = z.infer<typeof MetadataResponseSchema>;

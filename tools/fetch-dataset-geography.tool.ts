@@ -2,13 +2,13 @@ import { Tool } from "@modelcontextprotocol/sdk/types.js";
 
 import { BaseTool } from "./base.tool.js";
 import { 
+	FetchDatasetGeographyArgs,
 	FetchDatasetGeographyArgsSchema,
 	FetchDatasetGeographyInputSchema,
 	GeographyJsonSchema,
 	parseGeographyJson
 } from '../schema/dataset-geography.schema.js';
 
-import { FetchDatasetGeographyArgs } from '../types/fetch-dataset-geography.types.js';
 import { ToolContent } from '../types/base.types.js';
 
 

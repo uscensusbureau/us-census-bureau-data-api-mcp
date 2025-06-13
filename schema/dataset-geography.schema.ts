@@ -232,6 +232,7 @@ export function parseGeographyJson(rawGeography: unknown): z.infer<typeof Parsed
 /**
  * Type exports for convenience
  */
+export type FetchDatasetGeographyArgs = z.infer<typeof FetchDatasetGeographyInputSchema>;
 export type GeographyFipsEntry = z.infer<typeof GeographyFipsEntrySchema>;
 export type GeographyJson = z.infer<typeof GeographyJsonSchema>;
 export type ParsedGeographyEntry = z.infer<typeof ParsedGeographyEntrySchema>;
