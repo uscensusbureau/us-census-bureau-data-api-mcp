@@ -202,9 +202,10 @@ export function getFilteredVariables(
     );
   }
 
+  // Filter by excluded predicate types
   if (options.excludePredicateTypes?.length) {
     filtered = filtered.filter(([, variable]) => 
-      variable.predicateType && options.includePredicateTypes!.includes(variable.predicateType)
+      !variable.predicateType || !options.excludePredicateTypes!.includes(variable.predicateType)
     );
   }
 

@@ -2,7 +2,7 @@ import { Tool } from "@modelcontextprotocol/sdk/types.js";
 
 import { BaseTool } from "./base.tool.js";
 import { 
-	getVariableBasics,
+	getVariableNamesOnly,
 	FetchDatasetVariablesArgs,
 	FetchDatasetVariablesArgsSchema,
 	FetchDatasetVariablesInputSchema,
@@ -48,17 +48,17 @@ export class FetchDatasetVariablesTool extends BaseTool<FetchDatasetVariablesArg
 
 		    try {
 		    	const validatedData = VariablesJsonSchema.parse(variablesData);
-		    	const basicVariables = getVariableBasics(validatedData);
+		    	const variableNames = getVariableNamesOnly(validatedData);
 		    	
 		    	// Calculate some useful stats for the LLM
-		    	const totalVariables = basicVariables.length;
+		    	const totalVariables = variableNames.length;
 		    	
 		    	const responseText = [
 		    	  `Dataset: ${args.dataset}${args.year ? ` (${args.year})` : ''}`,
 		    	  `Total Variables: ${totalVariables}`,
 		    	  ``,
 		    	  `Complete variable list:`,
-		    	  JSON.stringify(basicVariables, null, 2)
+		    	  JSON.stringify(variableNames, null, 2)
 		    	].join('\n');
 
 		    	return {

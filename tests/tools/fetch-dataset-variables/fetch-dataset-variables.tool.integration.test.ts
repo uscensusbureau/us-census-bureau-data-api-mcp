@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { FetchDatasetVariablesTool } from '../../../tools/fetch-dataset-variables.tool';
-import { VariableBasic } from '../../../schema/dataset-variables.schema';
 
 interface CensusDataset {
   c_vintage?: number;
@@ -164,17 +163,10 @@ describe('FetchDatasetVariablesTool - Integration Tests', () => {
           expect(Array.isArray(variables)).toBe(true);
           expect(variables.length).toBe(variableCount);
           
-          variables.forEach((variable: VariableBasic, index: number) => {
-            expect(variable).toHaveProperty('name');
-            expect(variable).toHaveProperty('label');
-            expect(typeof variable.name).toBe('string');
-            expect(typeof variable.label).toBe('string');
-            expect(variable.name.length).toBeGreaterThan(0);
-            expect(variable.label.length).toBeGreaterThan(0);
-            
-            if (index < 3) {
-              console.log(`  Variable ${index + 1}: ${variable.name} - ${variable.label}`);
-            }
+          // FIX: Each variable should be a string, not an object
+          variables.forEach((variable: string) => {
+            expect(typeof variable).toBe('string');
+            expect(variable.length).toBeGreaterThan(0); // Should be non-empty string
           });
 
           results.push({
