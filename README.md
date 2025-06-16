@@ -57,8 +57,8 @@ This section covers tools that can be called.
 
 ### Describe Dataset
 The `describe-dataset` tool is used for fetching metadata about a given dataset in the Census Bureau’s API. It accepts the following arguments:
-* Dataset (Required) - The identifier of the dataset, e.g. "acs/acs1"
-* Year (Optional) - The vintage of the dataset, e.g. 1987
+* Dataset (Required) - The identifier of the dataset, e.g. `'acs/acs1'`
+* Year (Optional) - The vintage of the dataset, e.g. `1987`
 
 #### Example
 ```
@@ -68,8 +68,8 @@ echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"describe-d
 
 ### Fetch Dataset Geography
 The `fetch-dataset-geography` tool is used for fetching available geography levels for filtering a given dataset. It accepts the following arguments:
-* Dataset (Required) - The identifier of the dataset, e.g. "acs/acs1"
-* Year (Optional) - The vintage of the dataset, e.g. 1987
+* Dataset (Required) - The identifier of the dataset, e.g. `'acs/acs1'`
+* Year (Optional) - The vintage of the dataset, e.g. `1987`
 
 #### Example
 ```
@@ -79,8 +79,9 @@ echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"fetch-data
 
 ### Fetch Dataset Variables
 The `fetch-dataset-variables` tool is used for fetching variables for filtering a given dataset. It accepts the following arguments:
-* Dataset (Required) - The identifier of the dataset, e.g. "acs/acs1"
-* Year (Optional) - The vintage of the dataset, e.g. 1987
+* Dataset (Required) - The identifier of the dataset, e.g. `'acs/acs1'`
+* Group (Optional) - Filter variables by a specific group for this dataset, e.g. `'S0101'`
+* Year (Optional) - The vintage of the dataset, e.g. `1987`
 
 #### Example
 ```
@@ -90,13 +91,13 @@ echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"fetch-data
 
 ### Fetch Summary Table
 The `fetch-summary-table` tool is used for fetching a summary table from the Census Bureau’s API. It accepts the following arguments:
-* Year (Required) - The vintage of the dataset, e.g. 1987
-* Dataset (Required) - The identifier of the dataset, e.g. "acs/acs1"
-* Variables (Required) - The required variables for returning a valid response, e.g. "NAME", "B01001_001E"
+* Dataset (Required) - The identifier of the dataset, e.g. `'acs/acs1'`
+* Variables (Required) - The required variables for returning a valid response, e.g. `'NAME'`, `'B01001_001E'`
+* Year (Optional) - The vintage of the dataset, e.g. `1987`
 * For (Optional) - Restricts geography to various levels and is required in most datasets
 * In (Optional) - Restricts geography to smaller areas than state level
-* Predicates (Optional) - Filter options for the dataset, e.g. "for": "state*"
-* Descriptive (Optional) - Add variable labels to API response
+* Predicates (Optional) - Filter options for the dataset, e.g. `'for': 'state*'`
+* Descriptive (Optional) - Add variable labels to API response (default: `false`), e.g. `true`
 * Output Format (Optional) - Specificies CSV or JSON output
 
 #### Example

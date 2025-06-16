@@ -2,8 +2,10 @@ import { z } from 'zod';
 
 //Argument Validation 
 export const FetchDatasetVariablesInputSchema = z.object({
-  dataset: z.string().describe("Dataset identifier (e.g., 'acs/acs1')"),
-  year: z.number().describe("The year or vintage of the data, e.g. 1987").optional()
+  dataset: z.string().describe("Dataset identifier, e.g. 'acs/acs1'"),
+  group: z.string().describe("Filter variables by a specific group for this dataset, e.g. 'S0101'").optional(),
+  year: z.number().describe("The year or vintage of the data, e.g. 2022").optional(),
+
 });
 
 export const FetchDatasetVariablesArgsSchema = {
@@ -11,12 +13,16 @@ export const FetchDatasetVariablesArgsSchema = {
   properties: {
     dataset: {
       type: "string",
-      description: "The dataset identifier (e.g., 'acs/acs1')",
+      description: "The dataset identifier (e.g. 'acs/acs1')",
+    },
+    group: {
+      type: "string",
+      description: "Filter variables by a specific group for this dataset, e.g. 'S0101'"
     },
     year: {
       type: "number",
-      description: "The year of the data",
-    }
+      description: "The year or vintage of the data, e.g. 2022",
+    },
   },
   required: ["dataset"]
 };

@@ -34,10 +34,16 @@ export class FetchDatasetVariablesTool extends BaseTool<FetchDatasetVariablesArg
 	    }
 
 	    const fetch = (await import("node-fetch")).default;
-	    let year = ""; //Start with a blank year
+	    let group = "";// Start with a blank group
+	    let year = ""; // Start with a blank year
+	    let variablesAppendix = ""; // Assign a blank URL appendix
+
+	    if(args.group){ group = `/groups/${args.group}` } // Add the year if it is present in the input args
 	    if(args.year){ year = `${args.year}/` } // Add the year if it is present in the input args
+	    if(!args.group) { variablesAppendix = '/variables' }
+
 	    
-	    const baseUrl = `https://api.census.gov/data/${year}${args.dataset}/variables.json`; // Construct the URL
+	    const baseUrl = `https://api.census.gov/data/${year}${args.dataset}${group}${variablesAppendix}.json`; // Construct the URL
 			const variablesUrl = `${baseUrl}?key=${apiKey}`; // Add the API Key
 
 
@@ -52,9 +58,15 @@ export class FetchDatasetVariablesTool extends BaseTool<FetchDatasetVariablesArg
 		    	
 		    	// Calculate some useful stats for the LLM
 		    	const totalVariables = variableNames.length;
+		    	let groupResponse = "";
+		    	
+		    	if(args.group) {
+		    		groupResponse = `Group: ${args.group}`;
+		    	}
 		    	
 		    	const responseText = [
 		    	  `Dataset: ${args.dataset}${args.year ? ` (${args.year})` : ''}`,
+		    	  `${groupResponse}`,
 		    	  `Total Variables: ${totalVariables}`,
 		    	  ``,
 		    	  `Complete variable list:`,

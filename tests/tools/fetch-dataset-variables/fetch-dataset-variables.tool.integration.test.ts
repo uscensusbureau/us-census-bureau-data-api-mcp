@@ -19,17 +19,18 @@ describe('FetchDatasetVariablesTool - Integration Tests', () => {
   it('should fetch real ACS metadata', async () => {
     const tool = new FetchDatasetVariablesTool();
     const datasetName = 'acs/acs1';
+    const datasetYear = 2022;
     
     const response = await tool.handler({
       dataset: datasetName,
-      year: 2022
+      year: datasetYear
     });
 
     expect(response.content[0].type).toBe('text');
     const responseText = response.content[0].text;
 
     expect(responseText).toContain('Total Variables: 36635'); 
-    expect(responseText).toContain('Dataset: acs/acs1 (2022)');
+    expect(responseText).toContain(`Dataset: ${datasetName} (${datasetYear})`);
   }, 10000);
 
   it('should handle real API errors gracefully', async () => {
@@ -55,6 +56,27 @@ describe('FetchDatasetVariablesTool - Integration Tests', () => {
   });
 
   // Separate 
+  describe('when a group is specified', () => {
+    it('should fetch the dataset’s group’s variables', async () => {
+      const tool = new FetchDatasetVariablesTool();
+      const datasetName = 'acs/acs1';
+      const groupLabel = 'B17015';
+      const datasetYear = 2022;
+      
+      const response = await tool.handler({
+        dataset: datasetName,
+        group: groupLabel,
+        year: datasetYear
+      });
+
+      expect(response.content[0].type).toBe('text');
+      const responseText = response.content[0].text;
+
+      expect(responseText).toContain(`Group: ${groupLabel}`); 
+      expect(responseText).toContain('Total Variables: 190');
+    }, 10000);
+  });
+
   describe('when a random dataset is fetched', () => {
     let randomDatasets: Array<{ dataset: string; year?: number; title: string }> = [];
 

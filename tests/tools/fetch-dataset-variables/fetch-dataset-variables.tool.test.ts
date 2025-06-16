@@ -125,18 +125,34 @@ describe('FetchDatasetVariablesTool', () => {
       expect(calls[0][0]).toContain('https://api.census.gov/data/2022/acs/acs1/variables.json?key=');
     });
 
-    it('should construct URL without year for timeseries', async () => {
-      mockFetch.mockResolvedValue(createMockResponse(sampleVariablesResponse));
-
-      const args = {
-        dataset: 'timeseries/asm/area2012'
+    describe('when a group argument is present', () => {
+      it('should construct a group URL', async () => {
+        const args = {
+        dataset: 'acs/acs1',
+        year: 2022,
+        group: 'B17015'
       };
 
       await tool.handler(args);
+      const calls = mockFetch.mock.calls;
+      expect(calls[0][0]).toContain('https://api.census.gov/data/2022/acs/acs1/groups/B17015.json?key=');
+      });
+    });
 
-      expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('https://api.census.gov/data/timeseries/asm/area2012/variables.json?key=')
-      );
+    describe('when a timeseries dataset is specified', () => {
+      it('should construct a timeseries URL', async () => {
+        mockFetch.mockResolvedValue(createMockResponse(sampleVariablesResponse));
+
+        const args = {
+          dataset: 'timeseries/asm/area2012'
+        };
+
+        await tool.handler(args);
+
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.stringContaining('https://api.census.gov/data/timeseries/asm/area2012/variables.json?key=')
+        );
+      });
     });
   });
 
@@ -208,6 +224,29 @@ describe('FetchDatasetVariablesTool', () => {
       const response = await tool.handler(args);
       validateResponseStructure(response);
       expect(response.content[0].text).toContain('Failed to fetch dataset variables: Invalid JSON');
+    });
+
+    describe('when a group argument is present', () => {
+      it('should handle successful API response', async () => {
+        mockFetch.mockResolvedValue(createMockResponse(sampleVariablesResponse));
+
+        const args = {
+          dataset: 'acs/acs1',
+          group: 'B17015',
+          year: 2022
+        };
+
+        const response = await tool.handler(args);
+        validateResponseStructure(response);
+        
+        // Since you changed to JSON response, check for JSON content
+        expect(response.content[0].type).toBe('text');
+
+        const responseText = response.content[0].text;
+        
+        expect(responseText).toContain('Group: B17015');
+   
+      });
     });
   });
 });
