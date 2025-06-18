@@ -47,14 +47,6 @@ export function validateJsonResponseStructure(response: object) {
   expect(typeof response.content[0].json).toBe('object');
 }
 
-// Sample Census API response data
-export const sampleSummaryTableData= [
-  ['NAME', 'B01001_001E', 'state'],
-  ['Alabama', '4903185', '01'],
-  ['Alaska', '731158', '02'],
-  ['Arizona', '7278717', '04']
-];
-
 // Sample Census API error response
 export const sampleCensusError = {
   error: {

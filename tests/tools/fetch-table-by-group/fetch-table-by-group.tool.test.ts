@@ -5,21 +5,22 @@ vi.mock('node-fetch', () => ({
 }));
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { FetchSummaryTableTool } from '../../tools/fetch-summary-table.tool';
+import { FetchTableByGroupTool } from '../../../tools/fetch-table-by-group.tool';
 import { 
   validateToolStructure, 
   validateResponseStructure,
   createMockResponse,
   createMockFetchError,
-  sampleSummaryTableData,
   sampleCensusError
-} from '../helpers/test-utils.js';
+} from '../../helpers/test-utils';
 
-describe('FetchSummaryTableTool', () => {
-  let tool: FetchSummaryTableTool;
+import { sampleTableByGroupData } from '../../helpers/test-data';
+
+describe('FetchTableByGroupTool', () => {
+  let tool: FetchTableByGroupTool;
 
   beforeEach(() => {
-    tool = new FetchSummaryTableTool();
+    tool = new FetchTableByGroupTool();
     mockFetch.mockClear();
 
     process.env.CENSUS_API_KEY="test-api-key-12345"
@@ -33,8 +34,8 @@ describe('FetchSummaryTableTool', () => {
   describe('Tool Configuration', () => {
     it('should have correct tool metadata', () => {
       validateToolStructure(tool);
-      expect(tool.name).toBe('fetch-summary-table');
-      expect(tool.description).toBe('Fetch a summary table from the Census Bureau’s API');
+      expect(tool.name).toBe('fetch-table-by-group');
+      expect(tool.description).toBe('Fetch a table by the group label.');
     });
 
     it('should have valid input schema', () => {
@@ -42,15 +43,34 @@ describe('FetchSummaryTableTool', () => {
       expect(schema.type).toBe('object');
       expect(schema.properties).toHaveProperty('dataset');
       expect(schema.properties).toHaveProperty('year');
-      expect(schema.properties).toHaveProperty('variables');
-      expect(schema.required).toEqual(['dataset', 'year', 'variables']);
+      expect(schema.properties).toHaveProperty('group');
+      expect(schema.required).toEqual(['dataset', 'year', 'group']);
+    });
+
+    it('should validate presence of for or ucgid', () => {
+      const missingGroupArg = {
+        dataset: 'acs/acs1',
+        year: 2022,
+        group: 'B01001'
+      };
+
+      const result = tool.argsSchema.safeParse(missingGroupArg);
+
+      expect(result.error.issues).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            code: "custom", // Check the error code
+            message: "No geography specified error - define for or ucgid arguments.",
+          })
+        ])
+      );
     });
 
     it('should catch invalid geography level definitions', () => {
       const invalidArgs = {
         dataset: 'acs/acs1',
         year: 2022,
-        variables: ['B01001_001E'],
+        group: 'B01001',
         for:['state=*'],
         in:['county=01']
       };
@@ -64,7 +84,8 @@ describe('FetchSummaryTableTool', () => {
       const validArgs = {
         dataset: 'acs/acs1',
         year: 2022,
-        variables: ['B01001_001E']
+        group: 'B01001',
+        for: 'state:05'
       };
       expect(() => tool.argsSchema.parse(validArgs)).not.toThrow();
 
@@ -73,8 +94,7 @@ describe('FetchSummaryTableTool', () => {
         ...validArgs,
         for: 'state:*',
         in: 'us:1',
-        predicates: { AGEGROUP: '29' },
-        outputFormat: 'json'
+        predicates: { AGEGROUP: '29' }
       };
       expect(() => tool.argsSchema.parse(argsWithOptionals)).not.toThrow();
     });
@@ -99,12 +119,11 @@ describe('FetchSummaryTableTool', () => {
       const validArgs = {
         dataset: 'acs/acs1',
         year: 2022,
-        variables: ['B01001_001E'],
+        group: 'B01001',
         for: 'state:01',
         in: 'us:1',
         predicates: { AGEGROUP: '29', PAYANN: '100000' },
-        descriptive: true,
-        outputFormat: 'json'
+        descriptive: true
       };
       expect(() => tool.argsSchema.parse(validArgs)).not.toThrow();
     });
@@ -113,7 +132,8 @@ describe('FetchSummaryTableTool', () => {
       const validArgs = {
         dataset: "acs/acs1", // should be string
         year: 2022, // should be number
-        variables: ['B01001_001E']
+        group: 'B01001',
+        for: 'state:01'
       }
 
       expect(() => tool.argsSchema.parse(validArgs)).not.toThrow();
@@ -123,7 +143,7 @@ describe('FetchSummaryTableTool', () => {
       const invalidArgs = {
         dataset: "timeseries/data/set", // should be string
         year: 2022, // should be number
-        variables: ['B01001_001E']
+        group: 'B01001'
       }
 
       const result = tool.validateArgs(invalidArgs);
@@ -141,7 +161,7 @@ describe('FetchSummaryTableTool', () => {
       const args = {
         dataset: 'acs/acs1',
         year: 2022,
-        variables: ['B01001_001E']
+        group: 'B01001'
       };
 
       const response = await tool.handler(args);
@@ -153,12 +173,13 @@ describe('FetchSummaryTableTool', () => {
     });
 
     it('should use API key when available', async () => {
-      mockFetch.mockResolvedValue(createMockResponse(sampleSummaryTableData));
+      mockFetch.mockResolvedValue(createMockResponse(sampleTableByGroupData));
 
       const args = {
         dataset: 'acs/acs1',
         year: 2022,
-        variables: ['B01001_001E']
+        group: 'B01001',
+        for: 'state:03'
       };
 
       await tool.handler(args);
@@ -171,14 +192,15 @@ describe('FetchSummaryTableTool', () => {
 
   describe('URL Construction', () => {
     beforeEach(() => {
-      mockFetch.mockResolvedValue(createMockResponse(sampleSummaryTableData));
+      mockFetch.mockResolvedValue(createMockResponse(sampleTableByGroupData));
     });
 
     it('should construct basic URL correctly', async () => {
       const args = {
         dataset: 'acs/acs1',
         year: 2022,
-        variables: ['B01001_001E', 'B01001_002E']
+        group: 'B01001',
+        for: 'state:*'
       };
 
       await tool.handler(args);
@@ -187,7 +209,7 @@ describe('FetchSummaryTableTool', () => {
         expect.stringContaining('https://api.census.gov/data/2022/acs/acs1')
       );
       expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('get=B01001_001E%2CB01001_002E')
+        expect.stringContaining('get=group%28B01001%29')
       );
     });
 
@@ -195,7 +217,7 @@ describe('FetchSummaryTableTool', () => {
       const args = {
         dataset: 'acs/acs1',
         year: 2019,
-        variables: ['group(B02015)'],
+        group: 'B02015',
         for: 'state:*',
       };
 
@@ -210,12 +232,11 @@ describe('FetchSummaryTableTool', () => {
       const args = {
         dataset: 'acs/acs1',
         year: 2022,
-        variables: ['B01001_001E'],
+        group: 'B01001',
         for: 'state:01',
         in: 'us:1',
         predicates: { AGEGROUP: '29' },
-        descriptive: true,
-        outputFormat: 'json'
+        descriptive: true
       };
 
       await tool.handler(args);
@@ -224,7 +245,6 @@ describe('FetchSummaryTableTool', () => {
       expect(calledUrl).toContain('for=state%3A01');
       expect(calledUrl).toContain('in=us%3A1');
       expect(calledUrl).toContain('AGEGROUP=29');
-      expect(calledUrl).toContain('outputFormat=json');
       expect(calledUrl).toContain('descriptive=true');
     });
 
@@ -232,8 +252,9 @@ describe('FetchSummaryTableTool', () => {
       const args = {
         dataset: 'acs/acs1',
         year: 2022,
-        variables: ['B01001_001E'],
-        predicates: { AGEGROUP: '29', PAYANN: '100000', time: '2015' }
+        group: 'B01001',
+        for: 'state:*',
+        predicates: { AGEGROUP: '29', PAYANN: '100000' }
       };
 
       await tool.handler(args);
@@ -241,18 +262,18 @@ describe('FetchSummaryTableTool', () => {
       const calledUrl = mockFetch.mock.calls[0][0];
       expect(calledUrl).toContain('AGEGROUP=29');
       expect(calledUrl).toContain('PAYANN=100000');
-      expect(calledUrl).toContain('time=2015');
     });
   });
 
   describe('API Response Handling', () => {
     it('should handle successful API response', async () => {
-      mockFetch.mockResolvedValue(createMockResponse(sampleSummaryTableData));
+      mockFetch.mockResolvedValue(createMockResponse(sampleTableByGroupData));
 
       const args = {
         dataset: 'acs/acs1',
         year: 2022,
-        variables: ['B01001_001E']
+        group: 'B01001',
+        for: 'state:*'
       };
 
       const response = await tool.handler(args);
@@ -271,7 +292,8 @@ describe('FetchSummaryTableTool', () => {
       const args = {
         dataset: 'invalid/dataset',
         year: 2022,
-        variables: ['INVALID_VAR']
+        group: '123456',
+        for: 'state:*'
       };
 
       const response = await tool.handler(args);
@@ -285,7 +307,8 @@ describe('FetchSummaryTableTool', () => {
       const args = {
         dataset: 'acs/acs1',
         year: 2022,
-        variables: ['B01001_001E']
+        group: 'B01001',
+        for: 'state:*'
       };
 
       const response = await tool.handler(args);
@@ -302,7 +325,8 @@ describe('FetchSummaryTableTool', () => {
       const args = {
         dataset: 'acs/acs1',
         year: 2022,
-        variables: ['B01001_001E']
+        group: 'B01001',
+        for: 'state:02'
       };
 
       const response = await tool.handler(args);
@@ -322,7 +346,8 @@ describe('FetchSummaryTableTool', () => {
       const args = {
         dataset: 'acs/acs1',
         year: 2022,
-        variables: ['B01001_001E']
+        group: 'B01001',
+        for: 'state:01'
       };
 
       const response = await tool.handler(args);
@@ -338,7 +363,8 @@ describe('FetchSummaryTableTool', () => {
       const args = {
         dataset: 'acs/acs1',
         year: 2022,
-        variables: ['B01001_001E']
+        group: 'B01001',
+        for: 'state:*'
       };
 
       const response = await tool.handler(args);
@@ -353,12 +379,12 @@ describe('FetchSummaryTableTool', () => {
   describe('Integration Tests', () => {
 
     it('should perform complete successful request flow', async () => {
-      mockFetch.mockResolvedValue(createMockResponse(sampleSummaryTableData));
+      mockFetch.mockResolvedValue(createMockResponse(sampleTableByGroupData));
 
       const args = {
         dataset: 'acs/acs1',
         year: 2022,
-        variables: ['B01001_001E'],
+        group: ['B01001'],
         for: 'state:*'
       };
 
@@ -368,7 +394,7 @@ describe('FetchSummaryTableTool', () => {
       expect(mockFetch).toHaveBeenCalledTimes(1);
       const calledUrl = mockFetch.mock.calls[0][0];
       expect(calledUrl).toContain('https://api.census.gov/data/2022/acs/acs1');
-      expect(calledUrl).toContain('get=B01001_001E');
+      expect(calledUrl).toContain('get=group%28B01001%29');
       expect(calledUrl).toContain('for=state%3A*');
       expect(calledUrl).toContain('key=test-api-key-12345');
       
@@ -378,16 +404,15 @@ describe('FetchSummaryTableTool', () => {
     });
 
     it('should handle complex query with all parameters', async () => {
-      mockFetch.mockResolvedValue(createMockResponse(sampleSummaryTableData));
+      mockFetch.mockResolvedValue(createMockResponse(sampleTableByGroupData));
 
       const args = {
         dataset: 'acs/acs5',
         year: 2021,
-        variables: ['B01001_001E', 'B01001_002E'],
+        group: 'B01001',
         for: 'county:*',
         in: 'state:01',
         predicates: { AGEGROUP: '29', PAYANN: '100000' },
-        outputFormat: 'csv'
       };
 
       const response = await tool.handler(args);
@@ -397,12 +422,11 @@ describe('FetchSummaryTableTool', () => {
       
       // Verify all parameters are included
       expect(calledUrl).toContain('2021/acs/acs5');
-      expect(calledUrl).toContain('B01001_001E%2CB01001_002E');
+      expect(calledUrl).toContain('B01001');
       expect(calledUrl).toContain('for=county%3A*');
       expect(calledUrl).toContain('in=state%3A01');
       expect(calledUrl).toContain('AGEGROUP=29');
       expect(calledUrl).toContain('PAYANN=100000');
-      expect(calledUrl).toContain('outputFormat=csv');
       
       validateResponseStructure(response);
     });

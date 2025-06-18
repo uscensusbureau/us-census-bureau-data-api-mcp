@@ -423,3 +423,10 @@ export const sampleDatasetMetadata = {
     }
   ]
 };
+
+export const sampleTableByGroupData = [
+  ['NAME', 'B01001_001E', 'state'],
+  ['Alabama', '4903185', '01'],
+  ['Alaska', '731158', '02'],
+  ['Arizona', '7278717', '04']
+];

@@ -1,17 +1,17 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { z } from "zod";
-import { BaseTool } from "./tools/base.tool.js";
-import { MockMCPServer } from "./mocks/server.mock.js";
-import { MockFetchSummaryTableTool } from "./mocks/fetch-summary-table.mock.js";
-import { SummaryTableSchema } from '../schema/summary-table.schema.js'
+import { BaseTool } from "./tools/base.tool";
+import { MockMCPServer } from "./mocks/server.mock";
+import { MockFetchTableByGroupTool } from "./mocks/fetch-table-by-group.mock";
+import { TableSchema } from '../schema/table-group.schema'
 
 describe("MCP Server ListTools Handler", () => {
   let mcpServer: MockMCPServer;
-  let mockFetchSummaryTableTool: MockFetchSummaryTableTool;
+  let mockFetchTableByGroupTool: MockFetchTableByGroupTool;
 
   beforeEach(() => {
     mcpServer = new MockMCPServer("test-server", "1.0.0");
-    mockFetchSummaryTableTool = new MockFetchSummaryTableTool();
+    mockFetchTableByGroupTool = new MockFetchTableByGroupTool();
   });
 
   describe("with no tools registered", () => {
@@ -26,7 +26,7 @@ describe("MCP Server ListTools Handler", () => {
 
   describe("with one tool registered", () => {
     beforeEach(() => {
-      mcpServer.registerTool(mockFetchSummaryTableTool);
+      mcpServer.registerTool(mockFetchTableByGroupTool);
     });
 
     it("should return the correct tool information", async () => {
@@ -34,9 +34,9 @@ describe("MCP Server ListTools Handler", () => {
       
       expect(result.tools).toHaveLength(1);
       expect(result.tools[0]).toEqual({
-        name: "fetch-summary-table-mock",
+        name: "fetch-table-by-group-mock",
         description: "A test tool for unit testing",
-        inputSchema: SummaryTableSchema as Tool["inputSchema"]
+        inputSchema: TableSchema as Tool["inputSchema"]
       });
     });
 
@@ -82,23 +82,25 @@ describe("MCP Server ListTools Handler", () => {
 
   describe("tool schema validation", () => {
     beforeEach(() => {
-      mcpServer.registerTool(mockFetchSummaryTableTool);
+      mcpServer.registerTool(mockFetchTableByGroupTool);
     });
 
     it("should include required fields", async () => {
       const result = await mcpServer.listTools();
-      const fetchSummaryTableMockTool = result.tools.find(tool => tool.name === "fetch-summary-table-mock");
+      const fetchTableByGroupTool = result.tools.find(tool => tool.name === "fetch-table-by-group-mock");
+
+      console.log(result.tools);
       
-      expect(fetchSummaryTableMockTool?.inputSchema.required).toEqual(SummaryTableSchema.required);
+      expect(fetchTableByGroupTool?.inputSchema.required).toEqual(TableSchema.required);
     });
 
     it("should include property descriptions", async () => {
       const result = await mcpServer.listTools();
-      const fetchSummaryTableMockTool = result.tools.find(tool => tool.name === "fetch-summary-table-mock");
+      const fetchTableByGroupTool = result.tools.find(tool => tool.name === "fetch-table-by-group-mock");
       
-      expect(fetchSummaryTableMockTool?.inputSchema.properties.dataset.description).toBe(SummaryTableSchema.properties.dataset.description);
-      expect(fetchSummaryTableMockTool?.inputSchema.properties.year.description).toBe(SummaryTableSchema.properties.year.description);
-      expect(fetchSummaryTableMockTool?.inputSchema.properties.variables.description).toBe(SummaryTableSchema.properties.variables.description);
+      expect(fetchTableByGroupTool?.inputSchema.properties.dataset.description).toBe(TableSchema.properties.dataset.description);
+      expect(fetchTableByGroupTool?.inputSchema.properties.year.description).toBe(TableSchema.properties.year.description);
+      expect(fetchTableByGroupTool?.inputSchema.properties.group.description).toBe(TableSchema.properties.group.description);
     });
   });
 

@@ -49,7 +49,8 @@ describe('FetchDatasetVariablesTool', () => {
       // Test required fields
       const validArgs = {
         dataset: 'acs/acs1',
-        year: 2022
+        year: 2022,
+        variables: ["NAME"]
       };
       expect(() => tool.argsSchema.parse(validArgs)).not.toThrow();
     });
