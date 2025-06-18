@@ -5,7 +5,7 @@ vi.mock('node-fetch', () => ({
 }));
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { FetchTableByGroupTool } from '../../../tools/fetch-table-by-group.tool';
+import { FetchSummaryTableTool } from '../../../tools/fetch-summary-table.tool';
 import { 
   validateToolStructure, 
   validateResponseStructure,
@@ -16,11 +16,11 @@ import {
 
 import { sampleTableByGroupData } from '../../helpers/test-data';
 
-describe('FetchTableByGroupTool', () => {
-  let tool: FetchTableByGroupTool;
+describe('FetchSummaryTableTool', () => {
+  let tool: FetchSummaryTableTool;
 
   beforeEach(() => {
-    tool = new FetchTableByGroupTool();
+    tool = new FetchSummaryTableTool();
     mockFetch.mockClear();
 
     process.env.CENSUS_API_KEY="test-api-key-12345"
@@ -34,8 +34,8 @@ describe('FetchTableByGroupTool', () => {
   describe('Tool Configuration', () => {
     it('should have correct tool metadata', () => {
       validateToolStructure(tool);
-      expect(tool.name).toBe('fetch-table-by-group');
-      expect(tool.description).toBe('Fetch a table by the group label.');
+      expect(tool.name).toBe('fetch-summary-table');
+      expect(tool.description).toBe('Fetch a summary table.');
     });
 
     it('should have valid input schema', () => {
@@ -43,18 +43,20 @@ describe('FetchTableByGroupTool', () => {
       expect(schema.type).toBe('object');
       expect(schema.properties).toHaveProperty('dataset');
       expect(schema.properties).toHaveProperty('year');
-      expect(schema.properties).toHaveProperty('group');
-      expect(schema.required).toEqual(['dataset', 'year', 'group']);
+      expect(schema.properties).toHaveProperty('get');
+      expect(schema.required).toEqual(['dataset', 'year', 'get']);
     });
 
     it('should validate presence of for or ucgid', () => {
-      const missingGroupArg = {
+      const missingGeoArg = {
         dataset: 'acs/acs1',
         year: 2022,
-        group: 'B01001'
+        get: {
+          group: 'B01001'
+        }
       };
 
-      const result = tool.argsSchema.safeParse(missingGroupArg);
+      const result = tool.argsSchema.safeParse(missingGeoArg);
 
       expect(result.error.issues).toEqual(
         expect.arrayContaining([
@@ -70,7 +72,9 @@ describe('FetchTableByGroupTool', () => {
       const invalidArgs = {
         dataset: 'acs/acs1',
         year: 2022,
-        group: 'B01001',
+        get: { 
+          group: 'B01001' 
+        },
         for:['state=*'],
         in:['county=01']
       };
@@ -84,7 +88,9 @@ describe('FetchTableByGroupTool', () => {
       const validArgs = {
         dataset: 'acs/acs1',
         year: 2022,
-        group: 'B01001',
+        get: { 
+          variables: ['STC_TTL']
+        },
         for: 'state:05'
       };
       expect(() => tool.argsSchema.parse(validArgs)).not.toThrow();
@@ -94,7 +100,7 @@ describe('FetchTableByGroupTool', () => {
         ...validArgs,
         for: 'state:*',
         in: 'us:1',
-        predicates: { AGEGROUP: '29' }
+        predicates: { AGEGROUP: '29'}
       };
       expect(() => tool.argsSchema.parse(argsWithOptionals)).not.toThrow();
     });
@@ -106,11 +112,31 @@ describe('FetchTableByGroupTool', () => {
       expect(() => tool.argsSchema.parse(incompleteArgs)).toThrow();
     });
 
+    it('should fail without get defined', () => {
+      const invalidArgs = {
+        dataset: 'acs/acs1', // should be string
+        year: 2022, // should be number
+      };
+      expect(() => tool.argsSchema.parse(invalidArgs)).toThrow();
+    });
+
+    it('should fail with empty get object', () => {
+      const invalidArgs = {
+        dataset: 'acs/acs1', // should be string
+        year: 2022, // should be number
+        get: {}
+      };
+      expect(() => tool.argsSchema.parse(invalidArgs)).toThrow();
+    });
+
     it('should validate parameter types', () => {
       const invalidArgs = {
         dataset: 123, // should be string
         year: '2022', // should be number
-        variables: 'not-array' // should be array
+        get: {
+          group: [ 123456 ],
+          variables: 'not-array'
+        } // should be array
       };
       expect(() => tool.argsSchema.parse(invalidArgs)).toThrow();
     });
@@ -119,7 +145,10 @@ describe('FetchTableByGroupTool', () => {
       const validArgs = {
         dataset: 'acs/acs1',
         year: 2022,
-        group: 'B01001',
+        get: { 
+          group: 'B01001',
+          variables: ['PAYQTR1'] 
+        },
         for: 'state:01',
         in: 'us:1',
         predicates: { AGEGROUP: '29', PAYANN: '100000' },
@@ -132,9 +161,11 @@ describe('FetchTableByGroupTool', () => {
       const validArgs = {
         dataset: "acs/acs1", // should be string
         year: 2022, // should be number
-        group: 'B01001',
+        get: { 
+          group: 'B01001' 
+        },
         for: 'state:01'
-      }
+      };
 
       expect(() => tool.argsSchema.parse(validArgs)).not.toThrow();
     });
@@ -143,7 +174,9 @@ describe('FetchTableByGroupTool', () => {
       const invalidArgs = {
         dataset: "timeseries/data/set", // should be string
         year: 2022, // should be number
-        group: 'B01001'
+        get: { 
+          group: 'B01001' 
+        }
       }
 
       const result = tool.validateArgs(invalidArgs);
@@ -161,7 +194,9 @@ describe('FetchTableByGroupTool', () => {
       const args = {
         dataset: 'acs/acs1',
         year: 2022,
-        group: 'B01001'
+        get: { 
+          group: 'B01001'
+        }
       };
 
       const response = await tool.handler(args);
@@ -178,7 +213,9 @@ describe('FetchTableByGroupTool', () => {
       const args = {
         dataset: 'acs/acs1',
         year: 2022,
-        group: 'B01001',
+        get: { 
+          group: 'B01001' 
+        },
         for: 'state:03'
       };
 
@@ -199,7 +236,9 @@ describe('FetchTableByGroupTool', () => {
       const args = {
         dataset: 'acs/acs1',
         year: 2022,
-        group: 'B01001',
+        get: { 
+          group: 'B01001' 
+        },
         for: 'state:*'
       };
 
@@ -217,7 +256,9 @@ describe('FetchTableByGroupTool', () => {
       const args = {
         dataset: 'acs/acs1',
         year: 2019,
-        group: 'B02015',
+        get: { 
+          group: 'B02015' 
+        },
         for: 'state:*',
       };
 
@@ -232,7 +273,9 @@ describe('FetchTableByGroupTool', () => {
       const args = {
         dataset: 'acs/acs1',
         year: 2022,
-        group: 'B01001',
+        get: { 
+          group: 'B01001' 
+        },
         for: 'state:01',
         in: 'us:1',
         predicates: { AGEGROUP: '29' },
@@ -252,7 +295,9 @@ describe('FetchTableByGroupTool', () => {
       const args = {
         dataset: 'acs/acs1',
         year: 2022,
-        group: 'B01001',
+        get: { 
+          group: 'B01001' 
+        },
         for: 'state:*',
         predicates: { AGEGROUP: '29', PAYANN: '100000' }
       };
@@ -272,7 +317,9 @@ describe('FetchTableByGroupTool', () => {
       const args = {
         dataset: 'acs/acs1',
         year: 2022,
-        group: 'B01001',
+        get: { 
+          group: 'B01001' 
+        },
         for: 'state:*'
       };
 
@@ -292,7 +339,9 @@ describe('FetchTableByGroupTool', () => {
       const args = {
         dataset: 'invalid/dataset',
         year: 2022,
-        group: '123456',
+        get: { 
+          group: '123456' 
+        },
         for: 'state:*'
       };
 
@@ -307,7 +356,9 @@ describe('FetchTableByGroupTool', () => {
       const args = {
         dataset: 'acs/acs1',
         year: 2022,
-        group: 'B01001',
+        get: { 
+          group: 'B01001' 
+        },
         for: 'state:*'
       };
 
@@ -325,7 +376,9 @@ describe('FetchTableByGroupTool', () => {
       const args = {
         dataset: 'acs/acs1',
         year: 2022,
-        group: 'B01001',
+        get: { 
+          group: 'B01001' 
+        },
         for: 'state:02'
       };
 
@@ -346,7 +399,9 @@ describe('FetchTableByGroupTool', () => {
       const args = {
         dataset: 'acs/acs1',
         year: 2022,
-        group: 'B01001',
+        get: { 
+          group: 'B01001' 
+        },
         for: 'state:01'
       };
 
@@ -363,7 +418,9 @@ describe('FetchTableByGroupTool', () => {
       const args = {
         dataset: 'acs/acs1',
         year: 2022,
-        group: 'B01001',
+        get: { 
+          group: 'B01001' 
+        },
         for: 'state:*'
       };
 
@@ -384,7 +441,9 @@ describe('FetchTableByGroupTool', () => {
       const args = {
         dataset: 'acs/acs1',
         year: 2022,
-        group: ['B01001'],
+        get: { 
+          group: 'B01001'
+        },
         for: 'state:*'
       };
 
@@ -409,7 +468,9 @@ describe('FetchTableByGroupTool', () => {
       const args = {
         dataset: 'acs/acs5',
         year: 2021,
-        group: 'B01001',
+        get: { 
+          group: 'B01001' 
+        },
         for: 'county:*',
         in: 'state:01',
         predicates: { AGEGROUP: '29', PAYANN: '100000' },

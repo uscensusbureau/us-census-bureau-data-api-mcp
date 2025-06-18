@@ -1,6 +1,5 @@
 import { z } from "zod";
 import type { RefinementCtx } from "zod";
-import { TableArgs } from './table-group.schema.js';
 
 type Dataset = {
 	tool: string;
@@ -8,10 +7,17 @@ type Dataset = {
 	identifier?: string;
 }
 
+type TableArgs = {
+	group?: string;
+	variables?: string[];
+	for?: string;
+	ucgid?: string;
+}
+
 const datasets: Dataset[] = [
-	{
-		tool: "fetch-table-by-group",
-		message: "Incompatible dataset. Please use the fetch-table-by-group tool."
+	 {
+		tool: "fetch-summary-table",
+		message: "Incompatible dataset. Please use the fetch-summary-table tool."
 	 },
 	 {
 		tool: "fetch-timeseries-data",
@@ -40,8 +46,6 @@ export function datasetValidator(url: string): Dataset {
 }
 
 export function validateGeographyArgs(args: TableArgs, ctx: RefinementCtx) {
-
-	console.log(args);
 	
 	if( !args.for && !args.ucgid ) {
 		ctx.addIssue({
