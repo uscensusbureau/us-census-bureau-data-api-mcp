@@ -92,17 +92,19 @@ echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"fetch-data
 ### Fetch Summary Table
 The `fetch-summary-table` tool is used for fetching a summary table from the Census Bureau’s API. It accepts the following arguments:
 * Dataset (Required) - The identifier of the dataset, e.g. `'acs/acs1'`
-* Variables (Required) - The required variables for returning a valid response, e.g. `'NAME'`, `'B01001_001E'`
-* Year (Optional) - The vintage of the dataset, e.g. `1987`
-* For (Optional) - Restricts geography to various levels and is required in most datasets
-* In (Optional) - Restricts geography to smaller areas than state level
+* Year (Required) - The vintage of the dataset, e.g. `1987`
+* Get (Required) - An object that is required that accepts 2 optional arguments:
+	* Variables (optional) - An array of variables for filtering responses by attributes and rows, e.g. `'NAME'`, `'B01001_001E'`
+	* Group (optional) - A string that returns a larger collecton of variables, e.g. `S0101`
+* For (Optional) - A string that testricts geography to various levels and is required in most datasets
+* In (Optional) - A string that restricts geography to smaller areas than state level
+* UCGID (Optional) - A string that restricts geography by Uniform Census Geography Identifier (UCGID), e.g. `0400000US41`
 * Predicates (Optional) - Filter options for the dataset, e.g. `'for': 'state*'`
-* Descriptive (Optional) - Add variable labels to API response (default: `false`), e.g. `true`
-* Output Format (Optional) - Specificies CSV or JSON output
+* Descriptive (Optional) - Adds variable labels to API response (default: `false`), e.g. `true`
 
 #### Example
 ```
-echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"fetch-summary-table","arguments":{"dataset":"acs/acs1","year":2022,"variables":["NAME","B01001_001E"],"for":"state:01,13"}}}' \
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"fetch-summary-table","arguments":{"dataset":"acs/acs1","year":2022, "get": { "variables":["NAME","B01001_001E"] },"for":"state:01,13"}}}' \
 | docker run --rm -i -e CENSUS_API_KEY=YOUR_API_KEY census-api
 ```
 

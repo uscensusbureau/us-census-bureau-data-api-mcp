@@ -8,8 +8,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { FetchDatasetVariablesTool } from '../../../tools/fetch-dataset-variables.tool';
 import { 
   validateResponseStructure,
-  validateToolStructure, 
-  validateResponseStructure,
+  validateToolStructure,
   createMockResponse,
   createMockFetchError,
   sampleCensusError
