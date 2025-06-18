@@ -37,20 +37,24 @@ export const yearProperty = {
 
 export const getProperties = {
 	get: {
-		variables: {
-			type: "array",
-			items: { type: "string" },
-			description: "The variables (or rows) that should be fetched from a given table. A max of 50 variables can be passed.",
-			examples: [
-		    ['B24022_060E', 'B19001B_014E', 'C02014_002E']
-		  ]
-		},
-		group: {
-		  type: "string",
-		  description: "The group label that is used to fetch the entire table.",
-		  examples: [
-		    'S0101'
-		  ]
+		type: "object",
+		description: "The group and variables that should be fetched.",
+		properties: {
+			variables: {
+				type: "array",
+				items: { type: "string" },
+				description: "The variables (or rows) that should be fetched from a given table. A max of 50 variables can be passed.",
+				examples: [
+			    ['B24022_060E', 'B19001B_014E', 'C02014_002E']
+			  ]
+			},
+			group: {
+			  type: "string",
+			  description: "The group label that is used to fetch the entire table.",
+			  examples: [
+			    'S0101'
+			  ]
+			}
 		}
 	}
 }

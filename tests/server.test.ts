@@ -100,7 +100,7 @@ describe("MCP Server ListTools Handler", () => {
       
       expect(fetchSummaryTableTool?.inputSchema.properties.dataset.description).toBe(TableSchema.properties.dataset.description);
       expect(fetchSummaryTableTool?.inputSchema.properties.year.description).toBe(TableSchema.properties.year.description);
-      expect(fetchSummaryTableTool?.inputSchema.properties.get.group.description).toBe(TableSchema.properties.get.group.description);
+      expect(fetchSummaryTableTool?.inputSchema.properties.get.properties.group.description).toBe(TableSchema.properties.get.properties.group.description);
     });
   });
 
