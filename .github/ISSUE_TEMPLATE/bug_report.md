@@ -20,19 +20,19 @@ Steps to reproduce the behavior:
 **Expected behavior**
 A clear and concise description of what you expected to happen.
 
+**Conversation:**
+Please provide details about the conversation that led to this response. Examples include:
+- User Input [e.g. "What’s the population of Maryland?"]
+- Model Response [include any tools invoked, source data cited, and text responses]
+- MCP Tools Invoked [e.g. 'fetch-summary-table']
+
+**Model Details**
+ - The Name of the Model [e.g. Claude]
+ - The Version of the Model [e.g. Claude Sonnet 4.0]
+ - Where the Conversation Occured [e.g. Claude Desktop]
+
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
-
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
-
-**Smartphone (please complete the following information):**
- - Device: [e.g. iPhone6]
- - OS: [e.g. iOS8.1]
- - Browser [e.g. stock browser, safari]
- - Version [e.g. 22]
 
 **Additional context**
 Add any other context about the problem here.
