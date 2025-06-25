@@ -9,20 +9,25 @@ on:
       - reopened
       - synchronize
       - closed
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+      
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
-      - name: Install modules
-        run: npm install
+       # Build MCP server
+      - name: Install MCP server dependencies
+        working-directory: ./mcp-server
+        run: npm ci
 
-      - name: Run ESLint
+      - name: Run ESLint in MCP Server
+        working-directory: ./mcp-server
         run: npm run lint
    
  

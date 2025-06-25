@@ -12,15 +12,30 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Setup Node
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
-      - name: Install dependencies
-        run: npm install
-      - name: Run build
+          node-version: 22
+        
+      # Build MCP server
+      - name: Install MCP server dependencies
+        working-directory: ./mcp-server
+        run: npm ci
+        
+      - name: Build MCP server
+        working-directory: ./mcp-server
         run: npm run build
+        
+      # Test Docker builds
+      - name: Build Docker images
+        run: docker compose build
+        
+      - name: Verify Docker images
+        run: |
+          docker images
+          docker compose config

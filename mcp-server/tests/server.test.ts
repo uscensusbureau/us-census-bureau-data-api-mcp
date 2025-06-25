@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { z } from "zod";
-import { BaseTool } from "./tools/base.tool";
+import { BaseTool } from "../src/tools/base.tool";
 import { MockMCPServer } from "./mocks/server.mock";
 import { MockFetchSummaryTableTool } from "./mocks/fetch-summary-table.mock";
-import { TableSchema } from '../schema/summary-table.schema'
+import { TableSchema } from '../src/schema/summary-table.schema';
 
 describe("MCP Server ListTools Handler", () => {
   let mcpServer: MockMCPServer;

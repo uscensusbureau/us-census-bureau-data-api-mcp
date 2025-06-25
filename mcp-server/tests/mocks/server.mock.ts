@@ -1,6 +1,6 @@
 import { ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { MCPTool, ToolRegistry } from "../../tools/base.tool.js";
+import { MCPTool, ToolRegistry } from "../../src/tools/base.tool.js";
 
 type Tool = {
   name: string,

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { FetchDatasetVariablesTool } from '../../../tools/fetch-dataset-variables.tool';
+import { FetchDatasetVariablesTool } from '../../../src/tools/fetch-dataset-variables.tool';
 
 interface CensusDataset {
   c_vintage?: number;

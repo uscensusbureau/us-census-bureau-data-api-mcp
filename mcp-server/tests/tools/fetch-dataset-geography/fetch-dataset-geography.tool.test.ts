@@ -5,7 +5,7 @@ vi.mock('node-fetch', () => ({
 }));
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { DescribeDatasetTool } from '../../../tools/describe-dataset.tool';
+import { FetchDatasetGeographyTool } from '../../../src/tools/fetch-dataset-geography.tool';
 import { 
   validateResponseStructure,
   validateToolStructure, 
@@ -15,13 +15,13 @@ import {
   sampleCensusError
 } from '../../helpers/test-utils.js';
 
-import { sampleDatasetMetadata } from '../../helpers/test-data.js';
+import { sampleGeographyResponse } from '../../helpers/test-data.js';
 
-describe('DescribeDatasetTool', () => {
-  let tool: DescribeDatasetTool;
+describe('FetchDatasetGeographyTool', () => {
+  let tool: FetchDatasetGeographyTool;
 
   beforeEach(() => {
-    tool = new DescribeDatasetTool();
+    tool = new FetchDatasetGeographyTool();
     mockFetch.mockClear();
   });
 
@@ -33,8 +33,8 @@ describe('DescribeDatasetTool', () => {
   describe('Tool Configuration', () => {
     it('should have correct tool metadata', () => {
       validateToolStructure(tool);
-      expect(tool.name).toBe('describe-dataset');
-      expect(tool.description).toBe("Fetch metadata for a Census Bureau dataset.");
+      expect(tool.name).toBe('fetch-dataset-geography');
+      expect(tool.description).toBe("Fetch available geographies for filtering a dataset.");
     });
 
     it('should have valid input schema', () => {
@@ -97,7 +97,7 @@ describe('DescribeDatasetTool', () => {
     });
 
     it('should use API key when available', async () => {
-      mockFetch.mockResolvedValue(createMockResponse(sampleDatasetMetadata));
+      mockFetch.mockResolvedValue(createMockResponse(sampleGeographyResponse));
 
       const args = {
         dataset: 'acs/acs1',
@@ -114,14 +114,6 @@ describe('DescribeDatasetTool', () => {
 
   describe('URL Construction', () => {
     it('should construct basic URL correctly', async () => {
-      // Mock to fail on first call, succeed on profile.json
-      mockFetch
-        .mockResolvedValueOnce({
-          ok: false,
-          status: 404,
-          statusText: 'Not Found'
-        })
-        .mockResolvedValueOnce(createMockResponse(sampleDatasetMetadata));
 
       const args = {
         dataset: 'acs/acs1',
@@ -130,11 +122,11 @@ describe('DescribeDatasetTool', () => {
 
       await tool.handler(args);
       const calls = mockFetch.mock.calls;
-      expect(calls[0][0]).toContain('https://api.census.gov/data/2022/acs/acs1?key=');
+      expect(calls[0][0]).toContain('https://api.census.gov/data/2022/acs/acs1/geography.json?key=');
     });
 
     it('should construct URL without year for timeseries', async () => {
-      mockFetch.mockResolvedValue(createMockResponse(sampleDatasetMetadata));
+      mockFetch.mockResolvedValue(createMockResponse(sampleGeographyResponse));
 
       const args = {
         dataset: 'timeseries/asm/area2012'
@@ -143,14 +135,14 @@ describe('DescribeDatasetTool', () => {
       await tool.handler(args);
 
       expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('https://api.census.gov/data/timeseries/asm/area2012?key=')
+        expect.stringContaining('https://api.census.gov/data/timeseries/asm/area2012/geography.json?key=')
       );
     });
   });
 
   describe('API Response Handling', () => {
     it('should handle successful API response', async () => {
-      mockFetch.mockResolvedValue(createMockResponse(sampleDatasetMetadata));
+      mockFetch.mockResolvedValue(createMockResponse(sampleGeographyResponse));
 
       const args = {
         dataset: 'acs/acs1',
@@ -162,9 +154,13 @@ describe('DescribeDatasetTool', () => {
       
       // Since you changed to JSON response, check for JSON content
       expect(response.content[0].type).toBe('text');
+
       const responseText = response.content[0].text;
-      expect(responseText).toContain('"@type": "DatasetMetadata"');
-      expect(responseText).toContain('"title": "American Community Survey: 1-Year Estimates: Detailed Tables"');
+		  
+		  expect(responseText).toContain('code'); // or whatever properties your geography objects have
+		  expect(responseText).toContain('name'); // adjust to match your actual structure
+		  expect(responseText).toContain('displayName'); // adjust to match your actual structure
+ 
     });
 
     it('should handle API error responses', async () => {
@@ -178,7 +174,7 @@ describe('DescribeDatasetTool', () => {
       const response = await tool.handler(args);
       validateResponseStructure(response);
       expect(response.content[0].text).toContain(
-        'Failed to fetch dataset metadata: Unable to retrieve metadata from any available endpoint for invalid/dataset (2022). This dataset may not have metadata available, or may be a data-only endpoint.'
+        'Geography endpoint returned: 400 Bad Request'
       );
     });
 
@@ -192,7 +188,7 @@ describe('DescribeDatasetTool', () => {
 
       const response = await tool.handler(args);
       validateResponseStructure(response);
-      expect(response.content[0].text).toContain('Failed to fetch dataset metadata: Network error');
+      expect(response.content[0].text).toContain('Failed to fetch dataset geography levels: Network error');
     });
 
     it('should handle malformed JSON responses', async () => {
@@ -208,7 +204,7 @@ describe('DescribeDatasetTool', () => {
 
       const response = await tool.handler(args);
       validateResponseStructure(response);
-      expect(response.content[0].text).toContain('Failed to fetch dataset metadata: Invalid JSON');
+      expect(response.content[0].text).toContain('Failed to fetch dataset geography levels: Invalid JSON');
     });
   });
 });

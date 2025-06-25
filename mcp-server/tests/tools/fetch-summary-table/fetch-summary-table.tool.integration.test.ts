@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { FetchSummaryTableTool } from '../../../tools/fetch-summary-table.tool';
+import { FetchSummaryTableTool } from '../../../src/tools/fetch-summary-table.tool';
 
 describe('FetchSummaryTableTool - Integration Tests', () => {
 

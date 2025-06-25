@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { FetchDatasetGeographyTool } from '../../../tools/fetch-dataset-geography.tool';
+import { FetchDatasetGeographyTool } from '../../../src/tools/fetch-dataset-geography.tool';
 
 describe('FetchDatasetGeographyTool - Integration Tests', () => {
 

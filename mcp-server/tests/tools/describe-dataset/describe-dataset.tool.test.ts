@@ -5,22 +5,23 @@ vi.mock('node-fetch', () => ({
 }));
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { FetchDatasetVariablesTool } from '../../../tools/fetch-dataset-variables.tool';
+import { DescribeDatasetTool } from '../../../src/tools/describe-dataset.tool';
 import { 
   validateResponseStructure,
-  validateToolStructure,
+  validateToolStructure, 
+  validateResponseStructure,
   createMockResponse,
   createMockFetchError,
   sampleCensusError
 } from '../../helpers/test-utils.js';
 
-import { sampleVariablesResponse } from '../../helpers/test-data.js';
+import { sampleDatasetMetadata } from '../../helpers/test-data.js';
 
-describe('FetchDatasetVariablesTool', () => {
-  let tool: FetchDatasetVariablesTool;
+describe('DescribeDatasetTool', () => {
+  let tool: DescribeDatasetTool;
 
   beforeEach(() => {
-    tool = new FetchDatasetVariablesTool();
+    tool = new DescribeDatasetTool();
     mockFetch.mockClear();
   });
 
@@ -32,8 +33,8 @@ describe('FetchDatasetVariablesTool', () => {
   describe('Tool Configuration', () => {
     it('should have correct tool metadata', () => {
       validateToolStructure(tool);
-      expect(tool.name).toBe('fetch-dataset-variables');
-      expect(tool.description).toBe("Fetch available variables for querying a dataset.");
+      expect(tool.name).toBe('describe-dataset');
+      expect(tool.description).toBe("Fetch metadata for a Census Bureau dataset.");
     });
 
     it('should have valid input schema', () => {
@@ -48,8 +49,7 @@ describe('FetchDatasetVariablesTool', () => {
       // Test required fields
       const validArgs = {
         dataset: 'acs/acs1',
-        year: 2022,
-        variables: ["NAME"]
+        year: 2022
       };
       expect(() => tool.argsSchema.parse(validArgs)).not.toThrow();
     });
@@ -97,7 +97,7 @@ describe('FetchDatasetVariablesTool', () => {
     });
 
     it('should use API key when available', async () => {
-      mockFetch.mockResolvedValue(createMockResponse(sampleVariablesResponse));
+      mockFetch.mockResolvedValue(createMockResponse(sampleDatasetMetadata));
 
       const args = {
         dataset: 'acs/acs1',
@@ -114,6 +114,14 @@ describe('FetchDatasetVariablesTool', () => {
 
   describe('URL Construction', () => {
     it('should construct basic URL correctly', async () => {
+      // Mock to fail on first call, succeed on profile.json
+      mockFetch
+        .mockResolvedValueOnce({
+          ok: false,
+          status: 404,
+          statusText: 'Not Found'
+        })
+        .mockResolvedValueOnce(createMockResponse(sampleDatasetMetadata));
 
       const args = {
         dataset: 'acs/acs1',
@@ -122,43 +130,27 @@ describe('FetchDatasetVariablesTool', () => {
 
       await tool.handler(args);
       const calls = mockFetch.mock.calls;
-      expect(calls[0][0]).toContain('https://api.census.gov/data/2022/acs/acs1/variables.json?key=');
+      expect(calls[0][0]).toContain('https://api.census.gov/data/2022/acs/acs1?key=');
     });
 
-    describe('when a group argument is present', () => {
-      it('should construct a group URL', async () => {
-        const args = {
-        dataset: 'acs/acs1',
-        year: 2022,
-        group: 'B17015'
+    it('should construct URL without year for timeseries', async () => {
+      mockFetch.mockResolvedValue(createMockResponse(sampleDatasetMetadata));
+
+      const args = {
+        dataset: 'timeseries/asm/area2012'
       };
 
       await tool.handler(args);
-      const calls = mockFetch.mock.calls;
-      expect(calls[0][0]).toContain('https://api.census.gov/data/2022/acs/acs1/groups/B17015.json?key=');
-      });
-    });
 
-    describe('when a timeseries dataset is specified', () => {
-      it('should construct a timeseries URL', async () => {
-        mockFetch.mockResolvedValue(createMockResponse(sampleVariablesResponse));
-
-        const args = {
-          dataset: 'timeseries/asm/area2012'
-        };
-
-        await tool.handler(args);
-
-        expect(mockFetch).toHaveBeenCalledWith(
-          expect.stringContaining('https://api.census.gov/data/timeseries/asm/area2012/variables.json?key=')
-        );
-      });
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining('https://api.census.gov/data/timeseries/asm/area2012?key=')
+      );
     });
   });
 
   describe('API Response Handling', () => {
     it('should handle successful API response', async () => {
-      mockFetch.mockResolvedValue(createMockResponse(sampleVariablesResponse));
+      mockFetch.mockResolvedValue(createMockResponse(sampleDatasetMetadata));
 
       const args = {
         dataset: 'acs/acs1',
@@ -170,14 +162,9 @@ describe('FetchDatasetVariablesTool', () => {
       
       // Since you changed to JSON response, check for JSON content
       expect(response.content[0].type).toBe('text');
-
       const responseText = response.content[0].text;
-		  
-		  expect(responseText).toContain('for');
-		  expect(responseText).toContain('in'); 
-		  expect(responseText).toContain('ucgid');
-		  expect(responseText).toContain('Total Variables: 8');
- 
+      expect(responseText).toContain('"@type": "DatasetMetadata"');
+      expect(responseText).toContain('"title": "American Community Survey: 1-Year Estimates: Detailed Tables"');
     });
 
     it('should handle API error responses', async () => {
@@ -191,7 +178,7 @@ describe('FetchDatasetVariablesTool', () => {
       const response = await tool.handler(args);
       validateResponseStructure(response);
       expect(response.content[0].text).toContain(
-        'Variables endpoint returned: 400 Bad Request'
+        'Failed to fetch dataset metadata: Unable to retrieve metadata from any available endpoint for invalid/dataset (2022). This dataset may not have metadata available, or may be a data-only endpoint.'
       );
     });
 
@@ -203,10 +190,9 @@ describe('FetchDatasetVariablesTool', () => {
         year: 2022
       };
 
-
       const response = await tool.handler(args);
       validateResponseStructure(response);
-      expect(response.content[0].text).toContain('Failed to fetch dataset variables: Network error');
+      expect(response.content[0].text).toContain('Failed to fetch dataset metadata: Network error');
     });
 
     it('should handle malformed JSON responses', async () => {
@@ -220,33 +206,9 @@ describe('FetchDatasetVariablesTool', () => {
         year: 2022
       };
 
-
       const response = await tool.handler(args);
       validateResponseStructure(response);
-      expect(response.content[0].text).toContain('Failed to fetch dataset variables: Invalid JSON');
-    });
-
-    describe('when a group argument is present', () => {
-      it('should handle successful API response', async () => {
-        mockFetch.mockResolvedValue(createMockResponse(sampleVariablesResponse));
-
-        const args = {
-          dataset: 'acs/acs1',
-          group: 'B17015',
-          year: 2022
-        };
-
-        const response = await tool.handler(args);
-        validateResponseStructure(response);
-        
-        // Since you changed to JSON response, check for JSON content
-        expect(response.content[0].type).toBe('text');
-
-        const responseText = response.content[0].text;
-        
-        expect(responseText).toContain('Group: B17015');
-   
-      });
+      expect(response.content[0].text).toContain('Failed to fetch dataset metadata: Invalid JSON');
     });
   });
 });

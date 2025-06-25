@@ -14,15 +14,23 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    
     steps:
-      - uses: actions/checkout@v3
-      - name: Setup Node
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
-      - name: Install dependencies
-        run: npm install
-      - name: Run tests
+          node-version: 22
+        
+      # Test MCP server
+      - name: Install MCP server dependencies
+        working-directory: ./mcp-server
+        run: npm ci
+        
+      - name: Run MCP server tests
+        working-directory: ./mcp-server
         env:
           CENSUS_API_KEY: ${{ secrets.CENSUS_API_KEY }}
+          NODE_ENV: test
         run: npm test

@@ -5,23 +5,22 @@ vi.mock('node-fetch', () => ({
 }));
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { FetchDatasetGeographyTool } from '../../../tools/fetch-dataset-geography.tool';
+import { FetchDatasetVariablesTool } from '../../../src/tools/fetch-dataset-variables.tool';
 import { 
   validateResponseStructure,
-  validateToolStructure, 
-  validateResponseStructure,
+  validateToolStructure,
   createMockResponse,
   createMockFetchError,
   sampleCensusError
 } from '../../helpers/test-utils.js';
 
-import { sampleGeographyResponse } from '../../helpers/test-data.js';
+import { sampleVariablesResponse } from '../../helpers/test-data.js';
 
-describe('FetchDatasetGeographyTool', () => {
-  let tool: FetchDatasetGeographyTool;
+describe('FetchDatasetVariablesTool', () => {
+  let tool: FetchDatasetVariablesTool;
 
   beforeEach(() => {
-    tool = new FetchDatasetGeographyTool();
+    tool = new FetchDatasetVariablesTool();
     mockFetch.mockClear();
   });
 
@@ -33,8 +32,8 @@ describe('FetchDatasetGeographyTool', () => {
   describe('Tool Configuration', () => {
     it('should have correct tool metadata', () => {
       validateToolStructure(tool);
-      expect(tool.name).toBe('fetch-dataset-geography');
-      expect(tool.description).toBe("Fetch available geographies for filtering a dataset.");
+      expect(tool.name).toBe('fetch-dataset-variables');
+      expect(tool.description).toBe("Fetch available variables for querying a dataset.");
     });
 
     it('should have valid input schema', () => {
@@ -49,7 +48,8 @@ describe('FetchDatasetGeographyTool', () => {
       // Test required fields
       const validArgs = {
         dataset: 'acs/acs1',
-        year: 2022
+        year: 2022,
+        variables: ["NAME"]
       };
       expect(() => tool.argsSchema.parse(validArgs)).not.toThrow();
     });
@@ -97,7 +97,7 @@ describe('FetchDatasetGeographyTool', () => {
     });
 
     it('should use API key when available', async () => {
-      mockFetch.mockResolvedValue(createMockResponse(sampleGeographyResponse));
+      mockFetch.mockResolvedValue(createMockResponse(sampleVariablesResponse));
 
       const args = {
         dataset: 'acs/acs1',
@@ -122,27 +122,43 @@ describe('FetchDatasetGeographyTool', () => {
 
       await tool.handler(args);
       const calls = mockFetch.mock.calls;
-      expect(calls[0][0]).toContain('https://api.census.gov/data/2022/acs/acs1/geography.json?key=');
+      expect(calls[0][0]).toContain('https://api.census.gov/data/2022/acs/acs1/variables.json?key=');
     });
 
-    it('should construct URL without year for timeseries', async () => {
-      mockFetch.mockResolvedValue(createMockResponse(sampleGeographyResponse));
-
-      const args = {
-        dataset: 'timeseries/asm/area2012'
+    describe('when a group argument is present', () => {
+      it('should construct a group URL', async () => {
+        const args = {
+        dataset: 'acs/acs1',
+        year: 2022,
+        group: 'B17015'
       };
 
       await tool.handler(args);
+      const calls = mockFetch.mock.calls;
+      expect(calls[0][0]).toContain('https://api.census.gov/data/2022/acs/acs1/groups/B17015.json?key=');
+      });
+    });
 
-      expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('https://api.census.gov/data/timeseries/asm/area2012/geography.json?key=')
-      );
+    describe('when a timeseries dataset is specified', () => {
+      it('should construct a timeseries URL', async () => {
+        mockFetch.mockResolvedValue(createMockResponse(sampleVariablesResponse));
+
+        const args = {
+          dataset: 'timeseries/asm/area2012'
+        };
+
+        await tool.handler(args);
+
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.stringContaining('https://api.census.gov/data/timeseries/asm/area2012/variables.json?key=')
+        );
+      });
     });
   });
 
   describe('API Response Handling', () => {
     it('should handle successful API response', async () => {
-      mockFetch.mockResolvedValue(createMockResponse(sampleGeographyResponse));
+      mockFetch.mockResolvedValue(createMockResponse(sampleVariablesResponse));
 
       const args = {
         dataset: 'acs/acs1',
@@ -157,9 +173,10 @@ describe('FetchDatasetGeographyTool', () => {
 
       const responseText = response.content[0].text;
 		  
-		  expect(responseText).toContain('code'); // or whatever properties your geography objects have
-		  expect(responseText).toContain('name'); // adjust to match your actual structure
-		  expect(responseText).toContain('displayName'); // adjust to match your actual structure
+		  expect(responseText).toContain('for');
+		  expect(responseText).toContain('in'); 
+		  expect(responseText).toContain('ucgid');
+		  expect(responseText).toContain('Total Variables: 8');
  
     });
 
@@ -174,7 +191,7 @@ describe('FetchDatasetGeographyTool', () => {
       const response = await tool.handler(args);
       validateResponseStructure(response);
       expect(response.content[0].text).toContain(
-        'Geography endpoint returned: 400 Bad Request'
+        'Variables endpoint returned: 400 Bad Request'
       );
     });
 
@@ -186,9 +203,10 @@ describe('FetchDatasetGeographyTool', () => {
         year: 2022
       };
 
+
       const response = await tool.handler(args);
       validateResponseStructure(response);
-      expect(response.content[0].text).toContain('Failed to fetch dataset geography levels: Network error');
+      expect(response.content[0].text).toContain('Failed to fetch dataset variables: Network error');
     });
 
     it('should handle malformed JSON responses', async () => {
@@ -202,9 +220,33 @@ describe('FetchDatasetGeographyTool', () => {
         year: 2022
       };
 
+
       const response = await tool.handler(args);
       validateResponseStructure(response);
-      expect(response.content[0].text).toContain('Failed to fetch dataset geography levels: Invalid JSON');
+      expect(response.content[0].text).toContain('Failed to fetch dataset variables: Invalid JSON');
+    });
+
+    describe('when a group argument is present', () => {
+      it('should handle successful API response', async () => {
+        mockFetch.mockResolvedValue(createMockResponse(sampleVariablesResponse));
+
+        const args = {
+          dataset: 'acs/acs1',
+          group: 'B17015',
+          year: 2022
+        };
+
+        const response = await tool.handler(args);
+        validateResponseStructure(response);
+        
+        // Since you changed to JSON response, check for JSON content
+        expect(response.content[0].type).toBe('text');
+
+        const responseText = response.content[0].text;
+        
+        expect(responseText).toContain('Group: B17015');
+   
+      });
     });
   });
 });

@@ -5,7 +5,7 @@ vi.mock('node-fetch', () => ({
 }));
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { FetchSummaryTableTool } from '../../../tools/fetch-summary-table.tool';
+import { FetchSummaryTableTool } from '../../../src/tools/fetch-summary-table.tool';
 import { 
   validateToolStructure, 
   validateResponseStructure,

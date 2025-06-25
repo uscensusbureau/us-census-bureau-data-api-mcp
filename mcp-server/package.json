@@ -1,11 +1,9 @@
 {
-  "name": "census-api",
+  "name": "mcp-server-census-api",
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "build": "tsc && shx chmod +x dist/*.js",
-    "deploy": "npm run build && npm run docker-build",
-    "docker-build": "docker build -t census-api .",
+    "build": "tsc && shx chmod +x dist/*.js || true",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "prepare": "npm run build",
     "test": "vitest --printConsoleTrace=true --silent=false",

@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  mcp-server:
+    build:
+      context: ./mcp-server
+      dockerfile: Dockerfile
+    container_name: mcp-server
+    environment:
+      NODE_ENV: production
+    volumes:
+      - ./shared:/app/shared:ro
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+
+networks:
+  default:
+    name: census-mcp-network

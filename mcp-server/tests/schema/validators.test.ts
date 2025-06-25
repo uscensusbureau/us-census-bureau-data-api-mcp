@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { z } from 'zod';
 import type { RefinementCtx } from 'zod';
 
-import { datasetValidator, validateGeographyArgs } from '../../schema/validators';
+import { datasetValidator, validateGeographyArgs } from '../../src/schema/validators';
 
 type TableArgs = {
 	for?: string;

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { DescribeDatasetTool } from '../../../tools/describe-dataset.tool';
+import { DescribeDatasetTool } from '../../../src/tools/describe-dataset.tool';
 
 describe('DescribeDatasetTool - Integration Tests', () => {
 
