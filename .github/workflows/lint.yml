@@ -1,4 +1,4 @@
-name: ESLint Check
+name: MCP Server - Lint
 
 on:
   push:
@@ -12,14 +12,16 @@ on:
 
 jobs:
   build:
+    name: Code Quality Tests
     runs-on: ubuntu-latest
+    
     steps:
       - uses: actions/checkout@v4
       
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 22
 
        # Build MCP server
       - name: Install MCP server dependencies

@@ -1,4 +1,4 @@
-name: Build
+name: MCP Server - Build
   
 on: 
   push:
@@ -13,7 +13,9 @@ on:
 
 jobs:
   build:
+    name: Build & Docker Tests
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
       

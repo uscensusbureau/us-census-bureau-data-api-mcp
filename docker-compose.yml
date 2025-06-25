@@ -7,6 +7,7 @@ services:
       POSTGRES_PASSWORD: mcp_pass
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./mcp-db/init:/docker-entrypoint-initdb.d
     ports:
       - "5432:5432"
     healthcheck:
@@ -14,6 +15,24 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  census-mcp-db-test:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: mcp_db_test
+      POSTGRES_USER: mcp_user_test
+      POSTGRES_PASSWORD: mcp_pass_test
+    volumes:
+      - ./mcp-db/init:/docker-entrypoint-initdb.d  # Same basic setup
+      # No persistent volume - fresh on each start
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mcp_user_test -d mcp_db_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    profiles: [test]
 
   mcp-server:
     build:

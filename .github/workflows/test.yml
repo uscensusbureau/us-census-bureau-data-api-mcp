@@ -1,4 +1,4 @@
-name: Test
+name: MCP Server - Tests
   
 on: 
   push:
@@ -13,6 +13,7 @@ on:
 
 jobs:
   test:
+    name: Unit & Integration Tests
     runs-on: ubuntu-latest
     
     steps:

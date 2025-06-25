@@ -1,0 +1,109 @@
+name: MCP Database - Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'mcp-db/**'
+      - 'tests/database/**'
+      - 'tests/db/**'
+      - '.github/workflows/database-tests.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'mcp-db/**'
+      - 'tests/database/**'
+      - 'tests/db/**'
+      - '.github/workflows/database-tests.yml'
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  database-tests:
+    name: Schema Tests
+    runs-on: ubuntu-latest
+    
+    # Use PostgreSQL service instead of docker-compose for CI
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: mcp_db_test
+          POSTGRES_USER: mcp_user_test
+          POSTGRES_PASSWORD: mcp_pass_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5433:5432
+
+    env:
+      # Database connection for tests
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5433
+      POSTGRES_DB: mcp_db_test
+      POSTGRES_USER: mcp_user_test
+      POSTGRES_PASSWORD: mcp_pass_test
+      NODE_ENV: test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: 'mcp-db/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: ./mcp-db
+        run: npm ci
+
+      - name: Wait for PostgreSQL to be ready
+        run: |
+          for i in {1..30}; do
+            if pg_isready -h localhost -p 5433 -U mcp_user_test; then
+              echo "PostgreSQL is ready!"
+              break
+            fi
+            echo "Waiting for PostgreSQL... ($i/30)"
+            sleep 2
+          done
+
+      - name: Initialize database schema
+        run: |
+          echo "Initializing database schema..."
+          # Run all SQL files from the init directory
+          for sql_file in ./mcp-db/init/*.sql; do
+            if [ -f "$sql_file" ]; then
+              echo "Executing $sql_file..."
+              PGPASSWORD=mcp_pass_test psql -h localhost -p 5433 -U mcp_user_test -d mcp_db_test -f "$sql_file"
+            fi
+          done
+
+      - name: Verify database schema
+        run: |
+          echo "Checking if tables exist..."
+          PGPASSWORD=mcp_pass_test psql -h localhost -p 5433 -U mcp_user_test -d mcp_db_test -c "\dt"
+          echo "Checking if places table has data structure..."
+          PGPASSWORD=mcp_pass_test psql -h localhost -p 5433 -U mcp_user_test -d mcp_db_test -c "\d places"
+
+      - name: Test database connection
+        run: |
+          echo "Testing database connection..."
+          PGPASSWORD=mcp_pass_test psql -h localhost -p 5433 -U mcp_user_test -d mcp_db_test -c "SELECT version();"
+          echo "Connection successful!"
+
+      - name: Run database tests
+        working-directory: ./mcp-db
+        run: |
+          echo "Running database tests with verbose output..."
+          npm run test:db -- --reporter=verbose --no-coverage
+
+      - name: Run database tests with coverage (optional)
+        working-directory: ./mcp-db
+        run: npm run test:db -- --coverage
+        continue-on-error: true

@@ -43,11 +43,17 @@ By default, all logging functions are disabled in the `mcp-server` to prevent `j
 
 ### Testing
 
-This project uses [Vitest](https://vitest.dev/) to test the server.
+This project uses [Vitest](https://vitest.dev/) to test the MCP Server and MCP Database.
 
-Prior to running tests, a valid Census Bureau [API key](https://api.census.gov/data/key_signup.html) is required. This key should be defined in the `.env` file of the `mcp-server` directory. The `sample.env` offers an example of how this `.env` file should look.
+#### MCP Server Testing
 
-To run tests, run `npm run test`. To run ESLint, run `npm run lint`.
+Prior to running the MCP Server tests, a valid Census Bureau [API key](https://api.census.gov/data/key_signup.html) is required. This key should be defined in the `.env` file of the `mcp-server` directory. The `sample.env` offers an example of how this `.env` file should look.
+
+To run tests, navigate to the `mcp-server/` directory and run `npm run test`. To run ESLint, run `npm run lint` from the same directory.
+
+#### MCP Database Testing
+
+To run tests, navigate to the `mcp-db/` directoruy and run `npm run test:db`.
 
 ## MCP Server Architecture
 
