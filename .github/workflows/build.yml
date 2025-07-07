@@ -18,6 +18,9 @@ jobs:
     container: node:22.17-alpine
 
     steps:
+      - name: Install Bash
+        run: apk add --no-cache bash
+
       - uses: actions/checkout@v4
 
       - name: Set up Docker
