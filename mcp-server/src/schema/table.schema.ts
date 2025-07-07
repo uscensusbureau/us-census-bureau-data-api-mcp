@@ -68,6 +68,7 @@ export const geoProperties = {
 	    "state:01,02,06", 
 	    "county:001",
 	    "county:*",
+	    "tract:*",
 	    "place:12345"
 	  ]
 	},
@@ -77,7 +78,9 @@ export const geoProperties = {
 	  examples: [
 	    "state:01",
 	    "state:01,02",
-	    "county:075"
+	    "county:075",
+	    "state:01 county:001",
+	    "state:01%20county:001",
 	  ]
 	},
 	ucgid: {
@@ -92,7 +95,8 @@ export const geoProperties = {
 
 
 //Fields
-const geographyPattern: RegExp = /^[a-zA-Z+\s]+:[*\d,]+$/;
+const geographyPatternFor: RegExp = /^[a-zA-Z+\s]+:[*\d,]+$/;
+const geographyPatternIn: RegExp = /^[a-zA-Z+\s]+:[*\d,]+(?:(?:\s|%20)[a-zA-Z+\s]+:[*\d,]+)*$/;
 
 export const baseFields = {
 	dataset: z.string(),
@@ -122,14 +126,14 @@ export const variablesField = {
 export const geoFields = {
 	for: z.string()
     .optional()
-    .refine((val) => !val || geographyPattern.test(val), {
+    .refine((val) => !val || geographyPatternFor.test(val), {
       message: "Must be in format 'geography-level:value1,value2' or 'geography-level:*', e.g., 'state:01,02' or 'county:*'."
   	})
   	.describe("Geography-level restriction, e.g. 'state:01'"),
   in: z.string()
     .optional()
-    .refine((val) => !val || geographyPattern.test(val), {
-      message: "Must be in format 'geography-level:value1,value2', e.g., 'state:01' or 'state:01,02'."
+    .refine((val) => !val || geographyPatternIn.test(val), {
+      message: "Must be in format 'geography-level:value1' or 'geography-level:value1 geography-level:value2', e.g., 'state:01', 'state:01 county:001', or 'state:01%20county:001'."
 		})
     .describe("Geography-level restriction, e.g. 'state:01'"),
   ucgid: z.string().optional().describe("Alternative geography specification using UCGID, e.g., '0400000US06', '0400000US41'.")

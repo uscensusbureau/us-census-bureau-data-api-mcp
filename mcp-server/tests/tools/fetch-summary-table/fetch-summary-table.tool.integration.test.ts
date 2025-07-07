@@ -3,7 +3,7 @@ import { FetchSummaryTableTool } from '../../../src/tools/fetch-summary-table.to
 
 describe('FetchSummaryTableTool - Integration Tests', () => {
 
-  it('should fetch real ACS metadata', async () => {
+  it('should fetch real ACS data', async () => {
     const tool = new FetchSummaryTableTool();
     const datasetName = 'acs/acs1';
     const groupName = 'B17015';
@@ -15,6 +15,27 @@ describe('FetchSummaryTableTool - Integration Tests', () => {
         group: groupName
       },
       for: 'state:*'
+    });
+
+    expect(response.content[0].type).toBe('text');
+    const responseText = response.content[0].text;
+    expect(responseText).toContain(`${datasetName}`);
+    expect(responseText).toContain(`${groupName}`);
+  }, 10000); // Longer timeout for real API calls
+
+    it('should fetch real ACS data with complex geography definitions', async () => {
+    const tool = new FetchSummaryTableTool();
+    const datasetName = 'acs/acs5';
+    const groupName = 'B15003';
+    
+    const response = await tool.handler({
+      dataset: datasetName,
+      year: 2022,
+      get: {
+        group: groupName
+      },
+      for: 'tract:*',
+      in: 'state:17 county:031'
     });
 
     expect(response.content[0].type).toBe('text');

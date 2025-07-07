@@ -68,6 +68,21 @@ describe('FetchSummaryTableTool', () => {
       );
     });
 
+    it('should validate complex geography level definitions', () => {
+      const complexArgs = {
+        dataset: 'acs/acs1',
+        year: 2022,
+        get: { 
+          group: 'B01001' 
+        },
+        for: 'tract:*',
+        in: 'state:01 county:001'
+      };
+
+      expect(() => tool.argsSchema.parse(complexArgs)).not.toThrow();
+
+    });
+
     it('should catch invalid geography level definitions', () => {
       const invalidArgs = {
         dataset: 'acs/acs1',
@@ -75,8 +90,8 @@ describe('FetchSummaryTableTool', () => {
         get: { 
           group: 'B01001' 
         },
-        for:['state=*'],
-        in:['county=01']
+        for:['state:*'],
+        in:['county:01']
       };
 
       expect(() => tool.argsSchema.parse(invalidArgs)).toThrow();
