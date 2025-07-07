@@ -21,6 +21,7 @@ jobs:
   database-tests:
     name: Schema Tests
     runs-on: ubuntu-latest
+    container: node:22.17-alpine
     
     # Use PostgreSQL service instead of docker-compose for CI
     services:
@@ -50,13 +51,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22.17-alpine'
-          cache: 'npm'
-          cache-dependency-path: 'mcp-db/package-lock.json'
 
       - name: Install dependencies
         working-directory: ./mcp-db

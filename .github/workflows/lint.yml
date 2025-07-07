@@ -14,14 +14,10 @@ jobs:
   build:
     name: Code Quality Tests
     runs-on: ubuntu-latest
+    container: node:22.17-alpine
     
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22.17-alpine'
 
        # Build MCP server
       - name: Install MCP server dependencies
