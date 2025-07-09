@@ -45,7 +45,9 @@ jobs:
       POSTGRES_DB: mcp_db_test
       POSTGRES_USER: mcp_user_test
       POSTGRES_PASSWORD: mcp_pass_test
+      DATABASE_URL: postgresql://mcp_user_test:mcp_pass_test@localhost:5433/mcp_db_test
       NODE_ENV: test
+      CI: true
 
     steps:
       - name: Checkout code
@@ -73,23 +75,19 @@ jobs:
             sleep 2
           done
 
-      - name: Initialize database schema
+      - name: Run database migrations
+        working-directory: ./mcp-db
         run: |
-          echo "Initializing database schema..."
-          # Run all SQL files from the init directory
-          for sql_file in ./mcp-db/init/*.sql; do
-            if [ -f "$sql_file" ]; then
-              echo "Executing $sql_file..."
-              PGPASSWORD=mcp_pass_test psql -h localhost -p 5433 -U mcp_user_test -d mcp_db_test -f "$sql_file"
-            fi
-          done
+          echo "Running database migrations..."
+          npm run migrate:up
+          echo "Migrations completed successfully!"
 
-      - name: Verify database schema
+      - name: Verify migration success
         run: |
           echo "Checking if tables exist..."
           PGPASSWORD=mcp_pass_test psql -h localhost -p 5433 -U mcp_user_test -d mcp_db_test -c "\dt"
-          echo "Checking if places table has data structure..."
-          PGPASSWORD=mcp_pass_test psql -h localhost -p 5433 -U mcp_user_test -d mcp_db_test -c "\d places"
+          echo "Checking if pgmigrations table exists..."
+          PGPASSWORD=mcp_pass_test psql -h localhost -p 5433 -U mcp_user_test -d mcp_db_test -c "\d pgmigrations"
 
       - name: Test database connection
         run: |
@@ -102,8 +100,3 @@ jobs:
         run: |
           echo "Running database tests with verbose output..."
           npm run test:db -- --reporter=verbose --no-coverage
-
-      - name: Run database tests with coverage (optional)
-        working-directory: ./mcp-db
-        run: npm run test:db -- --coverage
-        continue-on-error: true

@@ -1,8 +1,10 @@
 # MCP Server for the Census Bureau API
 [![License: CC0-1.0](https://img.shields.io/badge/License-CC0%201.0-lightgrey.svg)](https://github.com/uscensusbureau/mcp-server-census-api/blob/main/LICENSE)
-[![Build](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/build.yml/badge.svg)](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/build.yml)
-[![Test](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/test.yml/badge.svg)](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/test.yml)
-[![ESLint Check](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/lint.yml/badge.svg)](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/lint.yml)
+[![MCP Project Build](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/build.yml/badge.svg)](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/build.yml)
+[![MCP Server - Tests](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/test.yml/badge.svg)](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/test.yml)
+[![MCP Database - Tests](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/test-db.yml/badge.svg)](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/test-db.yml)
+[![MCP Server - Lint](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/lint.yml/badge.svg)](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/lint.yml)
+[![MCP Database - Lint](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/lint-db.yml/badge.svg)](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/lint-db.yml)
 
 A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) server for interacting with the Census Bureau API. This project is built in the [MCP Typescript SDK](https://github.com/modelcontextprotocol/typescript-sdk).
 
@@ -52,6 +54,8 @@ Prior to running the MCP Server tests, a valid Census Bureau [API key](https://a
 To run tests, navigate to the `mcp-server/` directory and run `npm run test`. To run ESLint, run `npm run lint` from the same directory.
 
 #### MCP Database Testing
+
+A `.env` file needs to be created in the `mcp-db/` directory with a valid `DATABASE_URL` variable defined. The `sample.env` in the same directory includes the default value.
 
 To run tests, navigate to the `mcp-db/` directoruy and run `npm run test:db`.
 

@@ -7,7 +7,6 @@ services:
       POSTGRES_PASSWORD: mcp_pass
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./mcp-db/init:/docker-entrypoint-initdb.d
     ports:
       - "5432:5432"
     healthcheck:
@@ -16,15 +15,54 @@ services:
       timeout: 5s
       retries: 5
 
+  census-mcp-db-init:
+    image: node:20-alpine
+    working_dir: /app
+    environment:
+      DATABASE_URL: postgresql://mcp_user:mcp_pass@census-mcp-db:5432/mcp_db
+      NODE_ENV: production
+    volumes:
+      - ./mcp-db:/app
+    command: sh -c "
+      echo 'Installing dependencies...' &&
+      npm ci --omit=dev --silent &&
+      echo 'Running database migrations...' &&
+      npm run migrate:up &&
+      echo 'Database migrations complete!'"
+    depends_on:
+      census-mcp-db:
+        condition: service_healthy
+    restart: "no"
+
+  mcp-server:
+    build:
+      context: ./mcp-server
+      dockerfile: Dockerfile
+    container_name: mcp-server
+    environment:
+      POSTGRES_HOST: census-mcp-db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: mcp_db
+      POSTGRES_USER: mcp_user
+      POSTGRES_PASSWORD: mcp_pass
+      NODE_ENV: production
+    depends_on:
+      census-mcp-db:
+        condition: service_healthy
+      census-mcp-db-init:
+        condition: service_completed_successfully
+    volumes:
+      - ./shared:/app/shared:ro
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+
   census-mcp-db-test:
     image: postgres:16
     environment:
       POSTGRES_DB: mcp_db_test
       POSTGRES_USER: mcp_user_test
       POSTGRES_PASSWORD: mcp_pass_test
-    volumes:
-      - ./mcp-db/init:/docker-entrypoint-initdb.d  # Same basic setup
-      # No persistent volume - fresh on each start
     ports:
       - "5433:5432"
     healthcheck:
@@ -34,26 +72,17 @@ services:
       retries: 5
     profiles: [test]
 
-  mcp-server:
+  census-mcp-db-test-init:
     build:
-      context: ./mcp-server
+      context: ./mcp-db
       dockerfile: Dockerfile
-    container_name: mcp-server
     environment:
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: 5432
-      POSTGRES_DB: census-mcp-db
-      POSTGRES_USER: mcp_user
-      POSTGRES_PASSWORD: mcp_pass
-      NODE_ENV: production
+      DATABASE_URL: postgresql://mcp_user_test:mcp_pass_test@census-mcp-db-test:5432/mcp_db_test
     depends_on:
-      census-mcp-db:
+      census-mcp-db-test:
         condition: service_healthy
-    volumes:
-      - ./shared:/app/shared:ro
-    stdin_open: true
-    tty: true
-    restart: unless-stopped
+    profiles: [test]
+    restart: "no"
 
 volumes:
   postgres_data:

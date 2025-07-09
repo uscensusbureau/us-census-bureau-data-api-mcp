@@ -8,11 +8,10 @@ export async function setup(): Promise<void> {
   const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
   
   if (!isCI) {
-    // Only start Docker container for local testing, not testing in GitHub Actions
     console.log('Starting test database...');
     
     // Start test database
-    const startDb: ChildProcess = spawn('docker-compose', ['--profile', 'test', 'up', '-d', 'census-mcp-db-test'], {
+    const startDb: ChildProcess = spawn('docker', ['compose', '--profile', 'test', 'up', '-d', 'census-mcp-db-test'], {
       stdio: 'inherit'
     });
     
@@ -24,12 +23,12 @@ export async function setup(): Promise<void> {
     });
     
     console.log('Waiting for test database to be ready...');
-    await sleep(10000); // Give it more time
+    await sleep(10000);
   } else {
     console.log('Running in CI environment, using existing database service...');
   }
   
-  // Test connectivity to ensure database is actually ready (works for both local and CI)
+  // Test connectivity to ensure database is actually ready
   console.log('Testing database connectivity...');
   const { Client } = await import('pg');
   const client = new Client({
@@ -58,18 +57,36 @@ export async function setup(): Promise<void> {
       await sleep(2000);
     }
   }
+
+  // Run migrations on the test database in Docker
+  if (!isCI) {
+    console.log('Running migrations on test database...');
+    
+    const runMigrations: ChildProcess = spawn('docker', ['compose', '--profile', 'test', 'up', 'census-mcp-db-test-init'], {
+      stdio: 'inherit'
+    });
+    
+    await new Promise<void>((resolve, reject) => {
+      runMigrations.on('close', (code: number | null) => {
+        if (code === 0) {
+          console.log('Test database migrations completed!');
+          resolve();
+        } else {
+          reject(new Error(`Migration failed with code ${code}`));
+        }
+      });
+    });
+  }
 }
 
 export async function teardown(): Promise<void> {
-  // Check if running in GitHub Actions (or other CI where database cleanup is handled automatically)
   const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
   
   if (!isCI) {
-    // Only clean up Docker container locally, not in CI
     console.log('Cleaning up test database...');
     
-    // Only stop the test container, not all containers
-    const stopDb: ChildProcess = spawn('docker-compose', ['stop', 'census-mcp-db-test'], {
+    // Stop the test containers
+    const stopDb: ChildProcess = spawn('docker', ['compose', 'stop', 'census-mcp-db-test', 'census-mcp-db-test-init'], {
       stdio: 'inherit'
     });
     
@@ -77,8 +94,8 @@ export async function teardown(): Promise<void> {
       stopDb.on('close', () => resolve());
     });
     
-    // Optional: Remove the stopped container to free up resources
-    const removeDb: ChildProcess = spawn('docker-compose', ['rm', '-f', 'census-mcp-db-test'], {
+    // Remove the stopped containers
+    const removeDb: ChildProcess = spawn('docker', ['compose', 'rm', '-f', 'census-mcp-db-test', 'census-mcp-db-test-init'], {
       stdio: 'inherit'
     });
     
