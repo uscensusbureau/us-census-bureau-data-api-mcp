@@ -36,16 +36,16 @@ jobs:
           --health-timeout 5s
           --health-retries 5
         ports:
-          - 5433:5432
+          - 5434:5432
 
     env:
       # Database connection for tests
       POSTGRES_HOST: localhost
-      POSTGRES_PORT: 5433
+      POSTGRES_PORT: 5434
       POSTGRES_DB: mcp_db_test
       POSTGRES_USER: mcp_user_test
       POSTGRES_PASSWORD: mcp_pass_test
-      DATABASE_URL: postgresql://mcp_user_test:mcp_pass_test@localhost:5433/mcp_db_test
+      DATABASE_URL: postgresql://mcp_user_test:mcp_pass_test@localhost:5434/mcp_db_test
       NODE_ENV: test
       CI: true
 
@@ -67,7 +67,7 @@ jobs:
       - name: Wait for PostgreSQL to be ready
         run: |
           for i in {1..30}; do
-            if pg_isready -h localhost -p 5433 -U mcp_user_test; then
+            if pg_isready -h localhost -p 5434 -U mcp_user_test; then
               echo "PostgreSQL is ready!"
               break
             fi
@@ -85,14 +85,14 @@ jobs:
       - name: Verify migration success
         run: |
           echo "Checking if tables exist..."
-          PGPASSWORD=mcp_pass_test psql -h localhost -p 5433 -U mcp_user_test -d mcp_db_test -c "\dt"
+          PGPASSWORD=mcp_pass_test psql -h localhost -p 5434 -U mcp_user_test -d mcp_db_test -c "\dt"
           echo "Checking if pgmigrations table exists..."
-          PGPASSWORD=mcp_pass_test psql -h localhost -p 5433 -U mcp_user_test -d mcp_db_test -c "\d pgmigrations"
+          PGPASSWORD=mcp_pass_test psql -h localhost -p 5434 -U mcp_user_test -d mcp_db_test -c "\d pgmigrations"
 
       - name: Test database connection
         run: |
           echo "Testing database connection..."
-          PGPASSWORD=mcp_pass_test psql -h localhost -p 5433 -U mcp_user_test -d mcp_db_test -c "SELECT version();"
+          PGPASSWORD=mcp_pass_test psql -h localhost -p 5434 -U mcp_user_test -d mcp_db_test -c "SELECT version();"
           echo "Connection successful!"
 
       - name: Run database tests

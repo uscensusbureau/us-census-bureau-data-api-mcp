@@ -39,7 +39,7 @@ Be sure to update the path to the `mcp-server-census-api` in `args` and update t
 
 ## Development
 
-Run `docker compose` from the root of the project to build the containers.
+Run `docker compose --profile dev up` from the root of the project to build the containers.
 
 By default, all logging functions are disabled in the `mcp-server` to prevent `json` validation errors when interacting with the MCP server through MCP clients. To enable logging for development purposes, set `DEBUG_LOGS=true` when interacting with the server directly using the examples below, e.g. `echo '{CALL_ARGUMENTS}' docker exec -e DEBUG_LOGS=true -i mcp-server node dist/index.js`. 
 

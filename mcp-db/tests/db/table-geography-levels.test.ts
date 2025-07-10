@@ -10,7 +10,7 @@ import {
 
 const client = new Client(dbConfig);
 
-describe('Places Table', () => {
+describe('Geography Levels Table', () => {
   beforeAll(async () => {
     await client.connect();
   });
@@ -24,7 +24,7 @@ describe('Places Table', () => {
 	    SELECT EXISTS (
 	      SELECT FROM information_schema.tables 
 	      WHERE table_schema = 'public' 
-	      AND table_name = 'places'
+	      AND table_name = 'geography_levels'
 	    );
 	  `);
 	  
@@ -35,19 +35,11 @@ describe('Places Table', () => {
 	  const result: QueryResult<Pick<ColumnInfo, 'column_name' | 'data_type' | 'is_nullable'>> = await client.query(`
 	    SELECT column_name, data_type, is_nullable 
 	    FROM information_schema.columns 
-	    WHERE table_name = 'places' 
+	    WHERE table_name = 'geography_levels' 
 	    ORDER BY ordinal_position;
 	  `);
 
-	  const expectedColumns: string[] = [
-	    'id', 'name', 'full_name', 'state_code', 
-	    'state_name', 'county_code', 'county_name', 'fips_code',
-	    'census_geoid', 'geography_code', 'parent_place_id',
-	    'latitude', 'longitude', 'population', 'land_area_sqkm',
-	    'water_area_sqkm', 'elevation_meters', 'year',
-	    'is_active', 'data_source', 'created_at', 'updated_at',
-	    'predecessor_geoid', 'successor_geoid', 'geoid_change_reason'
-	  ];
+	  const expectedColumns: string[] = ['id', 'name', 'get_variable', 'on_spine', 'query_name'];
 
 	  const actualColumns: string[] = result.rows.map(row => row.column_name);
 	  
@@ -60,8 +52,8 @@ describe('Places Table', () => {
 	  const result: QueryResult<ColumnInfo> = await client.query(`
 	    SELECT column_name, data_type, character_maximum_length, numeric_precision, numeric_scale
 	    FROM information_schema.columns 
-	    WHERE table_name = 'places' 
-	    AND column_name IN ('name', 'latitude', 'longitude', 'year', 'census_geoid');
+	    WHERE table_name = 'geography_levels' 
+	    AND column_name IN ('name');
 	  `);
 
 	  const columnTypes: Record<string, Omit<ColumnInfo, 'column_name' | 'is_nullable'>> = result.rows.reduce((acc, row) => {
@@ -76,21 +68,14 @@ describe('Places Table', () => {
 
 	  expect(columnTypes.name.data_type).toBe('character varying');
 	  expect(columnTypes.name.character_maximum_length).toBe(255);
-	  expect(columnTypes.latitude.data_type).toBe('numeric');
-	  expect(columnTypes.latitude.numeric_precision).toBe(10);
-	  expect(columnTypes.latitude.numeric_scale).toBe(7);
-	  expect(columnTypes.longitude.data_type).toBe('numeric');
-	  expect(columnTypes.longitude.numeric_precision).toBe(11);
-	  expect(columnTypes.longitude.numeric_scale).toBe(7);
-	  expect(columnTypes.year.data_type).toBe('integer');
 	});
 
 	it('should have NOT NULL constraint on required fields', async () => {
 	  const result: QueryResult<Pick<ColumnInfo, 'column_name' | 'is_nullable'>> = await client.query(`
 	    SELECT column_name, is_nullable 
 	    FROM information_schema.columns 
-	    WHERE table_name = 'places' 
-	    AND column_name IN ('name');
+	    WHERE table_name = 'geography_levels' 
+	    AND column_name IN ('name', 'place_type');
 	  `);
 
 	  result.rows.forEach(row => {
@@ -98,33 +83,22 @@ describe('Places Table', () => {
 	  });
 	});
 
-	it('should have unique constraints', async () => {
-	  const result: QueryResult<ConstraintInfo> = await client.query(`
-	    SELECT constraint_name, constraint_type 
-	    FROM information_schema.table_constraints 
-	    WHERE table_name = 'places' 
-	    AND constraint_type = 'UNIQUE';
-	  `);
-
-	  expect(result.rows.length).toBeGreaterThanOrEqual(2);
-	});
-
 	it('should have primary key', async () => {
 	  const result: QueryResult<Pick<ConstraintInfo, 'constraint_name'>> = await client.query(`
 	    SELECT constraint_name 
 	    FROM information_schema.table_constraints 
-	    WHERE table_name = 'places' 
+	    WHERE table_name = 'geography_levels' 
 	    AND constraint_type = 'PRIMARY KEY';
 	  `);
 
 	  expect(result.rows.length).toBe(1);
 	});
 
-	it('should have foreign key for parent_place_id', async () => {
+	it('should have foreign key for parent_geography_level_id', async () => {
 	  const result: QueryResult<Pick<ConstraintInfo, 'constraint_name'>> = await client.query(`
 	    SELECT constraint_name 
 	    FROM information_schema.table_constraints 
-	    WHERE table_name = 'places' 
+	    WHERE table_name = 'geography_levels' 
 	    AND constraint_type = 'FOREIGN KEY';
 	  `);
 
@@ -135,27 +109,27 @@ describe('Places Table', () => {
 	  const result: QueryResult<IndexInfo> = await client.query(`
 	    SELECT indexname, indexdef
 	    FROM pg_indexes 
-	    WHERE tablename = 'places'
-	    AND indexname != 'places_pkey'; -- Exclude primary key index
+	    WHERE tablename = 'geography_levels'
+	    AND indexname != 'geography_levels_pkey'; -- Exclude primary key index
 	  `);
 
-	  // Check for name index (GIN index for full-text search)
+	  // Check for name index
 	  const hasNameIndex: boolean = result.rows.some(row => 
-	    row.indexname.includes('name') || row.indexdef.includes('to_tsvector')
+	    row.indexname.includes('parent_geography_level_id')
 	  );
 	  expect(hasNameIndex).toBe(true);
 
 	  // Should have multiple indexes
-	  expect(result.rows.length).toBeGreaterThan(6);
+	  expect(result.rows.length).toBeGreaterThan(0);
 	});
 
-	it('should allow inserting valid place data', async () => {
+	it('should allow inserting valid geography level data', async () => {
 	  await client.query('BEGIN');
 	  
 	  try {
 	    const result: QueryResult<{ id: bigint }> = await client.query(`
-	      INSERT INTO places (name, year, census_geoid) 
-	      VALUES ('Test City', 2022, 'TEST123') 
+	      INSERT INTO geography_levels (name, get_variable, on_spine, query_name ) 
+	      VALUES ('County', 'COUNTY', true, 'county') 
 	      RETURNING id;
 	    `);
 	    
@@ -175,7 +149,7 @@ describe('Places Table', () => {
 	  
 	  try {
 	    await expect(
-	      client.query(`INSERT INTO places (census_geoid) VALUES ('TEST123');`)
+	      client.query(`INSERT INTO geography_levels (name) VALUES ('County');`)
 	    ).rejects.toThrow();
 	    
 	    await client.query('ROLLBACK');

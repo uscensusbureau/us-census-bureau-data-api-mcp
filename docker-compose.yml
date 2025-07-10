@@ -1,4 +1,5 @@
 services:
+  # Production services (default - no profiles)
   census-mcp-db:
     image: postgres:16
     environment:
@@ -14,25 +15,21 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    profiles: [prod]
 
   census-mcp-db-init:
-    image: node:20-alpine
-    working_dir: /app
+    build:
+      context: ./mcp-db
+      dockerfile: Dockerfile
+      target: prod  # Prod stage - no dev dependencies
     environment:
       DATABASE_URL: postgresql://mcp_user:mcp_pass@census-mcp-db:5432/mcp_db
       NODE_ENV: production
-    volumes:
-      - ./mcp-db:/app
-    command: sh -c "
-      echo 'Installing dependencies...' &&
-      npm ci --omit=dev --silent &&
-      echo 'Running database migrations...' &&
-      npm run migrate:up &&
-      echo 'Database migrations complete!'"
     depends_on:
       census-mcp-db:
         condition: service_healthy
     restart: "no"
+    profiles: [prod]
 
   mcp-server:
     build:
@@ -56,7 +53,46 @@ services:
     stdin_open: true
     tty: true
     restart: unless-stopped
+    profiles: [prod]
 
+  # Development services
+  census-mcp-db-dev:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: mcp_db_dev
+      POSTGRES_USER: mcp_user_dev
+      POSTGRES_PASSWORD: mcp_pass_dev
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mcp_user_dev -d mcp_db_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    profiles: [dev]
+
+  census-mcp-db-dev-init:
+    build:
+      context: ./mcp-db
+      dockerfile: Dockerfile
+      target: dev  # Dev stage - includes vitest/eslint
+    environment:
+      DATABASE_URL: postgresql://mcp_user_dev:mcp_pass_dev@census-mcp-db-dev:5432/mcp_db_dev
+    command: sh -c "
+      echo 'Running migrations...' &&
+      npm run migrate:up &&
+      echo 'Development environment ready. You can run:' &&
+      echo '  docker compose --profile dev exec census-mcp-db-dev-init npm run lint' &&
+      echo '  docker compose --profile dev exec census-mcp-db-dev-init npm run test:db' &&
+      tail -f /dev/null"
+    depends_on:
+      census-mcp-db-dev:
+        condition: service_healthy
+    stdin_open: true
+    tty: true
+    profiles: [dev]
+
+  # Test services
   census-mcp-db-test:
     image: postgres:16
     environment:
@@ -64,7 +100,7 @@ services:
       POSTGRES_USER: mcp_user_test
       POSTGRES_PASSWORD: mcp_pass_test
     ports:
-      - "5433:5432"
+      - "5434:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U mcp_user_test -d mcp_db_test"]
       interval: 5s
@@ -76,8 +112,13 @@ services:
     build:
       context: ./mcp-db
       dockerfile: Dockerfile
+      target: dev  # Dev stage - includes vitest/eslint for testing
     environment:
       DATABASE_URL: postgresql://mcp_user_test:mcp_pass_test@census-mcp-db-test:5432/mcp_db_test
+    command: sh -c "
+      echo 'Running migrations...' &&
+      npm run migrate:up &&
+      echo 'Test database ready!'"
     depends_on:
       census-mcp-db-test:
         condition: service_healthy

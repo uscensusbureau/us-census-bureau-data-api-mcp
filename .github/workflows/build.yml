@@ -1,4 +1,4 @@
-name: MCP Server - Build
+name: MCP Project - Build
   
 on: 
   push:
@@ -12,8 +12,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    name: Build & Docker Tests
+  npm-build:
+    name: NPM Build Test
     runs-on: ubuntu-latest
 
     steps:
@@ -23,6 +23,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: 'npm'
+          cache-dependency-path: |
+            mcp-server/package-lock.json
+            mcp-db/package-lock.json
         
       # Build MCP server
       - name: Install MCP server dependencies
@@ -33,11 +37,149 @@ jobs:
         working-directory: ./mcp-server
         run: npm run build
         
-      # Test Docker builds
-      - name: Build Docker images
-        run: docker compose build
+      # Build MCP database components
+      - name: Install MCP database dependencies
+        working-directory: ./mcp-db
+        run: npm ci
         
-      - name: Verify Docker images
+      - name: Lint MCP database
+        working-directory: ./mcp-db
+        run: npm run lint
+
+  docker-dev-build:
+    name: Docker Development Build Test
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+    
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+    
+      - name: Build development Docker images
         run: |
-          docker images
+          docker compose --profile dev build --no-cache
+    
+      - name: Test development environment
+        run: |
+          echo "Starting development environment..."
+          docker compose --profile dev up -d
+          sleep 15
+          
+          echo "=== Development Container Status ==="
+          docker compose --profile dev ps
+          
+          echo "=== Testing Database Connectivity ==="
+          docker compose --profile dev exec -T census-mcp-db-dev pg_isready -U mcp_user_dev -d mcp_db_dev
+          
+          echo "=== Verifying Dev Tools Available ==="
+          docker compose --profile dev exec -T census-mcp-db-dev-init sh -c "
+            echo 'Checking for eslint...' && npx eslint --version
+            echo 'Checking for vitest...' && npx vitest --version
+          "
+          
+          echo "=== Development Environment Logs ==="
+          docker compose --profile dev logs census-mcp-db-dev-init
+    
+      - name: Cleanup development environment
+        if: always()
+        run: |
+          docker compose --profile dev down --volumes --remove-orphans
+
+  docker-prod-build:
+    name: Docker Production Build Test
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+    
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+    
+      - name: Build production Docker images
+        run: |
+          docker compose --profile prod build --no-cache
+    
+      - name: Test production environment
+        run: |
+          echo "Starting production environment..."
+          docker compose --profile prod up -d
+          sleep 20
+          
+          echo "=== Production Container Status ==="
+          docker compose --profile prod ps
+          
+          echo "=== Testing Database Connectivity ==="
+          docker compose --profile prod exec -T census-mcp-db pg_isready -U mcp_user -d mcp_db
+          
+          echo "=== Checking Migration Status ==="
+          if docker compose --profile prod logs census-mcp-db-init | grep -q "error\|Error\|ERROR"; then
+            echo "ERROR: Migration logs contain errors!"
+            exit 1
+          else
+            echo "Migrations completed successfully!"
+          fi
+          
+          echo "=== Verifying Production is Lean ==="
+          docker build --target prod -t test-prod-validation ./mcp-db
+          
+          docker run --rm test-prod-validation sh -c "
+            echo 'Production node_modules validation:'
+            echo 'Checking dev tools should NOT be present:'
+            
+            # Test if eslint is actually installed (not via npx download)
+            if [ -f node_modules/.bin/eslint ] || [ -d node_modules/eslint ]; then
+              echo 'ERROR: eslint found in production!'
+              exit 1
+            else
+              echo 'Good: eslint not in production'
+            fi
+            
+            # Test if vitest is actually installed  
+            if [ -f node_modules/.bin/vitest ] || [ -d node_modules/vitest ]; then
+              echo 'ERROR: vitest found in production!'
+              exit 1
+            else
+              echo 'Good: vitest not in production'
+            fi
+            
+            echo 'Production validation complete!'
+          "
+          
+          echo "=== MCP Server Status ==="
+          docker compose --profile prod logs mcp-server | head -20
+ 
+    
+      - name: Cleanup production environment
+        if: always()
+        run: |
+          docker compose --profile prod down --volumes --remove-orphans
+
+
+  verify-docker-images:
+    name: Verify All Docker Images
+    runs-on: ubuntu-latest
+    needs: [npm-build, docker-dev-build, docker-prod-build]
+    
+    steps:
+      - uses: actions/checkout@v4
+    
+      - name: Build all Docker images
+        run: |
+          echo "Building all Docker profiles..."
+          docker compose --profile dev build
+          docker compose --profile prod build
+    
+      - name: Verify Docker configuration
+        run: |
+          echo "=== Docker Compose Configuration ==="
           docker compose config
+          
+          echo "=== Available Docker Images ==="
+          docker images --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}" | grep -E "(mcp|census)"
+          
+          echo "=== Image Size Comparison ==="
+          DEV_SIZE=$(docker images --format "{{.Size}}" | head -1)
+          PROD_SIZE=$(docker images --format "{{.Size}}" | head -2 | tail -1)
+          echo "Development image size: $DEV_SIZE"
+          echo "Production image size: $PROD_SIZE"

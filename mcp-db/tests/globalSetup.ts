@@ -4,21 +4,37 @@ import { promisify } from 'util';
 const sleep = promisify(setTimeout);
 
 export async function setup(): Promise<void> {
-  // Check if running in GitHub Actions (or other CI where database is already provided)
+  process.env.POSTGRES_HOST = 'localhost';
+  process.env.POSTGRES_PORT = '5434';  // Test database port
+  process.env.POSTGRES_DB = 'mcp_db_test';
+  process.env.POSTGRES_USER = 'mcp_user_test';
+  process.env.POSTGRES_PASSWORD = 'mcp_pass_test';
+  
   const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
   
   if (!isCI) {
-    console.log('Starting test database...');
+    console.log('Starting test database and running migrations...');
     
-    // Start test database
-    const startDb: ChildProcess = spawn('docker', ['compose', '--profile', 'test', 'up', '-d', 'census-mcp-db-test'], {
-      stdio: 'inherit'
+    // Start test database and run migrations
+    const startDb: ChildProcess = spawn('docker', ['compose', '--profile', 'test', 'up', '-d', '--build'], {
+      stdio: 'pipe'
+    });
+    
+    startDb.stdout?.on('data', (data) => {
+      console.log(`Docker stdout: ${data}`);
+    });
+    
+    startDb.stderr?.on('data', (data) => {
+      console.error(`Docker stderr: ${data}`);
     });
     
     await new Promise<void>((resolve, reject) => {
       startDb.on('close', (code: number | null) => {
-        if (code === 0) resolve();
-        else reject(new Error(`Docker compose failed with code ${code}`));
+        if (code === 0) {
+          resolve();
+        } else {
+          reject(new Error(`Docker compose failed with code ${code}`));
+        }
       });
     });
     
@@ -28,19 +44,22 @@ export async function setup(): Promise<void> {
     console.log('Running in CI environment, using existing database service...');
   }
   
-  // Test connectivity to ensure database is actually ready
+  // Test connectivity
   console.log('Testing database connectivity...');
   const { Client } = await import('pg');
-  const client = new Client({
+  
+  const connectionConfig = {
     host: process.env.POSTGRES_HOST || 'localhost',
-    port: parseInt(process.env.POSTGRES_PORT || '5433'),
+    port: parseInt(process.env.POSTGRES_PORT || '5434'),
     database: process.env.POSTGRES_DB || 'mcp_db_test',
     user: process.env.POSTGRES_USER || 'mcp_user_test',
     password: process.env.POSTGRES_PASSWORD || 'mcp_pass_test',
-  });
-  
+  };
+
   let retries = 15;
   while (retries > 0) {
+    const client = new Client(connectionConfig);
+    
     try {
       await client.connect();
       await client.query('SELECT 1');
@@ -48,6 +67,12 @@ export async function setup(): Promise<void> {
       console.log('Test database is ready!');
       break;
     } catch (error) {
+      try {
+        await client.end();
+      } catch {
+        //Ignore failed connection
+      }
+      
       retries--;
       console.log(`Connection attempt failed, retries left: ${retries}`);
       if (retries === 0) {
@@ -57,26 +82,8 @@ export async function setup(): Promise<void> {
       await sleep(2000);
     }
   }
-
-  // Run migrations on the test database in Docker
-  if (!isCI) {
-    console.log('Running migrations on test database...');
-    
-    const runMigrations: ChildProcess = spawn('docker', ['compose', '--profile', 'test', 'up', 'census-mcp-db-test-init'], {
-      stdio: 'inherit'
-    });
-    
-    await new Promise<void>((resolve, reject) => {
-      runMigrations.on('close', (code: number | null) => {
-        if (code === 0) {
-          console.log('Test database migrations completed!');
-          resolve();
-        } else {
-          reject(new Error(`Migration failed with code ${code}`));
-        }
-      });
-    });
-  }
+  
+  console.log('=== GLOBAL SETUP COMPLETE ===');
 }
 
 export async function teardown(): Promise<void> {
@@ -85,22 +92,12 @@ export async function teardown(): Promise<void> {
   if (!isCI) {
     console.log('Cleaning up test database...');
     
-    // Stop the test containers
-    const stopDb: ChildProcess = spawn('docker', ['compose', 'stop', 'census-mcp-db-test', 'census-mcp-db-test-init'], {
+    const stopDb: ChildProcess = spawn('docker', ['compose', '--profile', 'test', 'down', '--volumes', '--remove-orphans'], {
       stdio: 'inherit'
     });
     
     await new Promise<void>((resolve) => {
       stopDb.on('close', () => resolve());
-    });
-    
-    // Remove the stopped containers
-    const removeDb: ChildProcess = spawn('docker', ['compose', 'rm', '-f', 'census-mcp-db-test', 'census-mcp-db-test-init'], {
-      stdio: 'inherit'
-    });
-    
-    await new Promise<void>((resolve) => {
-      removeDb.on('close', () => resolve());
     });
   } else {
     console.log('Running in CI environment, database cleanup handled automatically...');

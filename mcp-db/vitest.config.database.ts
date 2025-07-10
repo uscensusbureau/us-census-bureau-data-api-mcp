@@ -6,7 +6,6 @@ export default defineConfig({
     testTimeout: 30000, // Database tests might be slower
     hookTimeout: 10000,
     environment: 'node',
-    setupFiles: ['./tests/setup.ts'],
     globalSetup: ['./tests/globalSetup.ts']
   }
 });
