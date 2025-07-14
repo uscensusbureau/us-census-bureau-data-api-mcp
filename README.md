@@ -4,7 +4,6 @@
 [![MCP Server - Tests](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/test.yml/badge.svg)](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/test.yml)
 [![MCP Database - Tests](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/test-db.yml/badge.svg)](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/test-db.yml)
 [![MCP Server - Lint](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/lint.yml/badge.svg)](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/lint.yml)
-[![MCP Database - Lint](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/lint-db.yml/badge.svg)](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/lint-db.yml)
 
 A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) server for interacting with the Census Bureau API. This project is built in the [MCP Typescript SDK](https://github.com/modelcontextprotocol/typescript-sdk).
 
