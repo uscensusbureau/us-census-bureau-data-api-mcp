@@ -2,14 +2,18 @@ name: MCP Database - Tests
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: ['main']
     paths:
       - 'mcp-db/**'
       - 'tests/database/**'
       - 'tests/db/**'
       - '.github/workflows/database-tests.yml'
   pull_request:
-    branches: [ main, develop ]
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - closed
     paths:
       - 'mcp-db/**'
       - 'tests/database/**'

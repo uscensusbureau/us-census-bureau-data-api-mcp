@@ -1,4 +1,4 @@
-name: MCP Server - Lint
+name: MCP Project - Lint
 
 on:
   push:
@@ -11,8 +11,8 @@ on:
       - closed
 
 jobs:
-  build:
-    name: Code Quality Tests
+  lint-server:
+    name: Lint MCP Server
     runs-on: ubuntu-latest
     
     steps:
@@ -30,6 +30,27 @@ jobs:
 
       - name: Run ESLint in MCP Server
         working-directory: ./mcp-server
+        run: npm run lint
+  
+  lint-db:
+    name: Lint MCP DB
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+       # Build MCP DB
+      - name: Install MCP Database dependencies
+        working-directory: ./mcp-db
+        run: npm ci
+
+      - name: Run ESLint in MCP Database
+        working-directory: ./mcp-db
         run: npm run lint
    
  
