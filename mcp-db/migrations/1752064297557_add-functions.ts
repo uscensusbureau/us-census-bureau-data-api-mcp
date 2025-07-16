@@ -1,4 +1,6 @@
-exports.up = (pgm) => {
+import { MigrationBuilder } from 'node-pg-migrate';
+
+export async function up(pgm: MigrationBuilder): Promise<void> {
   // Function to automatically update the updated_at timestamp
   pgm.sql(`
     CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -32,7 +34,7 @@ exports.up = (pgm) => {
   `);
 };
 
-exports.down = (pgm) => {
+export async function down(pgm: MigrationBuilder): Promise<void> {
   pgm.sql('DROP FUNCTION IF EXISTS generate_cache_hash(TEXT, INTEGER, TEXT[], JSONB)');
   pgm.sql('DROP FUNCTION IF EXISTS update_updated_at_column()');
 };

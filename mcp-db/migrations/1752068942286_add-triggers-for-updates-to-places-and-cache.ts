@@ -1,4 +1,6 @@
-exports.up = (pgm) => {
+import { MigrationBuilder } from 'node-pg-migrate';
+
+export async function up(pgm: MigrationBuilder): Promise<void> {
   // Trigger to automatically update the updated_at column for places
   pgm.sql(`
     CREATE TRIGGER update_places_updated_at 
@@ -29,7 +31,7 @@ exports.up = (pgm) => {
   `);
 };
 
-exports.down = (pgm) => {
+export async function down(pgm: MigrationBuilder): Promise<void> {
   pgm.sql('DROP TRIGGER IF EXISTS update_census_data_cache_accessed ON census_data_cache');
   pgm.sql('DROP TRIGGER IF EXISTS update_places_updated_at ON places');
   pgm.sql('DROP FUNCTION IF EXISTS update_cache_accessed()');

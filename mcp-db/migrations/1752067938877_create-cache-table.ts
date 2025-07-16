@@ -1,4 +1,6 @@
-exports.up = (pgm) => {
+import { MigrationBuilder } from 'node-pg-migrate';
+
+export async function up(pgm: MigrationBuilder): Promise<void> {
   pgm.createTable('census_data_cache', {
     id: { type: 'bigserial', primaryKey: true },
     request_hash: { type: 'varchar(64)', notNull: true, unique: true },
@@ -14,6 +16,6 @@ exports.up = (pgm) => {
   });
 };
 
-exports.down = (pgm) => {
+export async function down(pgm: MigrationBuilder): Promise<void> {
   pgm.dropTable('census_data_cache');
 };

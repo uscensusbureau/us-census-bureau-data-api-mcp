@@ -1,4 +1,5 @@
 import { spawn, ChildProcess } from 'child_process';
+import { rm } from 'node:fs/promises';
 import { promisify } from 'util';
 
 const sleep = promisify(setTimeout);
@@ -101,5 +102,16 @@ export async function teardown(): Promise<void> {
     });
   } else {
     console.log('Running in CI environment, database cleanup handled automatically...');
+  }
+
+  await deleteDirectory('tests/db/seeds/fixtures');
+}
+
+async function deleteDirectory(directoryPath: string): Promise<void> {
+  try {
+    await rm(directoryPath, { recursive: true, force: true });
+    console.log(`Directory and its contents removed: ${directoryPath}`);
+  } catch (error) {
+    console.error(`Error removing directory: ${error}`);
   }
 }

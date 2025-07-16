@@ -1,7 +1,9 @@
-exports.up = (pgm) => {
+import { MigrationBuilder } from 'node-pg-migrate';
+
+export async function up(pgm: MigrationBuilder): Promise<void> {
   // Indexes for places table
-  pgm.sql("CREATE INDEX idx_places_name ON places USING gin(to_tsvector('english', name))"); // eslint-disable-line quotes
-  pgm.sql("CREATE INDEX idx_places_full_name ON places USING gin(to_tsvector('english', full_name))"); // eslint-disable-line quotes
+  pgm.sql("CREATE INDEX idx_places_name ON places USING gin(to_tsvector('english', name))");
+  pgm.sql("CREATE INDEX idx_places_full_name ON places USING gin(to_tsvector('english', full_name))");
   pgm.createIndex('places', 'state_code');
   pgm.createIndex('places', ['state_code', 'county_code']);
   pgm.createIndex('places', 'place_type');
@@ -25,7 +27,7 @@ exports.up = (pgm) => {
   pgm.sql('CREATE INDEX idx_census_data_cache_geography ON census_data_cache USING gin(geography_spec)');
 };
 
-exports.down = (pgm) => {
+export async function down(pgm: MigrationBuilder): Promise<void> {
   // Drop indexes (they'll be dropped automatically when tables are dropped)
   pgm.sql('DROP INDEX IF EXISTS idx_places_name');
   pgm.sql('DROP INDEX IF EXISTS idx_places_full_name');

@@ -1,4 +1,6 @@
-exports.up = (pgm) => {
+import { MigrationBuilder } from 'node-pg-migrate';
+
+export async function up(pgm: MigrationBuilder): Promise<void> {
   
   // Create geographic levels table - a table to describe and associate geographic levels
   pgm.createTable('geography_levels', {
@@ -27,7 +29,7 @@ exports.up = (pgm) => {
   });
 };
 
-exports.down = (pgm) => {
+export async function down(pgm: MigrationBuilder): Promise<void> {
   pgm.dropColumns('places', ['geography_level_id']);
   pgm.dropTable('geography_levels');
   

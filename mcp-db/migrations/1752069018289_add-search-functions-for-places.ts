@@ -1,5 +1,6 @@
-exports.up = (pgm) => {
-  // Function to search places with ranking and filtering
+import { MigrationBuilder } from 'node-pg-migrate';
+
+export async function up(pgm: MigrationBuilder): Promise<void> {
   pgm.sql(`
     CREATE OR REPLACE FUNCTION search_places(
         search_term TEXT,
@@ -131,7 +132,7 @@ exports.up = (pgm) => {
   `);
 };
 
-exports.down = (pgm) => {
+export async function down(pgm: MigrationBuilder): Promise<void> {
   pgm.sql('DROP FUNCTION IF EXISTS resolve_geography_by_coordinates(DECIMAL, DECIMAL, DECIMAL)');
   pgm.sql('DROP FUNCTION IF EXISTS fuzzy_search_places(TEXT, REAL, INTEGER)');
   pgm.sql('DROP FUNCTION IF EXISTS search_places(TEXT, CHAR, TEXT[], INTEGER)');

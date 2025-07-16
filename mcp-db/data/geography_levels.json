@@ -1,0 +1,652 @@
+{
+  "geography_levels": [
+    {
+      "get_variable": "US",
+      "query_name": "United States",
+      "name": "United States",
+      "summary_level": "010",
+      "parent_summary_level": null,
+      "on_spine": true,
+      "description": "The entire United States, including the 50 states, District of Columbia, and territories. The highest level in the Census Bureau's geographic hierarchy."
+    },
+    {
+      "get_variable": "REGION",
+      "query_name": "region",
+      "name": "Region",
+      "summary_level": "020",
+      "parent_summary_level": "010",
+      "on_spine": true,
+      "description": "Four groupings of states established by the Census Bureau for the presentation of census data: Northeast, Midwest, South, and West regions."
+    },
+    {
+      "get_variable": "DIVISION",
+      "query_name": "division",
+      "name": "Division",
+      "summary_level": "030",
+      "parent_summary_level": "020",
+      "on_spine": true,
+      "description": "Nine groupings of states and the District of Columbia that are subdivisions of the four census regions, such as New England and Middle Atlantic divisions."
+    },
+    {
+      "get_variable": "STATE",
+      "query_name": "state",
+      "name": "State",
+      "summary_level": "040",
+      "parent_summary_level": "030",
+      "on_spine": true,
+      "description": "The primary legal divisions of the United States, including the 50 states, District of Columbia, and territories treated as state equivalents."
+    },
+    {
+      "get_variable": "COUNTY",
+      "query_name": "county",
+      "name": "County",
+      "summary_level": "050",
+      "parent_summary_level": "040",
+      "on_spine": true,
+      "description": "The primary legal divisions of most states, including counties, parishes in Louisiana, boroughs in Alaska, and other equivalent entities."
+    },
+    {
+      "get_variable": "COUSUB",
+      "query_name": "county subdivision",
+      "name": "County Subdivision",
+      "summary_level": "060",
+      "parent_summary_level": "050",
+      "on_spine": false,
+      "description": "Primary divisions of counties including minor civil divisions (MCDs) such as towns and townships, and census county divisions (CCDs) in states without adequate MCDs."
+    },
+    {
+      "get_variable": "COUSUBPART",
+      "query_name": "county subdivision (or part)",
+      "name": "County Subdivision (Or Part)",
+      "summary_level": "061",
+      "parent_summary_level": "050",
+      "on_spine": false,
+      "description": "Portions of county subdivisions that may be split by other geographic boundaries for statistical presentation purposes."
+    },
+    {
+      "get_variable": "SUBMCD",
+      "query_name": "subminor civil division",
+      "name": "Subminor Civil Division",
+      "summary_level": "067",
+      "parent_summary_level": "060",
+      "on_spine": false,
+      "description": "Legal subdivisions of minor civil divisions, such as subbarrios in Puerto Rico, providing a more detailed level of local government organization."
+    },
+    {
+      "get_variable": "VTD",
+      "query_name": "voting district",
+      "name": "Voting District",
+      "summary_level": "070",
+      "parent_summary_level": "050",
+      "on_spine": false,
+      "description": "Geographic entities such as precincts, wards, and election districts established by state governments for conducting elections."
+    },
+    {
+      "get_variable": "VTDPART",
+      "query_name": "voting district (or part)",
+      "name": "Voting District (Or Part)",
+      "summary_level": "071",
+      "parent_summary_level": "050",
+      "on_spine": false,
+      "description": "Portions of voting districts that may be split by other geographic boundaries for statistical presentation purposes."
+    },
+    {
+      "get_variable": "BLOCK",
+      "query_name": "block",
+      "name": "Block",
+      "summary_level": "101",
+      "parent_summary_level": "150",
+      "on_spine": true,
+      "description": "The smallest geographic unit used by the Census Bureau for tabulation of 100-percent data. Blocks are bounded by visible features like streets and nonvisible boundaries like property lines."
+    },
+    {
+      "get_variable": "TRACT",
+      "query_name": "census tract",
+      "name": "Census Tract",
+      "summary_level": "140",
+      "parent_summary_level": "050",
+      "on_spine": true,
+      "description": "Small, relatively permanent statistical subdivisions of counties with populations typically between 1,200 and 8,000 people, designed to be relatively stable over time."
+    },
+    {
+      "get_variable": "BG",
+      "query_name": "block group",
+      "name": "Block Group",
+      "summary_level": "150",
+      "parent_summary_level": "140",
+      "on_spine": true,
+      "description": "Statistical divisions of census tracts, generally defined to contain between 600 and 3,000 people, used to present sample data and control block numbering."
+    },
+    {
+      "get_variable": "TABBLOCK",
+      "query_name": "tabulation block",
+      "name": "Tabulation Block",
+      "summary_level": "155",
+      "parent_summary_level": "150",
+      "on_spine": false,
+      "description": "Specific census blocks used for tabulation purposes, representing the smallest geographic units for which the Census Bureau collects and tabulates data."
+    },
+    {
+      "get_variable": "TABBLOCKPART",
+      "query_name": "tabulation block (or part)",
+      "name": "Tabulation Block (Or Part)",
+      "summary_level": "157",
+      "parent_summary_level": "150",
+      "on_spine": false,
+      "description": "Portions of tabulation blocks that may be split by other geographic boundaries for statistical presentation purposes."
+    },
+    {
+      "get_variable": "PLACE",
+      "query_name": "place",
+      "name": "Place",
+      "summary_level": "160",
+      "parent_summary_level": "040",
+      "on_spine": false,
+      "description": "Incorporated places and census designated places (CDPs) that represent concentrations of population, including cities, towns, villages, and other legally incorporated areas."
+    },
+    {
+      "get_variable": "PLACEPART",
+      "query_name": "place (or part)",
+      "name": "Place (Or Part)",
+      "summary_level": "162",
+      "parent_summary_level": "040",
+      "on_spine": false,
+      "description": "Portions of places that may be split by other geographic boundaries for statistical presentation purposes."
+    },
+    {
+      "get_variable": "CONCIT",
+      "query_name": "consolidated city",
+      "name": "Consolidated City",
+      "summary_level": "170",
+      "parent_summary_level": "040",
+      "on_spine": false,
+      "description": "A unit of local government where the functions of an incorporated place and its county have merged, resulting in a single consolidated government."
+    },
+    {
+      "get_variable": "CONCITPART",
+      "query_name": "consolidated city (or part)",
+      "name": "Consolidated City (Or Part)",
+      "summary_level": "172",
+      "parent_summary_level": "040",
+      "on_spine": false,
+      "description": "Portions of consolidated cities that may be split by other geographic boundaries for statistical presentation purposes."
+    },
+    {
+      "get_variable": "ANRC",
+      "query_name": "alaska native regional corporation",
+      "name": "Alaska Native Regional Corporation",
+      "summary_level": "230",
+      "parent_summary_level": "040",
+      "on_spine": false,
+      "description": "Twelve regional corporations created pursuant to the Alaska Native Claims Settlement Act to conduct for-profit and nonprofit affairs of Alaska Natives within defined regions."
+    },
+    {
+      "get_variable": "AIANNH",
+      "query_name": "american indian area/alaska native area/hawaiian home land",
+      "name": "American Indian Area/Alaska Native Area/Hawaiian Home Land",
+      "summary_level": "250",
+      "parent_summary_level": "010",
+      "on_spine": false,
+      "description": "Areas that have been set aside by the United States for the use of tribes, including federally recognized American Indian reservations, Alaska Native areas, and Hawaiian home lands."
+    },
+    {
+      "get_variable": "AIANRES",
+      "query_name": "american indian area/alaska native area (reservation only)",
+      "name": "American Indian Area/Alaska Native Area (Reservation Only)",
+      "summary_level": "251",
+      "parent_summary_level": "010",
+      "on_spine": false,
+      "description": "Federal reservations that are territory over which American Indian tribes have governmental authority, excluding off-reservation trust lands."
+    },
+    {
+      "get_variable": "AIANOFF",
+      "query_name": "american indian area (off-reservation trust land only)",
+      "name": "American Indian Area (Off-Reservation Trust Land Only)",
+      "summary_level": "252",
+      "parent_summary_level": "010",
+      "on_spine": false,
+      "description": "Areas for which the United States holds title in trust for the benefit of a tribe or individual American Indian, located outside reservation boundaries."
+    },
+    {
+      "get_variable": "AIANSTAT",
+      "query_name": "american indian area/alaska native area (statistical entity only)",
+      "name": "American Indian Area/Alaska Native Area (Statistical Entity Only)",
+      "summary_level": "254",
+      "parent_summary_level": "010",
+      "on_spine": false,
+      "description": "Statistical entities for American Indian tribes including tribal designated statistical areas, Oklahoma tribal statistical areas, and Alaska Native village statistical areas."
+    },
+    {
+      "get_variable": "TTRACT",
+      "query_name": "tribal census tract",
+      "name": "Tribal Census Tract",
+      "summary_level": "256",
+      "parent_summary_level": "250",
+      "on_spine": false,
+      "description": "Statistical subdivisions of American Indian reservations and off-reservation trust lands, defined independently of standard county-based census tracts."
+    },
+    {
+      "get_variable": "TBG",
+      "query_name": "tribal block group",
+      "name": "Tribal Block Group",
+      "summary_level": "258",
+      "parent_summary_level": "256",
+      "on_spine": false,
+      "description": "Statistical divisions of tribal census tracts, defined independently of standard county-based block groups to provide data for tribal areas."
+    },
+    {
+      "get_variable": "TSUB",
+      "query_name": "american indian area tribal subdivision",
+      "name": "American Indian Area Tribal Subdivision",
+      "summary_level": "260",
+      "parent_summary_level": "250",
+      "on_spine": false,
+      "description": "Legal administrative subdivisions of American Indian reservations and off-reservation trust lands that serve social, cultural, or economic purposes."
+    },
+    {
+      "get_variable": "TSUBPART",
+      "query_name": "american indian area tribal subdivision (or part)",
+      "name": "American Indian Area Tribal Subdivision (Or Part)",
+      "summary_level": "269",
+      "parent_summary_level": "250",
+      "on_spine": false,
+      "description": "Portions of tribal subdivisions that may be split by other geographic boundaries for statistical presentation purposes."
+    },
+    {
+      "get_variable": "AIANNHPART",
+      "query_name": "american indian area/alaska native area/hawaiian home land (or part)",
+      "name": "American Indian Area/Alaska Native Area/Hawaiian Home Land County",
+      "summary_level": "270",
+      "parent_summary_level": "040",
+      "on_spine": false,
+      "description": "State portions of American Indian areas, Alaska Native areas, and Hawaiian home lands for statistical presentation purposes."
+    },
+    {
+      "get_variable": "SAIANNHPART",
+      "query_name": "state american indian area/alaska native area/hawaiian home land (or part)",
+      "name": "State American Indian Area/Alaska Native Area/Hawaiian Home Land (Or Part)",
+      "summary_level": "280",
+      "parent_summary_level": "040",
+      "on_spine": false,
+      "description": "General state portions of American Indian areas, Alaska Native areas, and Hawaiian home lands, serving as a broader category for tribal areas within states."
+    },
+    {
+      "get_variable": "SAIANRESPART",
+      "query_name": "state american indian area/alaska native area (reservation or statistical entity only) (or part)",
+      "name": "State American Indian Area/Alaska Native Area (Reservation Or Statistical Entity Only) (Or Part)",
+      "summary_level": "283",
+      "parent_summary_level": "040",
+      "on_spine": false,
+      "description": "State portions of American Indian reservations and statistical entities, excluding off-reservation trust lands, for statistical presentation purposes."
+    },
+    {
+      "get_variable": "SAIANOFFPART",
+      "query_name": "state american indian area (off-reservation trust land only)/hawaiian home land (or part)",
+      "name": "State American Indian Area (Off-Reservation Trust Land Only)/Hawaiian Home Land (Or Part)",
+      "summary_level": "286",
+      "parent_summary_level": "040",
+      "on_spine": false,
+      "description": "State portions of American Indian off-reservation trust lands and Hawaiian home lands, distinct from reservation areas, for statistical presentation purposes."
+    },
+    {
+      "get_variable": "AIANRESPART",
+      "query_name": "american indian area/alaska native area (reservation only) (or part)",
+      "name": "American Indian Area/Alaska Native Area (Reservation Only) (Or Part)",
+      "summary_level": "290",
+      "parent_summary_level": "040",
+      "on_spine": false,
+      "description": "State portions of American Indian reservations and Alaska Native areas, excluding trust lands and statistical entities, for statistical presentation purposes."
+    },
+    {
+      "get_variable": "AIANOFFPART",
+      "query_name": "american indian area (off-reservation trust land only) (or part)",
+      "name": "American Indian Area (Off-Reservation Trust Land Only) (Or Part)",
+      "summary_level": "291",
+      "parent_summary_level": "040",
+      "on_spine": false,
+      "description": "State portions of American Indian off-reservation trust lands only, excluding reservation areas, for statistical presentation purposes."
+    },
+    {
+      "get_variable": "AIANSTATPART",
+      "query_name": "american indian area/alaska native area (statistical entity only) (or part)",
+      "name": "American Indian Area/Alaska Native Area (Statistical Entity Only) (Or Part)",
+      "summary_level": "292",
+      "parent_summary_level": "040",
+      "on_spine": false,
+      "description": "State portions of American Indian and Alaska Native statistical entities, excluding reservations and trust lands, for statistical presentation purposes."
+    },
+    {
+      "get_variable": "HHL",
+      "query_name": "hawaiian home land (or part)",
+      "name": "Hawaiian Home Land (Or Part)",
+      "summary_level": "293",
+      "parent_summary_level": "040",
+      "on_spine": false,
+      "description": "Areas held in trust for Native Hawaiians by the State of Hawaii, pursuant to the Hawaiian Homes Commission Act of 1920, as amended."
+    },
+    {
+      "get_variable": "ANVC",
+      "query_name": "alaska native village corporation (or part)",
+      "name": "Alaska Native Village Corporation (Or Part)",
+      "summary_level": "294",
+      "parent_summary_level": "040",
+      "on_spine": false,
+      "description": "State portions of Alaska Native village corporations, which are local entities created under the Alaska Native Claims Settlement Act."
+    },
+    {
+      "get_variable": "CBSA",
+      "query_name": "metropolitan statistical area/micropolitan statistical area",
+      "name": "Metropolitan Statistical Area/Micropolitan Statistical Area",
+      "summary_level": "310",
+      "parent_summary_level": "010",
+      "on_spine": false,
+      "description": "Core Based Statistical Areas consisting of counties associated with at least one urban area of 10,000+ population, plus adjacent counties with high economic integration."
+    },
+    {
+      "name": "State-Metropolitan Statistical Area/Micropolitan Statistical Area",
+      "description": "Core Based Statistical Areas within state boundaries",
+      "get_variable": "SCBSA",
+      "query_name": "state-metropolitan statistical area/micropolitan statistical area",
+      "on_spine": false,
+      "summary_level": "320",
+      "parent_summary_level": "310"
+    },
+    {
+      "get_variable": "MSA",
+      "query_name": "metropolitan statistical area",
+      "name": "Metropolitan Statistical Area",
+      "summary_level": "311",
+      "parent_summary_level": "010",
+      "on_spine": false,
+      "description": "Core Based Statistical Areas associated with at least one urban area of 50,000+ population, comprising central counties plus adjacent economically integrated counties."
+    },
+    {
+      "get_variable": "MICRO",
+      "query_name": "micropolitan statistical area",
+      "name": "Micropolitan Statistical Area",
+      "summary_level": "312",
+      "parent_summary_level": "010",
+      "on_spine": false,
+      "description": "Core Based Statistical Areas associated with at least one urban area of 10,000-49,999 population, comprising central counties plus adjacent economically integrated counties."
+    },
+    {
+      "get_variable": "MSAPC",
+      "query_name": "metropolitan statistical area principal city",
+      "name": "Metropolitan Statistical Area Principal City",
+      "summary_level": "313",
+      "parent_summary_level": "311",
+      "on_spine": false,
+      "description": "The largest incorporated place with 10,000+ population in a metropolitan statistical area, or other qualifying places based on population and employment criteria."
+    },
+    {
+      "get_variable": "METDIV",
+      "query_name": "metropolitan division",
+      "name": "Metropolitan Division",
+      "summary_level": "314",
+      "parent_summary_level": "311",
+      "on_spine": false,
+      "description": "Smaller groupings of counties within a metropolitan statistical area containing a single core with 2.5+ million population, representing employment centers."
+    },
+    {
+      "get_variable": "METDIVPC",
+      "query_name": "metropolitan division principal city",
+      "name": "Metropolitan Division Principal City",
+      "summary_level": "315",
+      "parent_summary_level": "314",
+      "on_spine": false,
+      "description": "The main city or town that represents an employment center within a metropolitan division, plus adjacent cities and towns with commuting ties."
+    },
+    {
+      "get_variable": "MICROPC",
+      "query_name": "micropolitan statistical area principal city",
+      "name": "Micropolitan Statistical Area Principal City",
+      "summary_level": "316",
+      "parent_summary_level": "312",
+      "on_spine": false,
+      "description": "The largest incorporated place with 10,000+ population in a micropolitan statistical area, or other qualifying places based on population and employment criteria."
+    },
+    {
+      "get_variable": "MSAPART",
+      "query_name": "metropolitan statistical area (or part)",
+      "name": "Metropolitan Statistical Area (Or Part)",
+      "summary_level": "321",
+      "parent_summary_level": "040",
+      "on_spine": false,
+      "description": "State portions of metropolitan statistical areas, representing the part of an MSA that falls within a specific state for statistical presentation purposes."
+    },
+    {
+      "get_variable": "MICROPART",
+      "query_name": "micropolitan statistical area (or part)",
+      "name": "Micropolitan Statistical Area (Or Part)",
+      "summary_level": "322",
+      "parent_summary_level": "040",
+      "on_spine": false,
+      "description": "State portions of micropolitan statistical areas, representing the part of a micropolitan area that falls within a specific state for statistical presentation purposes."
+    },
+    {
+      "get_variable": "CBSAPC",
+      "query_name": "metropolitan statistical area/micropolitan statistical area principal city (or part)",
+      "name": "Metropolitan Statistical Area/Micropolitan Statistical Area Principal City (Or Part)",
+      "summary_level": "323",
+      "parent_summary_level": "320",
+      "on_spine": false,
+      "description": "State portions of principal cities within Core Based Statistical Areas, representing the main urban centers within CBSAs for statistical presentation purposes."
+    },
+    {
+      "get_variable": "METDIVPART",
+      "query_name": "metropolitan division (or part)",
+      "name": "Metropolitan Division (Or Part)",
+      "summary_level": "324",
+      "parent_summary_level": "321",
+      "on_spine": false,
+      "description": "State portions of metropolitan divisions, representing parts of metropolitan divisions that fall within specific states for statistical presentation purposes."
+    },
+    {
+      "get_variable": "CSA",
+      "query_name": "combined statistical area",
+      "name": "Combined Statistical Area",
+      "summary_level": "330",
+      "parent_summary_level": "010",
+      "on_spine": false,
+      "description": "Two or more adjacent Core Based Statistical Areas that have substantial employment interchange, retaining separate identities within the larger combined area."
+    },
+    {
+      "get_variable": "CSAPART",
+      "query_name": "combined statistical area (or part)",
+      "name": "Combined Statistical Area (Or Part)",
+      "summary_level": "331",
+      "parent_summary_level": "040",
+      "on_spine": false,
+      "description": "State portions of combined statistical areas, representing parts of CSAs that fall within specific states for statistical presentation purposes."
+    },
+    {
+      "get_variable": "NECTA",
+      "query_name": "new england city and town area",
+      "name": "New England City And Town Area",
+      "summary_level": "332",
+      "parent_summary_level": "010",
+      "on_spine": false,
+      "description": "Alternative geographic entities in New England based on cities and towns rather than counties, similar in concept to Core Based Statistical Areas."
+    },
+    {
+      "get_variable": "NECTAPART",
+      "query_name": "new england city and town area (or part)",
+      "name": "New England City And Town Area (Or Part)",
+      "summary_level": "333",
+      "parent_summary_level": "040",
+      "on_spine": false,
+      "description": "State portions of New England City and Town Areas, representing parts of NECTAs that fall within specific states for statistical presentation purposes."
+    },
+    {
+      "get_variable": "CNECTA",
+      "query_name": "combined new england city and town area",
+      "name": "Combined New England City And Town Area",
+      "summary_level": "340",
+      "parent_summary_level": "010",
+      "on_spine": false,
+      "description": "Two or more adjacent New England City and Town Areas that have substantial employment interchange, similar to Combined Statistical Areas."
+    },
+    {
+      "get_variable": "CNECTAPART",
+      "query_name": "combined new england city and town area (or part)",
+      "name": "Combined New England City And Town Area (Or Part)",
+      "summary_level": "341",
+      "parent_summary_level": "040",
+      "on_spine": false,
+      "description": "State portions of combined New England City and Town Areas, representing parts of combined NECTAs that fall within specific states."
+    },
+    {
+      "get_variable": "UA",
+      "query_name": "urban area",
+      "name": "Urban Area",
+      "summary_level": "400",
+      "parent_summary_level": "010",
+      "on_spine": false,
+      "description": "Densely developed territory with at least 2,500 people, encompassing residential, commercial, and other nonresidential urban land uses representing the urban footprint."
+    },
+    {
+      "get_variable": "UAPART",
+      "query_name": "urban area (or part)",
+      "name": "Urban Area (Or Part)",
+      "summary_level": "410",
+      "parent_summary_level": "040",
+      "on_spine": false,
+      "description": "State portions of urban areas, representing parts of urban areas that fall within specific states for statistical presentation purposes."
+    },
+    {
+      "get_variable": "UC",
+      "query_name": "urban cluster",
+      "name": "Urban Cluster",
+      "summary_level": "430",
+      "parent_summary_level": "010",
+      "on_spine": false,
+      "description": "Densely developed territory with at least 2,500 but less than 50,000 people, representing smaller urban concentrations than urbanized areas."
+    },
+    {
+      "get_variable": "CD",
+      "query_name": "congressional district",
+      "name": "Congressional District",
+      "summary_level": "500",
+      "parent_summary_level": "040",
+      "on_spine": false,
+      "description": "The 435 areas from which people are elected to the U.S. House of Representatives, with each district designed to have equal population within each state."
+    },
+    {
+      "get_variable": "CDPART",
+      "query_name": "congressional district (or part)",
+      "name": "Congressional District (Or Part)",
+      "summary_level": "510",
+      "parent_summary_level": "040",
+      "on_spine": false,
+      "description": "Portions of congressional districts that may be split by other geographic boundaries for statistical presentation purposes."
+    },
+    {
+      "get_variable": "CD111",
+      "query_name": "congressional district (111th congress)",
+      "name": "Congressional District (111th Congress)",
+      "summary_level": "550",
+      "parent_summary_level": "040",
+      "on_spine": false,
+      "description": "Congressional district boundaries as they existed during the 111th Congress (2009-2011), used for historical comparison purposes."
+    },
+    {
+      "get_variable": "SLDU",
+      "query_name": "state legislative district (upper chamber)",
+      "name": "State Legislative District (Upper Chamber)",
+      "summary_level": "610",
+      "parent_summary_level": "040",
+      "on_spine": false,
+      "description": "Areas from which members are elected to state senate or equivalent upper chambers of state legislatures, including unicameral legislatures."
+    },
+    {
+      "get_variable": "SLDUPART",
+      "query_name": "state legislative district (upper chamber) (or part)",
+      "name": "State Legislative District (Upper Chamber) (Or Part)",
+      "summary_level": "612",
+      "parent_summary_level": "040",
+      "on_spine": false,
+      "description": "Portions of state legislative districts (upper chamber) that may be split by other geographic boundaries for statistical presentation purposes."
+    },
+    {
+      "get_variable": "SLDL",
+      "query_name": "state legislative district (lower chamber)",
+      "name": "State Legislative District (Lower Chamber)",
+      "summary_level": "620",
+      "parent_summary_level": "040",
+      "on_spine": false,
+      "description": "Areas from which members are elected to state house of representatives, assembly, or equivalent lower chambers of state legislatures."
+    },
+    {
+      "get_variable": "SLDLPART",
+      "query_name": "state legislative district (lower chamber) (or part)",
+      "name": "State Legislative District (Lower Chamber) (Or Part)",
+      "summary_level": "622",
+      "parent_summary_level": "040",
+      "on_spine": false,
+      "description": "Portions of state legislative districts (lower chamber) that may be split by other geographic boundaries for statistical presentation purposes."
+    },
+    {
+      "get_variable": "PUMA",
+      "query_name": "public use microdata area",
+      "name": "Public Use Microdata Area",
+      "summary_level": "795",
+      "parent_summary_level": "040",
+      "on_spine": false,
+      "description": "Statistical geographic areas with at least 100,000 people, used for disseminating Public Use Microdata Sample files while protecting confidentiality."
+    },
+    {
+      "get_variable": "ZCTA",
+      "query_name": "zip code tabulation area",
+      "name": "Zip Code Tabulation Area",
+      "summary_level": "860",
+      "parent_summary_level": "010",
+      "on_spine": false,
+      "description": "Approximate area representations of U.S. Postal Service five-digit ZIP Code service areas, created using whole blocks for statistical data presentation."
+    },
+    {
+      "get_variable": "ZCTAPART",
+      "query_name": "zip code tabulation area (or part)",
+      "name": "Zip Code Tabulation Area (Or Part)",
+      "summary_level": "861",
+      "parent_summary_level": "040",
+      "on_spine": false,
+      "description": "Portions of ZIP Code Tabulation Areas that may be split by other geographic boundaries for statistical presentation purposes."
+    },
+    {
+      "get_variable": "ELSD",
+      "query_name": "school district (elementary)",
+      "name": "School District (Elementary)",
+      "summary_level": "950",
+      "parent_summary_level": "040",
+      "on_spine": false,
+      "description": "Geographic entities that provide public educational services to the lower grade/age levels, typically kindergarten through grades 6-8."
+    },
+    {
+      "get_variable": "SCSD",
+      "query_name": "school district (secondary)",
+      "name": "School District (Secondary)",
+      "summary_level": "960",
+      "parent_summary_level": "040",
+      "on_spine": false,
+      "description": "Geographic entities that provide public educational services to the upper grade/age levels, typically grades 7-12 or 9-12."
+    },
+    {
+      "get_variable": "UNSD",
+      "query_name": "school district (unified)",
+      "name": "School District (Unified)",
+      "summary_level": "970",
+      "parent_summary_level": "040",
+      "on_spine": false,
+      "description": "Geographic entities that provide public educational services to children of all school ages, typically prekindergarten or kindergarten through grade 12."
+    },
+    {
+      "get_variable": "SDADM",
+      "query_name": "school district (administrative unit)",
+      "name": "School District (Administrative Unit)",
+      "summary_level": "980",
+      "parent_summary_level": "040",
+      "on_spine": false,
+      "description": "Administrative units that oversee school district operations and may provide services to multiple school districts within a region."
+    }
+  ]
+}

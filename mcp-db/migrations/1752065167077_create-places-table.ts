@@ -1,5 +1,6 @@
-exports.up = (pgm) => {
-  
+import { MigrationBuilder } from 'node-pg-migrate';
+
+export async function up(pgm: MigrationBuilder): Promise<void> {
   // Create places table - unified table for both geographic places and census geographies
   pgm.createTable('places', {
     id: { type: 'bigserial', primaryKey: true },
@@ -52,6 +53,6 @@ exports.up = (pgm) => {
   pgm.addConstraint('places', 'places_geography_code_type_year_unique', 'UNIQUE(geography_code, place_type, year)');
 };
 
-exports.down = (pgm) => {
+export async function down(pgm: MigrationBuilder): Promise<void> {
   pgm.dropTable('places');
 };

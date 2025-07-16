@@ -93,6 +93,11 @@ jobs:
           echo "Checking if pgmigrations table exists..."
           PGPASSWORD=mcp_pass_test psql -h localhost -p 5434 -U mcp_user_test -d mcp_db_test -c "\d pgmigrations"
 
+      - name: Run seed operations
+        working-directory: ./mcp-db
+        run: npm run seed
+
+
       - name: Test database connection
         run: |
           echo "Testing database connection..."

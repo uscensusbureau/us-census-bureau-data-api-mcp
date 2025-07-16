@@ -1,11 +1,14 @@
 {
   "name": "mcp-db-census-api",
   "version": "1.0.0",
+  "type": "module",
   "scripts": {
+    "build": "tsc && shx chmod +x dist/*.js || true",
     "lint": "eslint migrations/ tests/",
-    "migrate:create": "node-pg-migrate create",
-    "migrate:down": "node-pg-migrate down",
-    "migrate:up": "node-pg-migrate up",
+    "migrate:create": "npx tsx node_modules/.bin/node-pg-migrate create --migration-file-language ts",
+    "migrate:down": "npx tsx node_modules/.bin/node-pg-migrate down --verbose",
+    "migrate:up": "npx tsx node_modules/.bin/node-pg-migrate up --verbose",
+    "seed": "npm run build && node dist/seeds/scripts/seed-database.js",
     "test:db": "vitest --config vitest.config.database.ts",
     "test:db:watch": "vitest --config vitest.config.database.ts --watch"
   },
@@ -13,7 +16,8 @@
     "dotenv": "^17.1.0",
     "node-pg-migrate": "^8.0.3",
     "pg": "^8.11.3",
-    "tinypool": "^1.1.1"
+    "typescript": "^5.8.3",
+    "zod": "^4.0.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.28.0",
@@ -22,7 +26,7 @@
     "eslint": "^9.30.1",
     "globals": "^16.2.0",
     "shx": "^0.4.0",
-    "typescript": "^5.8.3",
+    "tsx": "^4.20.3",
     "typescript-eslint": "^8.33.1",
     "vitest": "^3.2.4"
   }

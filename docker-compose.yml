@@ -115,10 +115,6 @@ services:
       target: dev  # Dev stage - includes vitest/eslint for testing
     environment:
       DATABASE_URL: postgresql://mcp_user_test:mcp_pass_test@census-mcp-db-test:5432/mcp_db_test
-    command: sh -c "
-      echo 'Running migrations...' &&
-      npm run migrate:up &&
-      echo 'Test database ready!'"
     depends_on:
       census-mcp-db-test:
         condition: service_healthy

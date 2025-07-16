@@ -1,4 +1,6 @@
-exports.up = (pgm) => {
+import { MigrationBuilder } from 'node-pg-migrate';
+
+export async function up(pgm: MigrationBuilder): Promise<void> {
   // Function to clean expired cache entries
   pgm.sql(`
     CREATE OR REPLACE FUNCTION cleanup_expired_cache()
@@ -73,7 +75,7 @@ exports.up = (pgm) => {
   `);
 };
 
-exports.down = (pgm) => {
+export async function down(pgm: MigrationBuilder): Promise<void> {
   pgm.sql('DROP FUNCTION IF EXISTS optimize_database()');
   pgm.sql('DROP FUNCTION IF EXISTS get_cache_stats()');
   pgm.sql('DROP FUNCTION IF EXISTS cleanup_expired_cache()');

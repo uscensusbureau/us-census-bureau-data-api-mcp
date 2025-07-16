@@ -1,4 +1,6 @@
-exports.up = (pgm) => {
+import { MigrationBuilder } from 'node-pg-migrate';
+
+export async function up(pgm: MigrationBuilder): Promise<void> {
   // Enable UUID generation for request IDs
   pgm.sql('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"');
 
@@ -6,4 +8,4 @@ exports.up = (pgm) => {
   pgm.sql('CREATE EXTENSION IF NOT EXISTS pg_trgm');
 };
 
-exports.down = (pgm) => {};
+export async function down(): Promise<void> {};

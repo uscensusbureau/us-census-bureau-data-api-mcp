@@ -1,10 +1,11 @@
-# Developer Folders
-dist/
-build/
-node_modules/
+# GIT Files
+.git
 
-#Test Folders
-mcp-db/tests/db/seeds/fixtures
+#Build Files
+dist
+
+# Dependencies
+node_modules/
 
 # Logs and temp files
 *.log

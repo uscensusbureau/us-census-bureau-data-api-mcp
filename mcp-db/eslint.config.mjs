@@ -16,7 +16,7 @@ export default defineConfig([
 
   // TypeScript configuration for /tests directory
   {
-    files: ["tests/**/*.{ts,js}"],
+    files: ["tests/**/*.{ts,js}", "migrations/**/*.ts"],
     extends: [
       js.configs.recommended,
       ...tseslint.configs.recommended,
@@ -47,32 +47,5 @@ export default defineConfig([
       "prefer-const": "error",
       "no-var": "error",
     },
-  },
-
-  // CommonJS configuration for /migrations directory  
-  {
-    files: ["migrations/**/*.js"],
-    extends: [js.configs.recommended],
-    languageOptions: {
-      ecmaVersion: 2022,
-      sourceType: "commonjs",
-      globals: {
-        ...globals.node,
-        exports: "writable",
-        module: "writable",
-        require: "readonly",
-        __dirname: "readonly",
-        __filename: "readonly",
-      },
-    },
-    rules: {
-      "camelcase": "off", // Database columns use snake_case
-      "no-unused-vars": ["error", { argsIgnorePattern: "^_|^pgm" }],
-      "no-console": "off", // Allow console in migrations
-      "prefer-const": "error",
-      "no-var": "error",
-      "quotes": ["error", "single"],
-      "semi": ["error", "always"],
-    },
-  },
+  }
 ]);

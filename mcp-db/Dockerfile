@@ -1,15 +1,16 @@
-# Development/Test stage - includes all dependencies
+#Dev Environment
 FROM node:20-alpine AS dev
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci --silent
 COPY . .
-CMD ["npm", "run", "migrate:up"]
+RUN npm run build
+CMD ["sh", "-c", "npm run migrate:up"]
 
-# Production stage - only production dependencies
+# Production Environment
 FROM node:20-slim AS prod
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci --omit=dev --silent
 COPY . .
-CMD ["npm", "run", "migrate:up"]
+CMD ["sh", "-c", "npm run migrate:up && npm run seed"]

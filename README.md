@@ -14,7 +14,7 @@ A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) s
 
 ## Using the MCP Server
 
-After saving the project locally, configure your LLM Client to leverage the Census API MCP Server via your LLM Client’s configuration file. The syntax for the configuration file may vary by LLM. Here is an example configuration file that includes the appropriate scripts for launching the server:
+After saving the project locally and installing the requirements above, configure your LLM Client to leverage the Census API MCP Server via your LLM Client’s configuration file. The syntax for the configuration file may vary by LLM. Here is an example configuration file that includes the appropriate scripts for launching the server:
 
 ```
 {
@@ -75,7 +75,7 @@ The MCP server exposes two methods: `tools/list` and `tools/call`.
 
 To list available tools, use the `tools/list` method with no arguments. `tools/list` is a standard method that is often called by LLMs when the client is initialized.
 
-#### How to Run Outside an LLM
+#### How to Run via CLI
 ```
 echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | docker exec -i mcp-server node dist/index.js
 ```
@@ -88,7 +88,7 @@ The `describe-dataset` tool is used for fetching metadata about a given dataset 
 * Dataset (Required) - The identifier of the dataset, e.g. `'acs/acs1'`
 * Year (Optional) - The vintage of the dataset, e.g. `1987`
 
-#### How to Run Outside an LLM
+#### How to Run via CLI
 ```
 echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"describe-dataset","arguments":{"dataset":"acs/acs1","year":2022}}}' \
 | docker exec -i mcp-server node dist/index.js
@@ -99,7 +99,7 @@ The `fetch-dataset-geography` tool is used for fetching available geography leve
 * Dataset (Required) - The identifier of the dataset, e.g. `'acs/acs1'`
 * Year (Optional) - The vintage of the dataset, e.g. `1987`
 
-#### How to Run Outside an LLM
+#### How to Run via CLI
 ```
 echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"fetch-dataset-geography","arguments":{"dataset":"acs/acs1","year":2022}}}' \
 | docker exec -i mcp-server node dist/index.js
@@ -111,7 +111,7 @@ The `fetch-dataset-variables` tool is used for fetching variables for filtering 
 * Group (Optional) - Filter variables by a specific group for this dataset, e.g. `'S0101'`
 * Year (Optional) - The vintage of the dataset, e.g. `1987`
 
-#### How to Run Outside an LLM
+#### How to Run via CLI
 ```
 echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"fetch-dataset-variables","arguments":{"dataset":"acs/acs1","year":2022}}}' \
 | docker exec -i mcp-server node dist/index.js
@@ -130,7 +130,7 @@ The `fetch-summary-table` tool is used for fetching a summary table from the Cen
 * Predicates (Optional) - Filter options for the dataset, e.g. `'for': 'state*'`
 * Descriptive (Optional) - Adds variable labels to API response (default: `false`), e.g. `true`
 
-#### How to Run Outside an LLM
+#### How to Run via CLI
 ```
 echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"fetch-summary-table","arguments":{"dataset":"acs/acs1","year":2022, "get": { "variables":["NAME","B01001_001E"] },"for":"state:01,13"}}}' \
 | docker exec -i mcp-server node dist/index.js

@@ -39,7 +39,7 @@ describe('Geography Levels Table', () => {
 	    ORDER BY ordinal_position;
 	  `);
 
-	  const expectedColumns: string[] = ['id', 'name', 'get_variable', 'on_spine', 'query_name'];
+	  const expectedColumns: string[] = ['id', 'name', 'get_variable', 'on_spine', 'query_name', 'summary_level'];
 
 	  const actualColumns: string[] = result.rows.map(row => row.column_name);
 	  
@@ -128,8 +128,8 @@ describe('Geography Levels Table', () => {
 	  
 	  try {
 	    const result: QueryResult<{ id: bigint }> = await client.query(`
-	      INSERT INTO geography_levels (name, get_variable, on_spine, query_name ) 
-	      VALUES ('County', 'COUNTY', true, 'county') 
+	      INSERT INTO geography_levels (name, get_variable, on_spine, query_name, summary_level ) 
+	      VALUES ('County', 'COUNTY', true, 'county', '050') 
 	      RETURNING id;
 	    `);
 	    
