@@ -1,12 +1,13 @@
+// Global test setup
 import { spawn, ChildProcess } from 'child_process';
-import { rm } from 'node:fs/promises';
 import { promisify } from 'util';
 
-import { dbConfig } from './helpers/database-config';
+import { databaseConfig } from './helpers/database-config.js';
 
 const sleep = promisify(setTimeout);
 
 export async function setup(): Promise<void> {
+  
   const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
   
   if (!isCI) {
@@ -47,7 +48,7 @@ export async function setup(): Promise<void> {
 
   let retries = 15;
   while (retries > 0) {
-    const client = new Client(dbConfig);
+    const client = new Client(databaseConfig);
     
     try {
       await client.connect();
@@ -85,12 +86,12 @@ export async function teardown(): Promise<void> {
     try {
       const { Client } = await import('pg');
 
-      const client = new Client(dbConfig);
+      const client = new Client(databaseConfig);
       
       await client.connect();
       console.log('Connected to test database for cleanup...');
       
-      // Clean up test data in geography_levels
+      // Clean up test geography_levels data
       await client.query('TRUNCATE geography_levels RESTART IDENTITY CASCADE');
       console.log('✓ Cleaned geography_levels table');
       
@@ -114,15 +115,5 @@ export async function teardown(): Promise<void> {
   } else {
     console.log('Running in CI environment, database cleanup handled automatically...');
   }
-
-  await deleteDirectory('tests/db/seeds/fixtures');
 }
-
-async function deleteDirectory(directoryPath: string): Promise<void> {
-  try {
-    await rm(directoryPath, { recursive: true, force: true });
-    console.log(`Directory and its contents removed: ${directoryPath}`);
-  } catch (error) {
-    console.error(`Error removing directory: ${error}`);
-  }
-}
+ 

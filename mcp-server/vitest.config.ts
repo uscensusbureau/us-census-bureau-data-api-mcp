@@ -6,6 +6,7 @@ export default defineConfig({
 		globals: true,
 		environment: 'node',
 		env: loadEnv('', process.cwd(), ''), // Load .env files
+		globalSetup: ['./tests/globalSetup.ts'],
 		setupFiles: ['./tests/setup.ts'],
 		testTimeout: 10000		
 	}

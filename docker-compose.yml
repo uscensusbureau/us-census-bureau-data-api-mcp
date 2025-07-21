@@ -43,6 +43,7 @@ services:
       POSTGRES_USER: mcp_user
       POSTGRES_PASSWORD: mcp_pass
       NODE_ENV: production
+      DATABASE_URL: postgresql://mcp_user:mcp_pass@census-mcp-db:5432/mcp_db
     depends_on:
       census-mcp-db:
         condition: service_healthy

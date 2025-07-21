@@ -16,6 +16,21 @@ jobs:
     name: Unit & Integration Tests
     runs-on: ubuntu-latest
     
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: mcp_db_test
+          POSTGRES_USER: mcp_user_test
+          POSTGRES_PASSWORD: mcp_pass_test
+        ports:
+          - 5434:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
     steps:
       - uses: actions/checkout@v4
       
@@ -23,6 +38,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+      
+      # Set up database (run migrations)
+      - name: Install database dependencies
+        working-directory: ./mcp-db
+        run: npm ci
+        
+      - name: Run database migrations
+        working-directory: ./mcp-db
+        env:
+          DATABASE_URL: postgresql://mcp_user_test:mcp_pass_test@localhost:5434/mcp_db_test
+        run: npm run migrate:up
         
       # Test MCP server
       - name: Install MCP server dependencies
@@ -34,4 +60,9 @@ jobs:
         env:
           CENSUS_API_KEY: ${{ secrets.CENSUS_API_KEY }}
           NODE_ENV: test
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5434
+          POSTGRES_DB: mcp_db_test
+          POSTGRES_USER: mcp_user_test
+          POSTGRES_PASSWORD: mcp_pass_test
         run: npm test

@@ -1,11 +1,9 @@
 // Global test setup
-import { beforeEach, vi } from 'vitest';
+import {beforeAll, vi } from 'vitest';
 
-beforeEach(() => {
-  // Only set mock API key if no real one exists
-  if (!process.env.CENSUS_API_KEY) {
-    process.env.CENSUS_API_KEY = 'test-api-key-12345';
-  }
+beforeAll(() => {
+  // Override DATABASE_URL for Testing Environment
+  process.env.DATABASE_URL = 'postgresql://mcp_user_test:mcp_pass_test@localhost:5434/mcp_db_test';
 });
 
 // Mock console methods to avoid noise in tests
@@ -19,4 +17,3 @@ global.console = {
 
 // Setup fetch mock globally
 global.fetch = vi.fn();
- 
