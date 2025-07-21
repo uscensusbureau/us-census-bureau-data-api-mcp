@@ -38,7 +38,7 @@ Be sure to update the path to the `mcp-server-census-api` in `args` and update t
 
 ## Development
 
-Run `docker compose --profile dev up` from the root of the project to build the containers.
+Run `docker compose --profile dev up` from the root of the project to build the containers. This starts the MCP Database containers that runs migrations and seeds a local `postgres` database to supplement information from the Census Bureau API. It also starts the MCP Server itself.
 
 By default, all logging functions are disabled in the `mcp-server` to prevent `json` validation errors when interacting with the MCP server through MCP clients. To enable logging for development purposes, set `DEBUG_LOGS=true` when interacting with the server directly using the examples below, e.g. `echo '{CALL_ARGUMENTS}' docker exec -e DEBUG_LOGS=true -i mcp-server node dist/index.js`. 
 
@@ -60,12 +60,11 @@ To run tests, navigate to the `mcp-db/` directoruy and run `npm run test:db`.
 
 ## MCP Server Architecture
 
-* `docker-compose` - Organizes the project into different containers.
-* `mcp-server` - Source code for the MCP Server.
-* `mcp-server/index.ts` - Starts the MCP Server and registers tools.
-* `mcp-server/server.ts` - Defines the `McpServer` class that handles calls to the server, e.g. how `tools/list` and `tools/calls` respond to requests
-* `mcp-server/tools/` - Includes tool definitions and shared classes, e.g. `BaseTool` and `ToolRegistry`, to reduce repetition and exposes the tools list to the server
-* `mcp-server/schema/` - Houses each tool’s schema and is used to validate schemas in tests
+* `mcp-server/src/` - Source code for the MCP Server.
+* `mcp-server/src/index.ts` - Starts the MCP Server and registers tools.
+* `mcp-server/src/server.ts` - Defines the `McpServer` class that handles calls to the server, e.g. how `tools/list` and `tools/calls` respond to requests
+* `mcp-server/src/tools/` - Includes tool definitions and shared classes, e.g. `BaseTool` and `ToolRegistry`, to reduce repetition and exposes the tools list to the server
+* `mcp-server/src/schema/` - Houses each tool’s schema and is used to validate schemas in tests
 
 ## Available Methods
 
