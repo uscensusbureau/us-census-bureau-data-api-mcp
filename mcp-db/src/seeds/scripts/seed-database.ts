@@ -20,11 +20,10 @@ const seeds: SeedConfig[] = [
     table: 'geography_levels',
     dataPath: 'geography_levels',
     conflictColumn: 'summary_level',
-    beforeSeed: async (client: Client): Promise<void> => {
+    beforeSeed: async (client: Client, rawData: unknown[]): Promise<void> => {
       console.log('Validating geography levels data...');
       
       const runner = new SeedRunner(DATABASE_URL);
-      const rawData = await runner.loadData('geography_levels.json', 'geography_levels');
       
       try {
         // Validate entire array with Zod

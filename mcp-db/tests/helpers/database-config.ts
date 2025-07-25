@@ -7,9 +7,9 @@ interface DatabaseConfig {
 }
 
 export const dbConfig: DatabaseConfig = {
-  host: process.env.POSTGRES_HOST,
-  port: parseInt(process.env.POSTGRES_PORT),
-  database: process.env.POSTGRES_DB,
-  user: process.env.POSTGRES_USER,
-  password: process.env.POSTGRES_PASSWORD,
+  host: 'localhost',
+  port: 5434,
+  database: 'mcp_db_test',
+  user: 'mcp_user_test',
+  password: 'mcp_pass_test',
 };

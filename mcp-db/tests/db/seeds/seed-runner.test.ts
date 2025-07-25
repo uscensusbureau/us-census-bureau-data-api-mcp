@@ -121,7 +121,7 @@ describe('SeedRunner', () => {
       const filePath = path.join(__dirname, 'fixtures', 'invalid.json');
       await fs.writeFile(filePath, JSON.stringify(testData));
  
-      await expect(runner.loadData('invalid.json')).rejects.toThrow('Expected array data for invalid.json, got object');
+      await expect(runner.loadData('invalid.json')).rejects.toThrow('Expected array data from invalid.json, got object');
     });
   });
 
@@ -236,8 +236,7 @@ describe('SeedRunner', () => {
         // Missing conflictColumn
       };
 
-      await expect(runner.seed(seedConfig))
-        .rejects.toThrow('conflictColumn is required for table test_items');
+      await expect(runner.seed(seedConfig)).rejects.toThrow();
     });
 
     it('should handle idempotent operations', async () => {
@@ -319,6 +318,41 @@ describe('SeedRunner', () => {
       // Verify no data was inserted due to rollback
       const result = await client.query('SELECT COUNT(*) as count FROM test_items');
       expect(parseInt(result.rows[0].count)).toBe(0);
+    });
+  });
+
+  describe('validateSeedConfig', () => {
+    it('should return the parsed config when validation passes', () => {
+      const validConfig = {
+        file: 'test.json',
+        table: 'test_table',
+        conflictColumn: 'id'
+      };
+
+      const result = (runner).validateSeedConfig(validConfig);
+
+      expect(result).toEqual(validConfig);
+    });
+
+    it('should throw when validation fails', () => {
+      const invalidConfig = {
+        file: 'test.json',
+        table: 'test_table'
+        // conflictColumn is missing
+      };
+
+      expect(() => {
+        (runner).validateSeedConfig(invalidConfig);
+      }).toThrow('SeedConfig validation failed');
+
+    });
+
+    it('should handle non-Zod errors and still throw', () => {
+      const invalidConfig = null;
+
+      expect(() => {
+        (runner).validateSeedConfig(invalidConfig);
+      }).toThrow('SeedConfig validation failed');
     });
   });
 });

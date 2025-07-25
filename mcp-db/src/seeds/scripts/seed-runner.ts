@@ -2,8 +2,9 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { Client } from 'pg';
 import { fileURLToPath } from 'url';
+import { z } from 'zod';
 
-import { SeedConfig } from '../../schema/seed-config.schema.js';
+import { SeedConfig, SeedConfigSchema } from '../../schema/seed-config.schema.js';
 
 // Fix for ES modules - create __dirname equivalent
 const __filename = fileURLToPath(import.meta.url);
@@ -28,51 +29,72 @@ export class SeedRunner {
     await this.client.end();
   }
 
+  async fetchFromApi(url: string, queryParams?: Record<string, string>): Promise<any> {
+    const urlObj = new URL(url);
+    
+    // Add query parameters
+    if (queryParams) {
+      for (const [key, value] of Object.entries(queryParams)) {
+        urlObj.searchParams.append(key, value);
+      }
+    }
+    
+    const response = await fetch(urlObj.toString());
+
+    if (!response.ok) {
+      throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+    }
+
+    return response.json();
+  }
+
   // Load JSON file and extract data
-  async loadData(filename: string, extractPath?: string): Promise<any[]> {
-    const filePath = path.join(this.dataPath, filename);
-    const content = await fs.readFile(filePath, 'utf8');
-    let data: unknown = JSON.parse(content);
-    
-    // Handle nested JSON structures using extractPath
-    if (extractPath) {
-      console.log(`Extracting data from JSON path: ${extractPath}`);
-      const keys = extractPath.split('.');
-      
-      // Process keys sequentially without await in loop - using reduce instead of for loop
-      const processKey = (currentData: unknown, key: string): unknown => {
-        if (currentData && typeof currentData === 'object' && currentData !== null) {
-          const dataObj = currentData as Record<string, unknown>;
-          if (key in dataObj) {
-            console.log(`Found key "${key}", new data type: ${typeof dataObj[key]}`);
-            return dataObj[key];
-          } else {
-            console.error(`Key "${key}" not found in data`);
-            console.error(`Available keys: ${Object.keys(dataObj).join(', ')}`);
-            throw new Error(`Key "${key}" not found in seed file ${filename}`);
-          }
-        } else {
-          // Handle non-object data
-          console.error(`Key "${key}" not found in data`);
-          console.error(`Available keys: N/A (data is not an object)`);
-          throw new Error(`Key "${key}" not found in seed file ${filename}`);
+  async loadData(
+    source: string, 
+    extractPath?: string, 
+    isUrl: boolean = false, 
+    queryParams?: Record<string, string | number | boolean>
+  ): Promise<any[]> {
+    let data: unknown;
+
+    if (isUrl) {
+      let stringParams: Record<string, string> | undefined;
+
+      if (queryParams) {
+        stringParams = {};
+        for (const [key, value] of Object.entries(queryParams)) {
+          stringParams[key] = String(value);
         }
-      };
-      
-      // Use reduce to process keys sequentially without await in loop
-      data = keys.reduce(processKey, data);
+      }
+
+      // Fetch Data from the API
+      data = await this.fetchFromApi(source, stringParams);
+    } else {
+      // Use the filepath
+      const filePath = path.join(this.dataPath, source);
+      const content = await fs.readFile(filePath, 'utf8');
+      data = JSON.parse(content);
     }
-    
-    console.log(`Final data: ${Array.isArray(data) ? `Array[${data.length}]` : typeof data}`);
-    
+
+    // Extract nested data if needed
+    if (extractPath) {
+      const keys = extractPath.split('.');
+      data = keys.reduce((currentData, key) => {
+        if (currentData && typeof currentData === 'object' && key in currentData) {
+          return (currentData as Record<string, unknown>)[key];
+        }
+        throw new Error(`Key "${key}" not found in data from ${source}`);
+      }, data);
+    }
+
     if (!Array.isArray(data)) {
-      throw new Error(`Expected array data for ${filename}, got ${typeof data}`);
+      throw new Error(`Expected array data from ${source}, got ${typeof data}`);
     }
-    
+
     return data;
   }
 
-  // Simple insert with skip-on-conflict behavior
+  // Insert with skip-on-conflict behavior
   async insertOrSkip(tableName: string, data: Record<string, any>[], conflictColumn: string): Promise<void> {
     if (!data.length) return;
     
@@ -105,32 +127,61 @@ export class SeedRunner {
   }
 
   // Run a seed with optional setup/cleanup hooks
-  async seed(config: SeedConfig): Promise<void> {
-    const { file, table, conflictColumn, dataPath, beforeSeed, afterSeed } = config;
+  async seed(config: unknown): Promise<void> {
+    // Validate Seed Config
+    const validConfig = this.validateSeedConfig(config);
     
-    if (!conflictColumn) {
-      throw new Error(`conflictColumn is required for table ${table}`);
-    }
+    const { 
+      file, url, table, conflictColumn, dataPath,
+      beforeSeed, afterSeed, queryParams 
+    } = validConfig;
     
-    console.log(`Seeding ${table} from ${file}...`);
+    const source = file || url!;
+    const isUrl = !!url;
+  
+    console.log(`Seeding table ${table} from ${source}.`)
     
     try {
       await this.client.query('BEGIN');
       
-      // Run setup hook
-      if (beforeSeed) await beforeSeed(this.client);
+      // Load raw data
+      const rawData = await this.loadData(source, dataPath, isUrl, queryParams);
       
-      // Load and insert data - dataPath here is the JSON extraction path!
-      const data = await this.loadData(file, dataPath);
-      await this.insertOrSkip(table, data, conflictColumn);
+      if (beforeSeed) {
+        // Run beforeSeed logic
+        await beforeSeed(this.client, rawData);
+      }
       
-      // Run cleanup hook
-      if (afterSeed) await afterSeed(this.client);
+      await this.insertOrSkip(table, rawData, conflictColumn);
+      
+      if (afterSeed) {
+        // Run afterSeed logic
+        await afterSeed(this.client);
+      }
       
       await this.client.query('COMMIT');
     } catch (error) {
       await this.client.query('ROLLBACK');
+      console.error(`Seeding failed for ${table}: `, (error as Error).message);
       throw error;
+    }
+  }
+
+  private validateSeedConfig(config: unknown): SeedConfig {
+    try {
+      return SeedConfigSchema.parse(config);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        error.issues.forEach((issue, i) => {
+          const path = issue.path.length > 0 ? issue.path.join('.') : 'root';
+          console.error(`${i + 1}. ${path}: ${issue.message}`);
+          
+          if (issue.code === 'custom' && 'params' in issue) {
+            console.error(`Details: ${JSON.stringify(issue.params)}`);
+          }
+        });
+      }
+      throw new Error(`SeedConfig validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 }

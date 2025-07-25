@@ -46,6 +46,7 @@ describe('Seed Database', () => {
     }
 
     runner = new SeedRunner(databaseUrl, fixturesPath);
+
     await runner.connect();
 
     // Clean up geography_levels table before each test and handle deadlocks gracefully
@@ -73,6 +74,7 @@ describe('Seed Database', () => {
   });
 
   describe('geography_levels seed', () => {
+
     it('should seed geography levels with parent relationships', async () => {
       // Create test geography levels data
       const testGeographyData = {
@@ -555,11 +557,9 @@ describe('Seed Database', () => {
         file: 'geography_levels_no_conflict.json',
         table: 'geography_levels',
         dataPath: 'geography_levels'
-        // Missing conflictColumn
       };
 
-      await expect(runner.seed(seedConfig))
-        .rejects.toThrow('conflictColumn is required for table geography_levels');
+      await expect(runner.seed(seedConfig)).rejects.toThrow();
     });
 
     it('should preserve existing data when new records are added', async () => {

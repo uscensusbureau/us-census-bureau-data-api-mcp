@@ -111,6 +111,10 @@ jobs:
           echo "=== Checking Migration Status ==="
           if docker compose --profile prod logs census-mcp-db-init | grep -q "error\|Error\|ERROR"; then
             echo "ERROR: Migration logs contain errors!"
+            echo ""
+            echo "=== ERROR DETAILS ==="
+            docker compose --profile prod logs census-mcp-db-init | grep -i "error"
+            echo "====================="
             exit 1
           else
             echo "Migrations completed successfully!"
