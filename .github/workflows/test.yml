@@ -65,4 +65,19 @@ jobs:
           POSTGRES_DB: mcp_db_test
           POSTGRES_USER: mcp_user_test
           POSTGRES_PASSWORD: mcp_pass_test
-        run: npm test
+        run: npm run test -- --reporter=verbose --coverage.enabled true
+
+      - name: Report Coverage
+        uses: davelosert/vitest-coverage-report-action@v2
+        with:
+          working-directory: ./mcp-server
+
+      - name: Publish Results Badge
+        uses: wjervis7/vitest-badge-action@v1.0.0
+        if: success() || failure() # run whether steps succeed or not
+        with:
+          summary-path: ./mcp-server/coverage/coverage-summary.json
+          result-type: lines
+          gist-token: ${{ secrets.MCP_GIST_BADGE_TOKEN }}
+          gist-url: https://gist.github.com/luke-keller-census/0589e2c69696f077eef7d6af818a108b
+          upload-badge: ${{ github.base_ref == 'refs/heads/main' }}

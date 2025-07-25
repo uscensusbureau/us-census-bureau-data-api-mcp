@@ -84,7 +84,7 @@ services:
       npm run migrate:up &&
       echo 'Development environment ready. You can run:' &&
       echo '  docker compose --profile dev exec census-mcp-db-dev-init npm run lint' &&
-      echo '  docker compose --profile dev exec census-mcp-db-dev-init npm run test:db' &&
+      echo '  docker compose --profile dev exec census-mcp-db-dev-init npm run test' &&
       tail -f /dev/null"
     depends_on:
       census-mcp-db-dev:

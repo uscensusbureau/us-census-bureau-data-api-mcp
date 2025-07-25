@@ -5,6 +5,8 @@ node_modules/
 
 #Test Folders
 mcp-db/tests/db/seeds/fixtures
+mcp-db/coverage/
+mcp-server/coverage/
 
 # Logs and temp files
 *.log

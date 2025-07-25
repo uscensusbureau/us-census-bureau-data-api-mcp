@@ -8,6 +8,15 @@ export default defineConfig({
 		env: loadEnv('', process.cwd(), ''), // Load .env files
 		globalSetup: ['./tests/globalSetup.ts'],
 		setupFiles: ['./tests/setup.ts'],
-		testTimeout: 10000		
+		testTimeout: 10000,
+		coverage: {
+		  reporter: ['text', 'json-summary', 'json'],
+		  tresholds: {
+		    lines: 85,
+		    branches: 85,
+		    functions: 85,
+		    statements: 85
+		  }
+		}	
 	}
 })
