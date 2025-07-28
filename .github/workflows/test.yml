@@ -15,6 +15,7 @@ jobs:
   test:
     name: Unit & Integration Tests
     runs-on: ubuntu-latest
+    environment: test
     
     services:
       postgres:

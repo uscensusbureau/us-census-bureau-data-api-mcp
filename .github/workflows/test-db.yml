@@ -25,6 +25,7 @@ jobs:
   database-tests:
     name: Schema Tests
     runs-on: ubuntu-latest
+    environment: test
     
     # Use PostgreSQL service instead of docker-compose for CI
     services:
