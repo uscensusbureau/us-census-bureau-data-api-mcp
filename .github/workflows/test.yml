@@ -77,6 +77,7 @@ jobs:
         if: success() || failure() # run whether steps succeed or not
         with:
           summary-path: ./mcp-server/coverage/coverage-summary.json
+          vitest-config-path: ./mcp-server/vitest.config.ts
           result-type: lines
           gist-token: ${{ secrets.MCP_GIST_BADGE_TOKEN }}
           gist-url: https://gist.github.com/luke-keller-census/0589e2c69696f077eef7d6af818a108b
