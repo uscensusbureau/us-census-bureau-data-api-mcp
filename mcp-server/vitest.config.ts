@@ -11,7 +11,7 @@ export default defineConfig({
 		testTimeout: 10000,
 		coverage: {
 		  reporter: ['text', 'json-summary', 'json'],
-		  tresholds: {
+		  thresholds: {
 		    lines: 85,
 		    branches: 85,
 		    functions: 85,

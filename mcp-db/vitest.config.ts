@@ -9,7 +9,7 @@ export default defineConfig({
     globalSetup: ['./tests/globalSetup.ts'],
     coverage: {
       reporter: ['text', 'json-summary', 'json'],
-      tresholds: {
+      thresholds: {
         lines: 85,
         branches: 85,
         functions: 85,
