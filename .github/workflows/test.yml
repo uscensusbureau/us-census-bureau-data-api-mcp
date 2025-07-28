@@ -81,4 +81,4 @@ jobs:
           result-type: lines
           gist-token: ${{ secrets.MCP_GIST_BADGE_TOKEN }}
           gist-url: https://gist.github.com/luke-keller-census/0589e2c69696f077eef7d6af818a108b
-          upload-badge: ${{ github.base_ref == 'refs/heads/main' }}
+          upload-badge: ${{ github.ref == 'refs/heads/main' }}
