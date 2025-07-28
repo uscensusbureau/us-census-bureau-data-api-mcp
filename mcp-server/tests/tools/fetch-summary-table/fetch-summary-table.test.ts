@@ -191,7 +191,8 @@ describe('FetchSummaryTableTool', () => {
         year: 2022, // should be number
         get: { 
           group: 'B01001' 
-        }
+        },
+        for: 'state:*'
       }
 
       const result = tool.validateArgs(invalidArgs);

@@ -4,7 +4,7 @@ import type { RefinementCtx } from "zod";
 type Dataset = {
 	tool: string;
 	message: string;
-	identifier?: string;
+	identifiers?: string[];
 }
 
 type TableArgs = {
@@ -17,32 +17,30 @@ type TableArgs = {
 const datasets: Dataset[] = [
 	 {
 		tool: "fetch-summary-table",
-		message: "Incompatible dataset. Please use the fetch-summary-table tool."
+		message: "Incompatible dataset. Please use the fetch-summary-table tool.",
 	 },
 	 {
 		tool: "fetch-timeseries-data",
-		message: "Incompatible dataset.",
-		identifier: "timeseries"
+		message: "Incompatible dataset. Please use the (not yet defined) fetch-timeseries-data tool.",
+		identifiers: [ "timeseries" ]
 	 },
 	 {
-		tool: "fetch-pums-microdata",
-		message: "Incompatible dataset.",
-		identifier: "pums"
-	 },
-	 {
-		tool: "fetch-subject-table",
-		message: "Incompatible dataset.",
-		identifier: "subject"
+		tool: "fetch-microdata",
+		message: "Incompatible dataset. Please use the (not yet defined) fetch-microdata tool.",
+		identifiers: [ "cfspum", "cps", "pums", "pumpr", "sipp" ]
 	 }
 ];
 
-export function datasetValidator(url: string): Dataset {
 
-	const matched = datasets.find((dataset: Dataset) =>
-		dataset.identifier ? url.includes(dataset.identifier) : false
+export function datasetValidator(datasetArg: string): Dataset {
+
+	const matched = datasets.find((dataset: Dataset) =>	
+		dataset.identifiers?.some((identifier: string) => 
+			datasetArg.includes(identifier)
+		)
 	);
 
-	return matched ?? datasets.find((dataset: Dataset) => !("identifier" in dataset))!;
+	return matched ?? datasets.find((dataset: Dataset) => !("identifiers" in dataset))!;
 }
 
 export function validateGeographyArgs(args: TableArgs, ctx: RefinementCtx) {
