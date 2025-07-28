@@ -1,9 +1,11 @@
 # U.S. Census Bureau MCP Server
 [![License: CC0-1.0](https://img.shields.io/badge/License-CC0%201.0-lightgrey.svg)](https://github.com/uscensusbureau/mcp-server-census-api/blob/main/LICENSE)
 [![MCP Project Build](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/build.yml/badge.svg)](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/build.yml)
+[![MCP Project - Lint](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/lint.yml/badge.svg)](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/lint.yml)
 [![MCP Server - Tests](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/test.yml/badge.svg)](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/test.yml)
 [![MCP Database - Tests](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/test-db.yml/badge.svg)](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/test-db.yml)
-[![MCP Server - Lint](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/lint.yml/badge.svg)](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/lint.yml)
+[![MCP Server - Test Coverage](https://raw.githubusercontent.com/gist/luke-keller-census/0589e2c69696f077eef7d6af818a108b/raw/be94152a85b8c00cd4c9cb285ad691b85968b500/badge.svg)
+[![MCP Database - Test Coverage](https://raw.githubusercontent.com/gist/luke-keller-census/ae50d82d94893c2e674f7f742aea958e/raw/2f346b4ec002f3b0c079700aa5a3073140df9a2f/badge.svg)
 
 Bringing _official_ Census Bureau statistics to AI assistants everywhere.
 
