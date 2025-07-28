@@ -69,12 +69,14 @@ jobs:
 
       - name: Report Coverage
         uses: davelosert/vitest-coverage-report-action@v2
+        continue-on-error: true
         with:
           working-directory: ./mcp-server
 
       - name: Publish Results Badge
         uses: wjervis7/vitest-badge-action@v1.0.0
         if: success() || failure() # run whether steps succeed or not
+        continue-on-error: true
         with:
           summary-path: ./mcp-server/coverage/coverage-summary.json
           vitest-config-path: ./mcp-server/vitest.config.ts
