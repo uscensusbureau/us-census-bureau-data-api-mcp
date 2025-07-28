@@ -128,3 +128,5 @@ jobs:
           gist-token: ${{ secrets.MCP_GIST_BADGE_TOKEN }}
           gist-url: https://gist.github.com/luke-keller-census/ae50d82d94893c2e674f7f742aea958e
           upload-badge: ${{ github.ref == 'refs/heads/main' }}
+          badge-fail-color: D73A49,CB2431
+          badge-success-color: 34D058,28A745
