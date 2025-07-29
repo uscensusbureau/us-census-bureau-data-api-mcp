@@ -26,7 +26,6 @@ async function main() {
 
   const transport = new StdioServerTransport();
   await mcpServer.connect(transport);
-  console.log("MCP server started");
 }
 
 main().catch(console.error);
