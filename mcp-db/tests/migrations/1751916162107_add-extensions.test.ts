@@ -9,12 +9,7 @@ describe('Migration 1751916162107 - Add Extensions', () => {
   beforeEach(() => {
     sqlSpy = vi.fn().mockResolvedValue(undefined);
     
-    mockPgm = {
-      sql: sqlSpy,
-      createTable: vi.fn(),
-      dropTable: vi.fn(),
-      addColumn: vi.fn()
-    } as MigrationBuilder;
+    mockPgm = { sql: sqlSpy } as MigrationBuilder;
   });
 
   afterEach(() => {

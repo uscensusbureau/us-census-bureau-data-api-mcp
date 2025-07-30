@@ -11,12 +11,7 @@ describe('Migration 1752064297557 - Add Functions', () => {
   beforeEach(() => {
     sqlSpy = vi.fn().mockResolvedValue(undefined);
     
-    mockPgm = {
-      sql: sqlSpy,
-      createTable: vi.fn(),
-      dropTable: vi.fn(),
-      addColumn: vi.fn()
-    } as MigrationBuilder;
+    mockPgm = { sql: sqlSpy } as MigrationBuilder;
   });
 
   afterEach(() => {

@@ -22,7 +22,6 @@ describe('Migration 1752065167077 - Create Places Table', () => {
       sql: sqlSpy,
       createTable: createTableSpy,
       dropTable: dropTableSpy,
-      addColumn: vi.fn(),
       func: funcSpy,
       addConstraint: addConstraintSpy
     } as MigrationBuilder;

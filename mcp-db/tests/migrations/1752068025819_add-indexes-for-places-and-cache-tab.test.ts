@@ -12,13 +12,7 @@ describe('Migration 1752068025819 - Add Indexes for Places and Cache Tables', ()
     sqlSpy = vi.fn().mockResolvedValue(undefined);
     createIndexSpy = vi.fn().mockResolvedValue(undefined);
     
-    mockPgm = {
-      sql: sqlSpy,
-      createIndex: createIndexSpy, 
-      createTable: vi.fn(),
-      dropTable: vi.fn(),
-      addColumn: vi.fn()
-    } as MigrationBuilder;
+    mockPgm = { sql: sqlSpy, createIndex: createIndexSpy } as MigrationBuilder;
   });
 
   afterEach(() => {
