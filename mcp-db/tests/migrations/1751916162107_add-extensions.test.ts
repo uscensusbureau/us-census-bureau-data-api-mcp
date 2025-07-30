@@ -14,7 +14,7 @@ describe('Migration 1751916162107 - Add Extensions', () => {
       createTable: vi.fn(),
       dropTable: vi.fn(),
       addColumn: vi.fn()
-    } as any;
+    } as MigrationBuilder;
   });
 
   afterEach(() => {

@@ -16,7 +16,7 @@ describe('Migration 1752064297557 - Add Functions', () => {
       createTable: vi.fn(),
       dropTable: vi.fn(),
       addColumn: vi.fn()
-    } as any;
+    } as MigrationBuilder;
   });
 
   afterEach(() => {
