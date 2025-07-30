@@ -87,4 +87,4 @@ jobs:
           upload-badge: ${{ github.ref == 'refs/heads/main' }}
           badge-text: "MCP Server Coverage"
           badge-fail-color: D73A49,CB2431
-          badge-success-color: 34D058,28A745
+          badge-pass-color: 34D058,28A745
