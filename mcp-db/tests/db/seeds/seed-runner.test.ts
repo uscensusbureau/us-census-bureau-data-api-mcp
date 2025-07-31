@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { Client } from 'pg';
 import fs from 'fs/promises';
 import path from 'path';
@@ -10,10 +10,11 @@ import { SeedRunner } from '../../../src/seeds/scripts/seed-runner';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const testTableName = 'geography_levels_seed_runner_test';
- 
+
 describe('SeedRunner', () => {
   let client: Client;
   let runner: SeedRunner;
+  let fetchSpy: vi.SpyInstance;
  
   beforeAll(async () => {
     // Initialize client once for the entire test suite
@@ -66,10 +67,133 @@ describe('SeedRunner', () => {
  
     // Clean test table before each test
     await client.query(`DELETE FROM ${testTableName}`);
+
+    fetchSpy = vi.spyOn(global, 'fetch').mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: vi.fn().mockResolvedValue({
+        data: [
+          { id: 1, name: 'Test Item 1' },
+          { id: 2, name: 'Test Item 2' }
+        ]
+      })
+    } as unknown);
   });
  
   afterEach(async () => {
     await runner.disconnect();
+    fetchSpy.mockRestore();
+  });
+
+  describe('fetchFromApi', () => {
+    it('should fetch the correct URL', async() => {
+      const testUrl = 'https://api.example.com/data';
+
+      await runner.fetchFromApi(testUrl);
+
+      expect(fetchSpy).toHaveBeenCalledWith(testUrl);
+    });
+
+    it('should fetch the correct URL with query params', async() => {
+      const testUrl = 'https://api.example.com/data';
+      const queryParams = { get: 'NAME', for: 'state:*' }
+
+      await runner.fetchFromApi(testUrl, queryParams);
+
+      const testUrlWithParams = 'https://api.example.com/data?get=NAME&for=state%3A*';
+      expect(fetchSpy).toHaveBeenCalledWith(testUrlWithParams);
+    });
+
+    it('should return a JSON response', async() => {
+      const testUrl = 'https://api.example.com/data';
+      const queryParams = { get: 'NAME', for: 'state:*' }
+
+      const response = runner.fetchFromApi(testUrl, queryParams);
+
+      expect(await response).toMatchObject(
+        {
+          data: [
+            { id: 1, name: 'Test Item 1' },
+            { id: 2, name: 'Test Item 2' }
+          ]
+        }
+      );
+    });
+
+    it('should handle API errors and retry', async () => {
+      // Mock fetch to fail first two times, succeed on third
+      fetchSpy
+        .mockRejectedValueOnce(new Error('Network error'))
+        .mockRejectedValueOnce(new Error('Network error'))
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          json: vi.fn().mockResolvedValue({ data: [] })
+        } as unknown);
+
+      const testUrl = 'https://api.example.com/data';
+      
+      await runner.fetchFromApi(testUrl);
+      
+      // Should have been called 3 times (2 failures + 1 success)
+      expect(fetchSpy).toHaveBeenCalledTimes(3);
+      expect(fetchSpy).toHaveBeenNthCalledWith(1, testUrl);
+      expect(fetchSpy).toHaveBeenNthCalledWith(2, testUrl);
+      expect(fetchSpy).toHaveBeenNthCalledWith(3, testUrl);
+    });
+
+    it('should handle HTTP error responses', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 404,
+        statusText: 'Not Found'
+      } as unknown);
+
+      const testUrl = 'https://api.example.com/nonexistent';
+      
+      await expect(runner.fetchFromApi(testUrl)).rejects.toThrow('API request failed: 404 Not Found');
+      expect(fetchSpy).toHaveBeenCalledWith(testUrl);
+    });
+
+    it('should respect rate limiting', async () => {
+      // Create runner with strict rate limiting
+      const rateLimitedRunner = new SeedRunner('postgresql://test:test@localhost:5432/test', undefined, {
+        requestsPerSecond: 2,
+        burstLimit: 1
+      });
+
+      // Mock fetch with a small delay to simulate network requests
+      fetchSpy.mockImplementation(() => 
+        new Promise(resolve => 
+          setTimeout(() => resolve({
+            ok: true,
+            status: 200,
+            json: vi.fn().mockResolvedValue({ data: [] })
+          }), 10) // Small delay to simulate real network
+        )
+      );
+
+      const testUrl = 'https://api.example.com/data';
+      
+      // Make multiple requests
+      const promises = [
+        rateLimitedRunner.fetchFromApi(testUrl + '?id=1'),
+        rateLimitedRunner.fetchFromApi(testUrl + '?id=2'),
+        rateLimitedRunner.fetchFromApi(testUrl + '?id=3')
+      ];
+
+      const startTime = Date.now();
+      await Promise.all(promises);
+      const endTime = Date.now();
+      
+      // Should take at least 500ms due to rate limiting (2 requests per second, with burst limit 1)
+      // With 3 requests and requestsPerSecond=2, minimum time should be around 1000ms
+      expect(endTime - startTime).toBeGreaterThan(400);
+      expect(fetchSpy).toHaveBeenCalledTimes(3);
+      expect(fetchSpy).toHaveBeenNthCalledWith(1, testUrl + '?id=1');
+      expect(fetchSpy).toHaveBeenNthCalledWith(2, testUrl + '?id=2');
+      expect(fetchSpy).toHaveBeenNthCalledWith(3, testUrl + '?id=3');
+    });
   });
  
   describe('loadData', () => {
@@ -122,6 +246,25 @@ describe('SeedRunner', () => {
       await fs.writeFile(filePath, JSON.stringify(testData));
  
       await expect(runner.loadData('invalid.json')).rejects.toThrow('Expected array data from invalid.json, got object');
+    });
+
+    it('should handle API URLs', async() => {
+      const mockApiResponse = [
+        { NAME: 'California', STATE: '06' },
+        { NAME: 'Texas', STATE: '48' }
+      ];
+        
+      const fetchFromApiSpy = vi.spyOn(runner, 'fetchFromApi').mockResolvedValue(mockApiResponse);
+
+      const testUrl = 'https://api.census.gov';
+      const queryParams = { get: 'NAME', for: 'state:*' };
+
+      await runner.loadData(testUrl, undefined, true, queryParams);
+
+      expect(fetchFromApiSpy).toHaveBeenCalledWith(testUrl, {
+        get: 'NAME',
+        for: 'state:*'
+      });
     });
   });
 
@@ -185,6 +328,97 @@ describe('SeedRunner', () => {
       
       const result = await client.query('SELECT COUNT(*) as count FROM test_items');
       expect(parseInt(result.rows[0].count)).toBe(0);
+    });
+  });
+
+  describe('insertOrSkipBatch', () => {
+    let runner: SeedRunner;
+    let insertOrSkipSpy: vi.SpyInstance;
+    let consoleLogSpy: vi.SpyInstance;
+
+    beforeEach(() => {
+      runner = new SeedRunner('postgresql://test:test@localhost:5432/test');
+      
+      // Spy on the insertOrSkip method that gets called by insertOrSkipBatch
+      insertOrSkipSpy = vi.spyOn(runner, 'insertOrSkip').mockResolvedValue();
+      
+      // Spy on console.log to verify batch logging
+      consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    });
+
+    afterEach(async () => {
+      insertOrSkipSpy.mockRestore();
+      consoleLogSpy.mockRestore();
+    });
+
+    it('should return early for empty data array', async () => {
+      await runner.insertOrSkipBatch('test_table', [], 'id');
+
+      expect(insertOrSkipSpy).not.toHaveBeenCalled();
+      expect(consoleLogSpy).not.toHaveBeenCalled();
+    });
+
+    describe('small dataset (single batch)', () => {
+      it('should process small dataset in single batch', async () => {
+        const testData = [
+          { id: 1, name: 'Item 1' },
+          { id: 2, name: 'Item 2' },
+          { id: 3, name: 'Item 3' }
+        ];
+
+        await runner.insertOrSkipBatch('test_table', testData, 'id', 1000);
+
+        // Should call insertOrSkip once with all data
+        expect(insertOrSkipSpy).toHaveBeenCalledOnce();
+        expect(insertOrSkipSpy).toHaveBeenCalledWith('test_table', testData, 'id');
+
+        // Should log total count and single batch
+        expect(consoleLogSpy).toHaveBeenCalledWith('Processing 3 records in batches of 1000');
+        expect(consoleLogSpy).toHaveBeenCalledWith('Processing batch 1/1');
+      });
+    });
+
+    describe('large dataset (multiple batches)', () => {
+      it('should split large dataset into multiple batches', async () => {
+        // Create test data larger than batch size
+        const testData = Array.from({ length: 2500 }, (_, i) => ({
+          id: i + 1,
+          name: `Item ${i + 1}`
+        }));
+
+        await runner.insertOrSkipBatch('test_table', testData, 'id', 1000);
+
+        // Should call insertOrSkip 3 times (2500 records / 1000 batch size = 3 batches)
+        expect(insertOrSkipSpy).toHaveBeenCalledTimes(3);
+
+        // Verify each batch call
+        expect(insertOrSkipSpy).toHaveBeenNthCalledWith(1, 'test_table', testData.slice(0, 1000), 'id');
+        expect(insertOrSkipSpy).toHaveBeenNthCalledWith(2, 'test_table', testData.slice(1000, 2000), 'id');
+        expect(insertOrSkipSpy).toHaveBeenNthCalledWith(3, 'test_table', testData.slice(2000, 2500), 'id');
+
+        // Verify logging
+        expect(consoleLogSpy).toHaveBeenCalledWith('Processing 2500 records in batches of 1000');
+        expect(consoleLogSpy).toHaveBeenCalledWith('Processing batch 1/3');
+        expect(consoleLogSpy).toHaveBeenCalledWith('Processing batch 2/3');
+        expect(consoleLogSpy).toHaveBeenCalledWith('Processing batch 3/3');
+      });
+
+      it('should handle exact multiple of batch size', async () => {
+        const testData = Array.from({ length: 2000 }, (_, i) => ({
+          id: i + 1,
+          name: `Item ${i + 1}`
+        }));
+
+        await runner.insertOrSkipBatch('test_table', testData, 'id', 1000);
+
+        // Should call insertOrSkip exactly 2 times
+        expect(insertOrSkipSpy).toHaveBeenCalledTimes(2);
+        expect(insertOrSkipSpy).toHaveBeenNthCalledWith(1, 'test_table', testData.slice(0, 1000), 'id');
+        expect(insertOrSkipSpy).toHaveBeenNthCalledWith(2, 'test_table', testData.slice(1000, 2000), 'id');
+
+        expect(consoleLogSpy).toHaveBeenCalledWith('Processing batch 1/2');
+        expect(consoleLogSpy).toHaveBeenCalledWith('Processing batch 2/2');
+      });
     });
   });
  

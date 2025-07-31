@@ -6,19 +6,42 @@ import { z } from 'zod';
 
 import { SeedConfig, SeedConfigSchema } from '../../schema/seed-config.schema.js';
 
-// Fix for ES modules - create __dirname equivalent
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+interface RateLimitConfig {
+  requestsPerSecond: number;
+  burstLimit: number;
+  retryAttempts: number;
+  retryDelay: number;
+}
 
 export class SeedRunner {
   private client: Client;
   private dataPath: string;
+  private rateLimitConfig: RateLimitConfig;
+  private requestQueue: Array<() => Promise<any>> = [];
+  private activeRequests = 0;
+  private lastRequestTime = 0;
 
-  constructor(dbUrl: string, dataPath?: string) {
+  constructor(
+    dbUrl: string, 
+    dataPath?: string, 
+    rateLimitConfig?: Partial<RateLimitConfig>
+  ) {
     this.client = new Client({ connectionString: dbUrl });
     // Only use __dirname as fallback if no dataPath provided
     const defaultPath = path.join(__dirname, '../../../data');
     this.dataPath = dataPath || defaultPath;
+
+    // Default rate limiting configuration
+    this.rateLimitConfig = {
+      requestsPerSecond: 10,  // Max 10 requests per second
+      burstLimit: 5,          // Allow burst of 5 requests
+      retryAttempts: 3,       // Retry failed requests 3 times
+      retryDelay: 1000,       // 1 second delay between retries
+      ...rateLimitConfig
+    };
   }
 
   async connect(): Promise<void> {
@@ -26,10 +49,80 @@ export class SeedRunner {
   }
 
   async disconnect(): Promise<void> {
+    // Wait for all queued requests to complete
+    await this.waitForQueueToEmpty();
     await this.client.end();
   }
 
-  async fetchFromApi(url: string, queryParams?: Record<string, string>): Promise<any> {
+  private async waitForQueueToEmpty(): Promise<void> {
+    while (this.requestQueue.length > 0 || this.activeRequests > 0) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+  }
+
+  private async throttleRequest<T>(requestFn: () => Promise<T>): Promise<T> {
+    return new Promise((resolve, reject) => {
+      this.requestQueue.push(async () => {
+        try {
+          const result = await requestFn();
+          resolve(result);
+        } catch (error) {
+          reject(error);
+        }
+      });
+      
+      this.processQueue();
+    });
+  }
+
+  private async processQueue(): Promise<void> {
+    if (this.requestQueue.length === 0 || 
+        this.activeRequests >= this.rateLimitConfig.burstLimit) {
+      return;
+    }
+
+    const now = Date.now();
+    const timeSinceLastRequest = now - this.lastRequestTime;
+    const minInterval = 1000 / this.rateLimitConfig.requestsPerSecond;
+
+    if (timeSinceLastRequest < minInterval) {
+      // Wait before processing next request
+      setTimeout(() => this.processQueue(), minInterval - timeSinceLastRequest);
+      return;
+    }
+
+    const requestFn = this.requestQueue.shift();
+    if (!requestFn) return;
+
+    this.activeRequests++;
+    this.lastRequestTime = now;
+
+    try {
+      await requestFn();
+    } catch (error) {
+      console.error('Request failed:', error);
+    } finally {
+      this.activeRequests--;
+      // Process next request after a brief delay
+      setTimeout(() => this.processQueue(), 10);
+    }
+  }
+
+  async fetchFromApi(
+    url: string, 
+    queryParams?: Record<string, string>, 
+    retryCount = 0
+  ): Promise<any> {
+    return this.throttleRequest(async () => {
+      return this.performFetch(url, queryParams, retryCount);
+    });
+  }
+
+  private async performFetch(
+    url: string, 
+    queryParams?: Record<string, string>, 
+    retryCount = 0
+  ): Promise<any> {
     const urlObj = new URL(url);
     
     // Add query parameters
@@ -39,13 +132,30 @@ export class SeedRunner {
       }
     }
     
-    const response = await fetch(urlObj.toString());
+    console.log(`Making API request to: ${urlObj.toString()}`);
+    
+    try {
+      const response = await fetch(urlObj.toString());
 
-    if (!response.ok) {
-      throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      if (retryCount < this.rateLimitConfig.retryAttempts) {
+        console.warn(`Request failed, retrying in ${this.rateLimitConfig.retryDelay}ms (attempt ${retryCount + 1}/${this.rateLimitConfig.retryAttempts})`);
+        
+        await new Promise(resolve => 
+          setTimeout(resolve, this.rateLimitConfig.retryDelay * (retryCount + 1))
+        );
+        
+        // Retry with the same throttled request - no new throttling
+        return this.performFetch(url, queryParams, retryCount + 1);
+      }
+      
+      throw error;
     }
-
-    return response.json();
   }
 
   // Load JSON file and extract data
@@ -67,7 +177,7 @@ export class SeedRunner {
         }
       }
 
-      // Fetch Data from the API
+      // Fetch Data from the API with rate limiting
       data = await this.fetchFromApi(source, stringParams);
     } else {
       // Use the filepath
@@ -126,6 +236,30 @@ export class SeedRunner {
     console.log(`Processed ${data.length} records for ${tableName} (inserted new, skipped existing)`);
   }
 
+  // Batch processing for large datasets
+  async insertOrSkipBatch(
+    tableName: string, 
+    data: Record<string, any>[], 
+    conflictColumn: string, 
+    batchSize: number = 1000
+  ): Promise<void> {
+    if (!data.length) return;
+
+    console.log(`Processing ${data.length} records in batches of ${batchSize}`);
+    
+    for (let i = 0; i < data.length; i += batchSize) {
+      const batch = data.slice(i, i + batchSize);
+      console.log(`Processing batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(data.length / batchSize)}`);
+      
+      await this.insertOrSkip(tableName, batch, conflictColumn);
+      
+      // Small delay between batches to avoid overwhelming the database
+      if (i + batchSize < data.length) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+    }
+  }
+
   // Run a seed with optional setup/cleanup hooks
   async seed(config: unknown): Promise<void> {
     // Validate Seed Config
@@ -144,7 +278,7 @@ export class SeedRunner {
     try {
       await this.client.query('BEGIN');
       
-      // Load raw data
+      // Load raw data with rate limiting if from API
       const rawData = await this.loadData(source, dataPath, isUrl, queryParams);
       
       if (beforeSeed) {
@@ -152,7 +286,12 @@ export class SeedRunner {
         await beforeSeed(this.client, rawData);
       }
       
-      await this.insertOrSkip(table, rawData, conflictColumn);
+      // Use batch processing for large datasets
+      if (rawData.length > 1000) {
+        await this.insertOrSkipBatch(table, rawData, conflictColumn);
+      } else {
+        await this.insertOrSkip(table, rawData, conflictColumn);
+      }
       
       if (afterSeed) {
         // Run afterSeed logic
