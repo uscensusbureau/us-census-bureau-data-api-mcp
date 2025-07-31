@@ -1,19 +1,21 @@
 import { MigrationBuilder } from 'node-pg-migrate';
 
+export const geographyLevelsArgs = {
+  id: { type: 'bigserial', primaryKey: true },
+  
+  name: { type: 'varchar(255)', notNull: true, unique: true },
+  description: { type: 'text', notNull: false },
+  get_variable: { type: 'varchar(20)', notNull: true, unique: true },
+  query_name: { type: 'varchar(255)', notNull: true, unique: true },
+  on_spine: { type: 'boolean', notNull: true },
+
+  parent_geography_level_id: { type: 'bigint', references: 'geography_levels(id)' }
+};
+
 export async function up(pgm: MigrationBuilder): Promise<void> {
   
   // Create geographic levels table - a table to describe and associate geographic levels
-  pgm.createTable('geography_levels', {
-  	id: { type: 'bigserial', primaryKey: true },
-    
-    name: { type: 'varchar(255)', notNull: true, unique: true },
-    description: { type: 'text', notNull: false },
-    get_variable: { type: 'varchar(20)', notNull: true, unique: true },
-    query_name: { type: 'varchar(255)', notNull: true, unique: true },
-    on_spine: { type: 'boolean', notNull: true },
-
-    parent_geography_level_id: { type: 'bigint', references: 'geography_levels(id)' }
-  });
+  pgm.createTable('geography_levels', geographyLevelsArgs);
 
   pgm.addColumns('places', {
     geography_level_id: { type: 'bigint', references: 'geography_levels(id)' },
