@@ -14,7 +14,7 @@ type GeographyLevel = z.infer<typeof GeographyLevelSchema>;
 const DATABASE_URL: string = process.env.DATABASE_URL || 'postgresql://mcp_user:mcp_pass@localhost:5432/mcp_db';
 
 // Seed configurations
-const seeds: SeedConfig[] = [
+export const seeds: SeedConfig[] = [
   {
     file: 'geography_levels.json',
     table: 'geography_levels',
@@ -77,37 +77,56 @@ const seeds: SeedConfig[] = [
   }
 ];
 
-async function main(): Promise<void> {
-  console.log('Starting database seeding...');
+export async function runSeedsWithRunner(
+  runner: SeedRunner,
+  seedConfigs: SeedConfig[],
+  targetSeedName?: string
+): Promise<void> {
+  // Run specific seed or all seeds
+  const seedsToRun: SeedConfig[] = targetSeedName 
+    ? seedConfigs.filter(s => s.file === targetSeedName) 
+    : seedConfigs;
   
-  const runner = new SeedRunner(DATABASE_URL);
+  if (seedsToRun.length === 0) {
+    throw new Error(`Seed file "${targetSeedName}" not found`);
+  }
+  
+  // Process seeds sequentially
+  await seedsToRun.reduce(async (previousSeed, seedConfig) => {
+    await previousSeed;
+    return runner.seed(seedConfig);
+  }, Promise.resolve());
+}
+
+export async function runSeeds(
+  databaseUrl: string = DATABASE_URL,
+  seedConfigs: SeedConfig[] = seeds,
+  targetSeedName?: string
+): Promise<void> {
+  const runner = new SeedRunner(databaseUrl);
   
   try {
     await runner.connect();
     console.log('Connected to database');
     
-    // Run specific seed or all seeds
-    const seedName: string | undefined = process.argv[2];
-    const seedsToRun: SeedConfig[] = seedName ? seeds.filter(s => s.file === seedName) : seeds;
-    
-    if (seedsToRun.length === 0) {
-      console.error(`Seed file "${seedName}" not found`);
-      process.exit(1);
-    }
-    
-    // Process seeds sequentially without await in loop - using reduce instead of for loop
-    await seedsToRun.reduce(async (previousSeed, seedConfig) => {
-      await previousSeed; // Wait for previous seed to complete
-      return runner.seed(seedConfig);
-    }, Promise.resolve());
+    await runSeedsWithRunner(runner, seedConfigs, targetSeedName);
     
     console.log('Seeding completed successfully!');
     
+  } finally {
+    await runner.disconnect();
+  }
+}
+
+async function main(): Promise<void> {
+  console.log('Starting database seeding...');
+  
+  try {
+    const seedName: string | undefined = process.argv[2];
+    await runSeeds(DATABASE_URL, seeds, seedName);
   } catch (error) {
     console.error('Seeding failed:', (error as Error).message);
     process.exit(1);
-  } finally {
-    await runner.disconnect();
   }
 }
 
