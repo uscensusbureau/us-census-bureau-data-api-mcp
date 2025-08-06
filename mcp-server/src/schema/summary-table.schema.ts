@@ -1,6 +1,6 @@
-import { z } from "zod";
+import { z } from 'zod'
 
-import { 
+import {
   baseFields,
   baseProperties,
   geoFields,
@@ -9,24 +9,24 @@ import {
   getProperties,
   yearField,
   yearProperty,
-} from './table.schema.js';
+} from './table.schema.js'
 
 export const TableSchema = {
-  type: "object",
+  type: 'object',
   properties: {
     ...baseProperties,
     ...yearProperty,
     ...getProperties,
-    ...geoProperties
+    ...geoProperties,
   },
-  required: ["dataset", "year", "get"]
-};
+  required: ['dataset', 'year', 'get'],
+}
 
 export const FetchTableInputSchema = z.object({
   ...baseFields,
   ...yearField,
   ...getFields,
-  ...geoFields
-});
+  ...geoFields,
+})
 
-export type TableArgs = z.infer<typeof FetchTableInputSchema>;
+export type TableArgs = z.infer<typeof FetchTableInputSchema>

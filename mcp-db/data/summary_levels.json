@@ -1,5 +1,5 @@
 {
-  "geography_levels": [
+  "summary_levels": [
     {
       "get_variable": "US",
       "query_name": "United States",

@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod'
 
 export const GeographyLevelSchema = z.object({
   name: z.string(),
@@ -7,5 +7,5 @@ export const GeographyLevelSchema = z.object({
   query_name: z.string(),
   on_spine: z.boolean(),
   summary_level: z.string(),
-  parent_summary_level: z.string().nullable()
-});
+  parent_summary_level: z.string().nullable(),
+})

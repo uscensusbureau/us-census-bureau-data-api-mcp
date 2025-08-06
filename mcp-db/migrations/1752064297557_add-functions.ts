@@ -1,4 +1,4 @@
-import { MigrationBuilder } from 'node-pg-migrate';
+import { MigrationBuilder } from 'node-pg-migrate'
 
 export async function up(pgm: MigrationBuilder): Promise<void> {
   // Function to automatically update the updated_at timestamp
@@ -10,7 +10,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
         RETURN NEW;
     END;
     $$ LANGUAGE plpgsql;
-  `);
+  `)
 
   // Function to generate a SHA-256 hash for cache keys
   pgm.sql(`
@@ -31,10 +31,12 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
         );
     END;
     $$ LANGUAGE plpgsql IMMUTABLE;
-  `);
-};
+  `)
+}
 
 export async function down(pgm: MigrationBuilder): Promise<void> {
-  pgm.sql('DROP FUNCTION IF EXISTS generate_cache_hash(TEXT, INTEGER, TEXT[], JSONB)');
-  pgm.sql('DROP FUNCTION IF EXISTS update_updated_at_column()');
-};
+  pgm.sql(
+    'DROP FUNCTION IF EXISTS generate_cache_hash(TEXT, INTEGER, TEXT[], JSONB)',
+  )
+  pgm.sql('DROP FUNCTION IF EXISTS update_updated_at_column()')
+}

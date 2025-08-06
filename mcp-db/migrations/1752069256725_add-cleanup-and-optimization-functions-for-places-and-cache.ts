@@ -1,4 +1,4 @@
-import { MigrationBuilder } from 'node-pg-migrate';
+import { MigrationBuilder } from 'node-pg-migrate'
 
 export const cleanupExpiredCacheSql = `
   CREATE OR REPLACE FUNCTION cleanup_expired_cache()
@@ -13,7 +13,7 @@ export const cleanupExpiredCacheSql = `
     RETURN deleted_count;
   END;
   $$ LANGUAGE plpgsql;
-`;
+`
 
 export const getCacheStatsSql = `
   CREATE OR REPLACE FUNCTION get_cache_stats()
@@ -47,7 +47,7 @@ export const getCacheStatsSql = `
     FROM census_data_cache;
   END;
   $$ LANGUAGE plpgsql;
-`;
+`
 
 export const optimizeDatabaseSql = `
   CREATE OR REPLACE FUNCTION optimize_database()
@@ -68,21 +68,21 @@ export const optimizeDatabaseSql = `
     RETURN result_message;
   END;
   $$ LANGUAGE plpgsql;
-`;
+`
 
 export async function up(pgm: MigrationBuilder): Promise<void> {
   // Function to clean expired cache entries
-  pgm.sql(cleanupExpiredCacheSql);
+  pgm.sql(cleanupExpiredCacheSql)
 
   // Function to get cache statistics
-  pgm.sql(getCacheStatsSql);
+  pgm.sql(getCacheStatsSql)
 
   // Function to optimize database tables
-  pgm.sql(optimizeDatabaseSql);
-};
+  pgm.sql(optimizeDatabaseSql)
+}
 
 export async function down(pgm: MigrationBuilder): Promise<void> {
-  pgm.sql('DROP FUNCTION IF EXISTS optimize_database()');
-  pgm.sql('DROP FUNCTION IF EXISTS get_cache_stats()');
-  pgm.sql('DROP FUNCTION IF EXISTS cleanup_expired_cache()');
-};
+  pgm.sql('DROP FUNCTION IF EXISTS optimize_database()')
+  pgm.sql('DROP FUNCTION IF EXISTS get_cache_stats()')
+  pgm.sql('DROP FUNCTION IF EXISTS cleanup_expired_cache()')
+}

@@ -1,4 +1,4 @@
-import { MigrationBuilder } from 'node-pg-migrate';
+import { MigrationBuilder } from 'node-pg-migrate'
 
 export const searchPlacesSql = `
   CREATE OR REPLACE FUNCTION search_places(
@@ -46,7 +46,7 @@ export const searchPlacesSql = `
       LIMIT limit_results;
   END;
   $$ LANGUAGE plpgsql;
-`;
+`
 
 export const fuzzySearchPlacesSql = `
   CREATE OR REPLACE FUNCTION fuzzy_search_places(
@@ -81,7 +81,7 @@ export const fuzzySearchPlacesSql = `
       LIMIT limit_results;
   END;
   $$ LANGUAGE plpgsql;
-`;
+`
 
 export const geoCoordinateSearchSql = `
   CREATE OR REPLACE FUNCTION resolve_geography_by_coordinates(
@@ -126,20 +126,22 @@ export const geoCoordinateSearchSql = `
     LIMIT 10;
   END;
   $$ LANGUAGE plpgsql;
-`;
+`
 
 export async function up(pgm: MigrationBuilder): Promise<void> {
-  pgm.sql(searchPlacesSql);
+  pgm.sql(searchPlacesSql)
 
   // Function to find places by partial name match (fuzzy search)
-  pgm.sql(fuzzySearchPlacesSql);
+  pgm.sql(fuzzySearchPlacesSql)
 
   // Function to resolve geography by coordinates (reverse geocoding)
-  pgm.sql(geoCoordinateSearchSql);
-};
+  pgm.sql(geoCoordinateSearchSql)
+}
 
 export async function down(pgm: MigrationBuilder): Promise<void> {
-  pgm.sql('DROP FUNCTION IF EXISTS resolve_geography_by_coordinates(DECIMAL, DECIMAL, DECIMAL)');
-  pgm.sql('DROP FUNCTION IF EXISTS fuzzy_search_places(TEXT, REAL, INTEGER)');
-  pgm.sql('DROP FUNCTION IF EXISTS search_places(TEXT, CHAR, TEXT[], INTEGER)');
-};
+  pgm.sql(
+    'DROP FUNCTION IF EXISTS resolve_geography_by_coordinates(DECIMAL, DECIMAL, DECIMAL)',
+  )
+  pgm.sql('DROP FUNCTION IF EXISTS fuzzy_search_places(TEXT, REAL, INTEGER)')
+  pgm.sql('DROP FUNCTION IF EXISTS search_places(TEXT, CHAR, TEXT[], INTEGER)')
+}
