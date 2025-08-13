@@ -32,7 +32,7 @@ export type SeedConfig = Omit<
   z.infer<typeof SeedConfigSchema>,
   'beforeSeed' | 'afterSeed' | 'queryParams'
 > & {
-  beforeSeed?: (client: Client, rawData: unknown[]) => Promise<void>
+  beforeSeed?: (client: Client, rawData: unknown[]) => void
   afterSeed?: (client: Client) => Promise<void>
   queryParams?: Record<string, string | number | boolean>
 }

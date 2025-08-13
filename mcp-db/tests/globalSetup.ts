@@ -129,7 +129,8 @@ export async function teardown(): Promise<void> {
     )
   }
 
-  await deleteDirectory('tests/db/seeds/fixtures')
+  await deleteDirectory('tests/seeds/scripts/fixtures')
+  await deleteDirectory('tests/seeds/configs/fixtures')
 }
 
 async function deleteDirectory(directoryPath: string): Promise<void> {

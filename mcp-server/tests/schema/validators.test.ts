@@ -1,6 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { z } from 'zod'
-import type { RefinementCtx } from 'zod'
+import { RefinementCtx, z } from 'zod'
 
 import {
   datasetValidator,

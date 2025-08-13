@@ -46,7 +46,7 @@ describe('FetchDatasetGeographyTool - Integration Tests', () => {
 
     // Insert known test data
     await testClient.query(`
-      INSERT INTO summary_levels (name, description, get_variable, query_name, on_spine, summary_level, parent_summary_level)
+      INSERT INTO summary_levels (name, description, get_variable, query_name, on_spine, code, parent_summary_level)
       VALUES 
         ('United States', 'United States total', 'NATION', 'us', true, '010', null),
         ('State', 'States and State equivalents', 'STATE', 'state', true, '040', '010'),
@@ -60,7 +60,7 @@ describe('FetchDatasetGeographyTool - Integration Tests', () => {
       UPDATE summary_levels 
       SET parent_summary_level_id = (
         SELECT id FROM summary_levels parent 
-        WHERE parent.summary_level = summary_levels.parent_summary_level
+        WHERE parent.code = summary_levels.parent_summary_level
       )
       WHERE parent_summary_level IS NOT NULL;
     `)
@@ -72,16 +72,16 @@ describe('FetchDatasetGeographyTool - Integration Tests', () => {
       expect(isHealthy).toBe(true)
 
       const result = await databaseService.query(`
-        SELECT name, query_name, summary_level, on_spine, parent_summary_level
+        SELECT name, query_name, code, on_spine, parent_summary_level
         FROM summary_levels 
-        ORDER BY summary_level
+        ORDER BY code
       `)
 
       expect(result.rows).toHaveLength(5) //Geo Levels are Seeded by DB Container
       expect(result.rows[0]).toMatchObject({
         name: 'United States',
         query_name: 'us',
-        summary_level: '010',
+        code: '010',
         on_spine: true,
         parent_summary_level: null,
       })

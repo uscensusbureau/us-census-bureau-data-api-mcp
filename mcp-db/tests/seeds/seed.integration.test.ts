@@ -8,13 +8,13 @@ import {
   afterAll,
 } from 'vitest'
 import { Client } from 'pg'
-import { dbConfig } from '../../helpers/database-config'
-import { SeedRunner } from '../../../src/seeds/scripts/seed-runner'
+import { dbConfig } from '../helpers/database-config'
+import { SeedRunner } from '../../src/seeds/scripts/seed-runner'
 import {
   CloseAction,
   HttpAction,
   setupMockServer,
-} from '../../helpers/mock-server'
+} from '../helpers/mock-server'
 
 interface MockServer {
   port: number

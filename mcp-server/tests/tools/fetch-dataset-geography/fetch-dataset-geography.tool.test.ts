@@ -56,7 +56,7 @@ describe('FetchDatasetGeographyTool', () => {
         get_variable: 'NATION',
         query_name: 'us',
         on_spine: true,
-        summary_level: '010',
+        code: '010',
         parent_summary_level: null,
         parent_geography_level_id: null,
       },
@@ -67,7 +67,7 @@ describe('FetchDatasetGeographyTool', () => {
         get_variable: 'STATE',
         query_name: 'state',
         on_spine: true,
-        summary_level: '040',
+        code: '040',
         parent_summary_level: '010',
         parent_geography_level_id: 1,
       },
@@ -78,7 +78,7 @@ describe('FetchDatasetGeographyTool', () => {
         get_variable: 'COUNTY',
         query_name: 'county',
         on_spine: true,
-        summary_level: '050',
+        code: '050',
         parent_summary_level: '040',
         parent_geography_level_id: 2,
       },
@@ -250,7 +250,7 @@ describe('FetchDatasetGeographyTool', () => {
       // Verify the SQL query structure
       const queryCall = mockDbService.query.mock.calls[0][0]
       expect(queryCall).toContain('FROM summary_levels')
-      expect(queryCall).toContain('ORDER BY summary_level')
+      expect(queryCall).toContain('ORDER BY code')
     })
 
     it('should handle database query errors', async () => {

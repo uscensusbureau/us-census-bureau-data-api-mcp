@@ -6,7 +6,7 @@ import { ColumnInfo, ConstraintInfo, IndexInfo } from '../helpers/types'
 
 const client = new Client(dbConfig)
 
-describe('Geography Levels Table', () => {
+describe('Summary Levels Table', () => {
   beforeAll(async () => {
     await client.connect()
   })
@@ -43,7 +43,7 @@ describe('Geography Levels Table', () => {
       'get_variable',
       'on_spine',
       'query_name',
-      'summary_level',
+      'code',
     ]
 
     const actualColumns: string[] = result.rows.map((row) => row.column_name)
@@ -107,7 +107,7 @@ describe('Geography Levels Table', () => {
     expect(result.rows.length).toBe(1)
   })
 
-  it('should have foreign key for parent_geography_level_id', async () => {
+  it('should have foreign key for parent_summary_level_id', async () => {
     const result: QueryResult<Pick<ConstraintInfo, 'constraint_name'>> =
       await client.query(`
 	    SELECT constraint_name 
@@ -142,7 +142,7 @@ describe('Geography Levels Table', () => {
 
     try {
       const result: QueryResult<{ id: bigint }> = await client.query(`
-	      INSERT INTO summary_levels (name, get_variable, on_spine, query_name, summary_level ) 
+	      INSERT INTO summary_levels (name, get_variable, on_spine, query_name, code ) 
 	      VALUES ('County', 'COUNTY', true, 'county', '050') 
 	      RETURNING id;
 	    `)

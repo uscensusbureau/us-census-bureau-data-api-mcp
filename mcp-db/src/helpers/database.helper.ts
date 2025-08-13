@@ -1,0 +1,3 @@
+export const DATABASE_URL: string =
+  process.env.DATABASE_URL ||
+  'postgresql://mcp_user:mcp_pass@localhost:5432/mcp_db'

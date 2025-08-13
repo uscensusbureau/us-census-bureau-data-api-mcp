@@ -44,11 +44,11 @@ export class FetchDatasetGeographyTool extends BaseTool<FetchDatasetGeographyArg
         get_variable,
         query_name,
         on_spine,
-        summary_level,
+        code,
         parent_summary_level,
         parent_summary_level_id
       FROM summary_levels
-      ORDER BY summary_level
+      ORDER BY code
     `)
 
     return result.rows
@@ -65,11 +65,11 @@ export class FetchDatasetGeographyTool extends BaseTool<FetchDatasetGeographyArg
       if (level.parent_summary_level) {
         // Find parent level to build hierarchical query
         const parentLevel = levels.find(
-          (l) => l.summary_level === level.parent_summary_level,
+          (l) => l.code === level.parent_summary_level,
         )
         if (parentLevel) {
           // Special case: Don't use US as a parent in queries
-          if (parentLevel.summary_level === '010') {
+          if (parentLevel.code === '010') {
             // For geographies that have US as parent, just use standalone syntax
             queryExample = `for=${level.query_name}:*`
           } else {
@@ -86,7 +86,7 @@ export class FetchDatasetGeographyTool extends BaseTool<FetchDatasetGeographyArg
 
       metadata[level.name] = {
         querySyntax: level.query_name,
-        code: level.summary_level,
+        code: level.code,
         queryExample: queryExample,
         onSpine: level.on_spine,
       }
@@ -113,7 +113,7 @@ export class FetchDatasetGeographyTool extends BaseTool<FetchDatasetGeographyArg
     // Create reverse lookup by summary level code
     const codeToLevel = new Map<string, SummaryLevelRow>()
     geographyLevels.forEach((level) => {
-      codeToLevel.set(level.summary_level, level)
+      codeToLevel.set(level.code, level)
     })
 
     const parsed = validatedRaw.fips.map((entry) => {
