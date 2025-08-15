@@ -18,6 +18,7 @@ import { GeographyLevel } from '../../../src/schema/geography-level.schema'
 import { SeedConfig } from '../../../src/schema/seed-config.schema.js'
 import { SeedRunner } from '../../../src/seeds/scripts/seed-runner'
 import { SummaryLevelsConfig } from '../../../src/seeds/configs/summary-levels.config'
+import { YearsConfig } from '../../../src/seeds/configs/years.config'
 import {
   runSeedsWithRunner,
   runSeeds,
@@ -225,8 +226,9 @@ describe('Seed Database', () => {
 
   describe('seeds', () => {
     it('includes all configs', async () => {
-      expect(seeds).toHaveLength(1)
+      expect(seeds).toHaveLength(2)
       expect(seeds).toContain(SummaryLevelsConfig)
+      expect(seeds).toContain(YearsConfig)
     })
   })
 

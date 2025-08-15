@@ -14,14 +14,14 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import { dbConfig } from '../../helpers/database-config'
-import { GeographyLevel } from '../../../src/schema/geography-level.schema'
+import { SummaryLevel } from '../../../src/schema/summary-level.schema'
 import { SeedRunner } from '../../../src/seeds/scripts/seed-runner'
 import { seeds } from '../../../src/seeds/scripts/seed-database'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-interface GeographyLevelRow extends GeographyLevel {
+interface SummaryLevelRow extends SummaryLevel {
   id: number
   parent_summary_level_id: number | null
   created_at: Date
@@ -398,7 +398,7 @@ describe('Summary Levels Config', () => {
       await runner.seed(seedConfig)
 
       // Verify data was inserted
-      const result = await client.query<GeographyLevelRow>(
+      const result = await client.query<SummaryLevelRow>(
         'SELECT * FROM summary_levels ORDER BY code',
       )
       expect(result.rows).toHaveLength(3)
@@ -474,7 +474,7 @@ describe('Summary Levels Config', () => {
       await runner.seed(seedConfig)
 
       // Should still have only 2 records (not duplicated)
-      const result = await client.query<GeographyLevelRow>(
+      const result = await client.query<SummaryLevelRow>(
         'SELECT * FROM summary_levels ORDER BY code',
       )
       expect(result.rows).toHaveLength(2)

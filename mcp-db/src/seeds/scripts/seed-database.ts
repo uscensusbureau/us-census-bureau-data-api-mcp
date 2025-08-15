@@ -8,9 +8,10 @@ import { SeedRunner } from './seed-runner.js'
 
 import { NationConfig } from '../configs/nation.config.js'
 import { SummaryLevelsConfig } from '../configs/summary-levels.config.js'
+import { YearsConfig } from '../configs/years.config.js'
 
 // Seed configurations
-export const seeds: SeedConfig[] = [SummaryLevelsConfig]
+export const seeds: SeedConfig[] = [SummaryLevelsConfig, YearsConfig]
 
 export async function runSeedsWithRunner(
   runner: SeedRunner,
