@@ -3,7 +3,7 @@ import { z } from 'zod'
 // Zod schema for the returned dataset
 export const SimplifiedAPIDatasetSchema = z.object({
   c_dataset: z.array(z.string()),
-  vintage: z.number().optional(),
+  c_vintage: z.number().optional(),
   title: z.string(),
   description: z.string(),
   c_isAggregate: z.boolean().optional(),
@@ -20,7 +20,7 @@ export const DatasetMetadataJsonSchema = z.object({
   conformsTo: z.string(),
   describedBy: z.string(),
   dataset: z.array(z.object({
-    vintage: z.number().optional(),
+    c_vintage: z.number().optional(),
     c_dataset: z.array(z.string()),
     c_geographyLink: z.string(),
     c_tags: z.string().nullable().optional(),
