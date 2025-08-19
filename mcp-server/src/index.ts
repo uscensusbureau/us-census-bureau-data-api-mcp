@@ -13,7 +13,7 @@ import { MCPServer } from './server.js'
 import { FetchDatasetGeographyTool } from './tools/fetch-dataset-geography.tool.js'
 import { FetchDatasetVariablesTool } from './tools/fetch-dataset-variables.tool.js'
 import { FetchSummaryTableTool } from './tools/fetch-summary-table.tool.js'
-import { IdentifyDatasetTool } from './tools/identify-dataset.tool.js'
+import { IdentifyDatasetsTool } from './tools/identify-datasets.tool.js'
 
 // MCP Server Setup
 async function main() {
@@ -24,7 +24,7 @@ async function main() {
   mcpServer.registerTool(new FetchDatasetGeographyTool())
   mcpServer.registerTool(new FetchDatasetVariablesTool())
   mcpServer.registerTool(new FetchSummaryTableTool())
-  mcpServer.registerTool(new IdentifyDatasetTool())
+  mcpServer.registerTool(new IdentifyDatasetsTool())
 
   const transport = new StdioServerTransport()
   await mcpServer.connect(transport)
