@@ -5,8 +5,9 @@ import { fileURLToPath } from 'url'
 import { z } from 'zod'
 
 import {
+  GeographySeedConfig,
+  GeographyContext,
   SeedConfig,
-  SeedConfigSchema,
 } from '../../schema/seed-config.schema.js'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -18,6 +19,12 @@ interface RateLimitConfig {
   retryAttempts: number
   retryDelay: number
 }
+
+type StaticBeforeSeed = (
+  client: Client,
+  rawData: unknown[],
+) => void | Promise<void>
+type StaticAfterSeed = (client: Client) => void | Promise<void>
 
 export class SeedRunner {
   private client: Client
@@ -55,6 +62,16 @@ export class SeedRunner {
     // Wait for all queued requests to complete
     await this.waitForQueueToEmpty()
     await this.client.end()
+  }
+
+  async getAvailableYears(): Promise<{ id: number; year: number }[]> {
+    const result = await this.client.query(
+      'SELECT id, year FROM years ORDER BY year',
+    )
+    return result.rows.map((row) => ({
+      id: parseInt(row.id, 10),
+      year: parseInt(row.year, 10),
+    }))
   }
 
   private async waitForQueueToEmpty(): Promise<void> {
@@ -113,29 +130,14 @@ export class SeedRunner {
     }
   }
 
-  async fetchFromApi(
-    url: string,
-    queryParams?: Record<string, string>,
-    retryCount = 0,
-  ): Promise<any> {
+  async fetchFromApi(url: string, retryCount = 0): Promise<any> {
     return this.throttleRequest(async () => {
-      return this.performFetch(url, queryParams, retryCount)
+      return this.performFetch(url, retryCount)
     })
   }
 
-  private async performFetch(
-    url: string,
-    queryParams?: Record<string, string>,
-    retryCount = 0,
-  ): Promise<any> {
+  private async performFetch(url: string, retryCount = 0): Promise<any> {
     const urlObj = new URL(url)
-
-    // Add query parameters
-    if (queryParams) {
-      for (const [key, value] of Object.entries(queryParams)) {
-        urlObj.searchParams.append(key, value)
-      }
-    }
 
     console.log(`Making API request to: ${urlObj.toString()}`)
 
@@ -163,7 +165,7 @@ export class SeedRunner {
         )
 
         // Retry with the same throttled request - no new throttling
-        return this.performFetch(url, queryParams, retryCount + 1)
+        return this.performFetch(url, retryCount + 1)
       }
 
       throw error
@@ -175,22 +177,12 @@ export class SeedRunner {
     source: string,
     extractPath?: string,
     isUrl: boolean = false,
-    queryParams?: Record<string, string | number | boolean>,
   ): Promise<any[]> {
     let data: unknown
 
     if (isUrl) {
-      let stringParams: Record<string, string> | undefined
-
-      if (queryParams) {
-        stringParams = {}
-        for (const [key, value] of Object.entries(queryParams)) {
-          stringParams[key] = String(value)
-        }
-      }
-
       // Fetch Data from the API with rate limiting
-      data = await this.fetchFromApi(source, stringParams)
+      data = await this.fetchFromApi(source)
     } else {
       // Use the filepath
       const filePath = path.join(this.dataPath, source)
@@ -225,8 +217,8 @@ export class SeedRunner {
     tableName: string,
     data: Record<string, any>[],
     conflictColumn: string,
-  ): Promise<void> {
-    if (!data.length) return
+  ): Promise<number[]> {
+    if (!data.length) return []
 
     const columns = Object.keys(data[0])
 
@@ -251,7 +243,8 @@ export class SeedRunner {
       INSERT INTO ${tableName} (${columns.join(', ')}) 
       VALUES ${placeholders}
       ON CONFLICT (${conflictColumn}) 
-      DO NOTHING
+      DO UPDATE SET ${conflictColumn} = ${tableName}.${conflictColumn}
+      RETURNING id
     `
 
     console.log(
@@ -261,10 +254,12 @@ export class SeedRunner {
       'Existing records will be skipped, only new records will be inserted',
     )
 
-    await this.client.query(query, values.flat())
+    const result = await this.client.query(query, values.flat())
     console.log(
       `Processed ${data.length} records for ${tableName} (inserted new, skipped existing)`,
     )
+
+    return result.rows.map((row) => row.id)
   }
 
   // Batch processing for large datasets
@@ -273,10 +268,12 @@ export class SeedRunner {
     data: Record<string, any>[],
     conflictColumn: string,
     batchSize: number = 1000,
-  ): Promise<void> {
-    if (!data.length) return
+  ): Promise<number[]> {
+    if (!data.length) return []
 
     console.log(`Processing ${data.length} records in batches of ${batchSize}`)
+
+    const allInsertedIds: number[] = []
 
     for (let i = 0; i < data.length; i += batchSize) {
       const batch = data.slice(i, i + batchSize)
@@ -284,84 +281,91 @@ export class SeedRunner {
         `Processing batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(data.length / batchSize)}`,
       )
 
-      await this.insertOrSkip(tableName, batch, conflictColumn)
+      const batchIds = await this.insertOrSkip(tableName, batch, conflictColumn)
+      allInsertedIds.push(...batchIds)
 
       // Small delay between batches to avoid overwhelming the database
       if (i + batchSize < data.length) {
         await new Promise((resolve) => setTimeout(resolve, 100))
       }
     }
+
+    return allInsertedIds
   }
 
-  // Run a seed with optional setup/cleanup hooks
-  async seed(config: unknown): Promise<void> {
-    // Validate Seed Config
-    const validConfig = this.validateSeedConfig(config)
+  async seed(config: SeedConfig): Promise<void>
+  async seed(
+    config: GeographySeedConfig,
+    context: GeographyContext,
+  ): Promise<void>
+  async seed(
+    config: SeedConfig | GeographySeedConfig,
+    context?: GeographyContext,
+  ): Promise<void> {
+    if (context && !('url' in config)) {
+      console.warn('Context provided but config does not use dynamic URLs')
+    }
 
-    const {
-      file,
-      url,
-      table,
-      conflictColumn,
-      dataPath,
-      beforeSeed,
-      afterSeed,
-      queryParams,
-    } = validConfig
+    const url =
+      typeof config.url === 'function'
+        ? context
+          ? config.url(context)
+          : undefined
+        : config.url
 
-    const source = file || url!
+    const source = config.file || url!
     const isUrl = !!url
 
-    console.log(`Seeding table ${table} from ${source}.`)
+    console.log(`Seeding table ${config.table} from ${source}.`)
 
     try {
       await this.client.query('BEGIN')
 
       // Load raw data with rate limiting if from API
-      const rawData = await this.loadData(source, dataPath, isUrl, queryParams)
+      const rawData = await this.loadData(source, config.dataPath, isUrl)
 
-      if (beforeSeed) {
-        // Run beforeSeed logic
-        await beforeSeed(this.client, rawData)
+      if (config.beforeSeed) {
+        if (context) {
+          // Pass context to beforeSeed
+          await config.beforeSeed(this.client, rawData, context)
+        } else {
+          await (config.beforeSeed as StaticBeforeSeed)(this.client, rawData)
+        }
       }
+
+      let insertedIds: number[] = []
 
       // Use batch processing for large datasets
       if (rawData.length > 1000) {
-        await this.insertOrSkipBatch(table, rawData, conflictColumn)
+        insertedIds = await this.insertOrSkipBatch(
+          config.table,
+          rawData,
+          config.conflictColumn,
+        )
       } else {
-        await this.insertOrSkip(table, rawData, conflictColumn)
+        insertedIds = await this.insertOrSkip(
+          config.table,
+          rawData,
+          config.conflictColumn,
+        )
       }
 
-      if (afterSeed) {
-        // Run afterSeed logic
-        await afterSeed(this.client)
+      if (config.afterSeed) {
+        if (context) {
+          await config.afterSeed(this.client, context, insertedIds)
+        } else {
+          await (config.afterSeed as StaticAfterSeed)(this.client)
+        }
       }
 
       await this.client.query('COMMIT')
     } catch (error) {
       await this.client.query('ROLLBACK')
-      console.error(`Seeding failed for ${table}: `, (error as Error).message)
-      throw error
-    }
-  }
-
-  private validateSeedConfig(config: unknown): SeedConfig {
-    try {
-      return SeedConfigSchema.parse(config)
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        error.issues.forEach((issue, i) => {
-          const path = issue.path.length > 0 ? issue.path.join('.') : 'root'
-          console.error(`${i + 1}. ${path}: ${issue.message}`)
-
-          if (issue.code === 'custom' && 'params' in issue) {
-            console.error(`Details: ${JSON.stringify(issue.params)}`)
-          }
-        })
-      }
-      throw new Error(
-        `SeedConfig validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      console.error(
+        `Seeding failed for ${config.table}: `,
+        (error as Error).message,
       )
+      throw error
     }
   }
 }

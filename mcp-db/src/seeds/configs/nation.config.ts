@@ -1,44 +1,48 @@
 import { Client } from 'pg'
-import { SeedConfig } from '../../schema/seed-config.schema.js'
-import { transformApiGeographyData } from '../../schema/geography.schema.js'
 
-export const NationConfig: SeedConfig = {
-  url: 'https://api.census.gov/data/2023/geoinfo?get=NAME,SUMLEVEL,GEO_ID,INTPTLAT,INTPTLON&for=us:*',
+import {
+  GeographySeedConfig,
+  GeographyContext,
+} from '../../schema/seed-config.schema.js'
+import { transformApiGeographyData } from '../../schema/geography.schema.js'
+import { createGeographyYear } from '../../helpers/geography-years.helper.js'
+
+export const NationConfig: GeographySeedConfig = {
+  url: (context: GeographyContext) =>
+    `https://api.census.gov/data/${context.year}/geoinfo?get=NAME,SUMLEVEL,GEO_ID,INTPTLAT,INTPTLON&for=us:*`,
   table: 'geographies',
   conflictColumn: 'ucgid_code',
-  beforeSeed: (client: Client, rawData: unknown[]): void => {
-    console.log('Processing nation geography data...')
+  beforeSeed: (
+    client: Client,
+    rawData: unknown[],
+    context: GeographyContext,
+  ): void => {
+    console.log(`Processing nation geography data for ${context.year}...`)
 
-    // Use the reusable transformation function from geography.schema.ts
     const transformedData = transformApiGeographyData(rawData, 'nation')
-
-    console.log(transformedData)
-
-    // Add geography-specific query parameters for individual records
     transformedData.forEach((record) => {
-      // For nation, there's only one record and it should always use us:*
       record.for_param = 'us:*'
       record.in_param = null
     })
 
-    // Replace raw data with transformed data for insertion
+    // Store nation data in context for potential use by child geographies
+    context.parentGeographies = context.parentGeographies || {}
+    context.parentGeographies.nation = transformedData
+
     rawData.length = 0
     rawData.push(...transformedData)
-
-    console.log(`✓ Processed ${transformedData.length} nation records`)
   },
-  afterSeed: async (client: Client): Promise<void> => {
-    const result = await client.query(`
-      SELECT name, for_param, summary_level_code, ucgid_code 
-      FROM geographies 
-      WHERE summary_level_code = '010'
-    `)
-    console.log(`✓ Seeded ${result.rows.length} nation record(s)`)
-    if (result.rows.length > 0) {
-      const nation = result.rows[0]
-      console.log(
-        `  ${nation.name} (${nation.ucgid_code}) -> ${nation.for_param}`,
-      )
+  afterSeed: async (
+    client: Client,
+    context: GeographyContext,
+    insertedIds: number[],
+  ): Promise<void> => {
+    for (const geography_id of insertedIds) {
+      await createGeographyYear(client, geography_id, context.year_id)
     }
+
+    console.log(
+      `Seeded ${insertedIds.length} nation record(s) for ${context.year}`,
+    )
   },
 }

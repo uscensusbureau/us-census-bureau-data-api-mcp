@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 // Column mappings from Census API fields to database columns
-export const GeographyMappings = {
+export const GeographyMappings: Record<string, keyof GeographyRecord> = {
   NAME: 'name',
   GEO_ID: 'ucgid_code',
   SUMLEVEL: 'summary_level_code',
@@ -78,11 +78,36 @@ export const SummaryLevels = {
   },
 } as const
 
+export const GeographyRecordSchema = z.object({
+  name: z.string(),
+  for_param: z.string(),
+  summary_level_code: z.string().optional(),
+  ucgid_code: z.string().optional(),
+  in_param: z.string().nullable(),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
+  state_code: z.string().optional(),
+  county_code: z.string().optional(),
+  created_at: z.string().optional(),
+  updated_at: z.string().optional(),
+})
+
+export type GeographyRecord = z.infer<typeof GeographyRecordSchema>
+
+export const ParentGeographiesSchema = z.object({
+  nation: z.array(GeographyRecordSchema).optional(),
+  states: z.array(GeographyRecordSchema).optional(),
+  counties: z.array(GeographyRecordSchema).optional(),
+  places: z.array(GeographyRecordSchema).optional(),
+})
+
+export type ParentGeographies = z.infer<typeof ParentGeographiesSchema>
+
 // Main transformation function for Census API data
 export function transformApiGeographyData(
   rawData: unknown[],
   summaryLevel: keyof typeof SummaryLevels,
-): Record<string, unknown>[] {
+): GeographyRecord[] {
   console.log(`Transforming ${summaryLevel} data from Census API...`)
 
   // Validate raw API response format
@@ -120,14 +145,12 @@ export function transformApiGeographyData(
       )
     }
 
-    const record: Record<string, unknown> = {}
+    const record: Record<string, string | number | null> = {}
 
     // Map standard fields by header name (order-independent)
     headers.forEach((header, columnIndex) => {
       // Type-safe check for mapped headers
-      const dbColumn = isGeographyMappingKey(header)
-        ? GeographyMappings[header]
-        : undefined
+      const dbColumn = GeographyMappings[header]
 
       if (!dbColumn) {
         // Skip unmapped headers (like 'us', 'state', etc. from geography filters)
@@ -144,17 +167,18 @@ export function transformApiGeographyData(
             `Row ${index + 1}: Invalid number for ${header}: "${row[columnIndex]}"`,
           )
         }
-      }
-      // SUMLEVEL, NAME, GEO_ID, STATE, COUNTY stay as strings
 
-      record[dbColumn] = value
+        record[dbColumn] = parseFloat(value as string)
+      } else {
+        record[dbColumn] = value as string
+      }
     })
 
     // Add standard timestamps
     record.created_at = new Date().toISOString()
     record.updated_at = new Date().toISOString()
 
-    return record
+    return record as GeographyRecord
   })
 
   // Create and validate against dynamic schema
@@ -165,7 +189,7 @@ export function transformApiGeographyData(
     console.log(
       `✓ Successfully validated ${validatedData.length} ${summaryLevel} records`,
     )
-    return validatedData
+    return validatedData as GeographyRecord[]
   } catch (error) {
     if (error instanceof z.ZodError) {
       console.error(`${summaryLevel} validation failed:`)

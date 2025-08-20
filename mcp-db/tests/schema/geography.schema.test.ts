@@ -2,7 +2,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
   GeographyMappings,
+  GeographyRecordSchema,
   GeographyValueValidators,
+  ParentGeographiesSchema,
   SummaryLevels,
   transformApiGeographyData,
 } from '../../src/schema/geography.schema'
@@ -31,6 +33,43 @@ describe('Geography Schema', () => {
         INTPTLAT: 'latitude',
         INTPTLON: 'longitude',
       })
+    })
+  })
+
+  describe('GeographyRecordSchema', () => {
+    it('validates a complete record', () => {
+      const geoRecord = {
+        name: 'Alabama',
+        ucgid_code: '0400000US01',
+        geo_id: '0400000US01',
+        summary_level_code: '040',
+        for_param: 'state:01',
+        in_param: null,
+        year: 2023,
+        intptlat: 32.31823,
+        intptlon: -86.902298,
+      }
+
+      const result = GeographyRecordSchema.safeParse(geoRecord)
+
+      expect(result.success).toBe(true)
+    })
+
+    it('invalidates an incomplete record', () => {
+      const geoRecord = {
+        name: 'Alabama',
+        ucgid_code: '0400000US01',
+        geo_id: '0400000US01',
+        summary_level_code: '040',
+        for_param: null, // Not nullable
+        in_param: null,
+        year: 2023,
+        intptlat: 32.31823,
+        intptlon: -86.902298,
+      }
+
+      const result = GeographyRecordSchema.safeParse(geoRecord)
+      expect(result.success).toBe(false)
     })
   })
 
@@ -86,6 +125,36 @@ describe('Geography Schema', () => {
       expect(GeographyValueValidators.INTPTLON.safeParse(181).success).toBe(
         false,
       )
+    })
+  })
+  describe('ParentGeographiesSchema', () => {
+    const validGeo = {
+      name: 'Test Geography',
+      ucgid_code: '0400000US01',
+      geo_id: '0400000US01',
+      summary_level_code: '040',
+      for_param: 'state:*',
+      in_param: null,
+      year: 2023,
+    }
+
+    it('should validate complete parent geographies structure', () => {
+      const parentGeos = {
+        nation: [{ ...validGeo, name: 'United States' }],
+        states: [validGeo],
+        counties: [{ ...validGeo, name: 'Test County' }],
+        places: [{ ...validGeo, name: 'Test City' }],
+      }
+
+      const result = ParentGeographiesSchema.safeParse(parentGeos)
+      expect(result.success).toBe(true)
+    })
+
+    it('should allow all properties to be optional', () => {
+      const parentGeos = {}
+
+      const result = ParentGeographiesSchema.safeParse(parentGeos)
+      expect(result.success).toBe(true)
     })
   })
 

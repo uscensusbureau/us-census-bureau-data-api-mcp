@@ -15,14 +15,21 @@ import { fileURLToPath } from 'url'
 
 import { dbConfig } from '../../helpers/database-config'
 import { GeographyLevel } from '../../../src/schema/geography-level.schema'
-import { SeedConfig } from '../../../src/schema/seed-config.schema.js'
+import {
+  SeedConfig,
+  GeographySeedConfig,
+  GeographyContext,
+} from '../../../src/schema/seed-config.schema.js'
 import { SeedRunner } from '../../../src/seeds/scripts/seed-runner'
 import { SummaryLevelsConfig } from '../../../src/seeds/configs/summary-levels.config'
 import { YearsConfig } from '../../../src/seeds/configs/years.config'
+import { NationConfig } from '../../../src/seeds/configs/nation.config'
 import {
   runSeedsWithRunner,
   runSeeds,
+  runGeographySeeds,
   seeds,
+  geographySeeds,
 } from '../../../src/seeds/scripts/seed-database'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -38,13 +45,84 @@ interface GeographyLevelRow extends GeographyLevel {
 interface MockRunner {
   connect: vi.Mock<[], Promise<void>>
   disconnect: vi.Mock<[], Promise<void>>
-  seed: vi.Mock<[SeedConfig]>
+  seed: vi.Mock<[SeedConfig] | [GeographySeedConfig, GeographyContext]>
+  getAvailableYears: vi.Mock<[], Promise<{ id: number; year: number }[]>>
 }
 
-async function createSeedRunnerSpy(mockRunner: MockRunner) {
-  return vi
+function createMockRunner(overrides: Partial<MockRunner> = {}): MockRunner {
+  return {
+    connect: vi.fn().mockResolvedValue(void 0),
+    disconnect: vi.fn().mockResolvedValue(void 0),
+    seed: vi.fn().mockResolvedValue(void 0),
+    getAvailableYears: vi.fn().mockResolvedValue([
+      { year: 2020, id: 1 },
+      { year: 2023, id: 2 },
+    ]),
+    ...overrides,
+  }
+}
+
+async function setupMockSeedRunner(
+  mockRunner: MockRunner = createMockRunner(),
+) {
+  const SeedRunnerSpy = vi
     .spyOn(await import('../../../src/seeds/scripts/seed-runner'), 'SeedRunner')
     .mockImplementation(() => mockRunner as MockRunner)
+
+  return {
+    mockRunner,
+    SeedRunnerSpy,
+    mockRunnerInstance:
+      new (SeedRunnerSpy as typeof SeedRunner)() as SeedRunner,
+  }
+}
+
+class MockRunnerManager {
+  public mockRunner: MockRunner
+  public SeedRunnerSpy: vi.SpyInstance
+  public mockRunnerInstance: SeedRunner
+
+  constructor(overrides: Partial<MockRunner> = {}) {
+    this.mockRunner = createMockRunner(overrides)
+  }
+
+  async setup() {
+    const result = await setupMockSeedRunner(this.mockRunner)
+    this.SeedRunnerSpy = result.SeedRunnerSpy
+    this.mockRunnerInstance = result.mockRunnerInstance
+    return this
+  }
+
+  cleanup() {
+    if (this.SeedRunnerSpy) {
+      this.SeedRunnerSpy.mockRestore()
+    }
+  }
+
+  withConnectionError(error = new Error('Connection failed')) {
+    this.mockRunner.connect.mockRejectedValue(error)
+    return this
+  }
+
+  withSeedError(error = new Error('Seeding failed')) {
+    this.mockRunner.seed.mockRejectedValue(error)
+    return this
+  }
+
+  withYearsError(error = new Error('Database query failed')) {
+    this.mockRunner.getAvailableYears.mockRejectedValue(error)
+    return this
+  }
+
+  withEmptyYears() {
+    this.mockRunner.getAvailableYears.mockResolvedValue([])
+    return this
+  }
+
+  withCustomYears(years: Array<{ year: number; id: number }>) {
+    this.mockRunner.getAvailableYears.mockResolvedValue(years)
+    return this
+  }
 }
 
 describe('Seed Database', () => {
@@ -54,11 +132,8 @@ describe('Seed Database', () => {
   let client: Client
 
   beforeAll(async () => {
-    // Initialize client once for the entire test suite
     client = new Client(dbConfig)
     await client.connect()
-
-    // Construct database URL for SeedRunner
 
     await client.query(`
       CREATE TABLE IF NOT EXISTS ${testTableName} (
@@ -83,7 +158,6 @@ describe('Seed Database', () => {
   })
 
   beforeEach(async () => {
-    // Create test fixtures directory
     const fixturesPath = path.join(__dirname, 'fixtures')
     try {
       await fs.mkdir(fixturesPath, { recursive: true })
@@ -94,21 +168,19 @@ describe('Seed Database', () => {
     runner = new SeedRunner(databaseUrl, fixturesPath)
     await runner.connect()
 
-    // Clean up summary_levels table before each test and handle deadlocks gracefully
     const cleanupWithRetry = async (maxRetries = 3) => {
       for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
           await client.query(
             `TRUNCATE TABLE ${testTableName} RESTART IDENTITY CASCADE`,
           )
-          return // Success
+          return
         } catch (error: unknown) {
           if (error.code === '40P01' && attempt < maxRetries) {
-            // Deadlock detected
             console.log(`Deadlock detected on attempt ${attempt}, retrying...`)
-            await new Promise((resolve) => setTimeout(resolve, attempt * 100)) // Exponential backoff
+            await new Promise((resolve) => setTimeout(resolve, attempt * 100))
           } else {
-            throw error // Re-throw if not a deadlock or max retries exceeded
+            throw error
           }
         }
       }
@@ -147,31 +219,26 @@ describe('Seed Database', () => {
       it('should run all seeds when no seed name provided', async () => {
         process.argv = ['node', 'seed-database.js']
 
-        const { main, seeds } = await import(
+        const { main } = await import(
           '../../../src/seeds/scripts/seed-database'
         )
         await main(runSeedsMock)
 
         expect(runSeedsMock).toHaveBeenCalledTimes(1)
-        expect(runSeedsMock).toHaveBeenCalledWith(
-          expect.any(String), // DATABASE_URL
-          seeds,
-          undefined,
-        )
+        expect(runSeedsMock).toHaveBeenCalledWith(expect.any(String), undefined)
         expect(processExitSpy).not.toHaveBeenCalled()
       })
 
       it('should run specific seed when seed name provided', async () => {
         process.argv = ['node', 'seed-database.js', 'summary_levels.json']
 
-        const { main, seeds } = await import(
+        const { main } = await import(
           '../../../src/seeds/scripts/seed-database'
         )
         await main(runSeedsMock)
 
         expect(runSeedsMock).toHaveBeenCalledWith(
           expect.any(String),
-          seeds,
           'summary_levels.json',
         )
         expect(processExitSpy).not.toHaveBeenCalled()
@@ -225,141 +292,72 @@ describe('Seed Database', () => {
   })
 
   describe('seeds', () => {
-    it('includes all configs', async () => {
+    it('includes all configs', () => {
       expect(seeds).toHaveLength(2)
       expect(seeds).toContain(SummaryLevelsConfig)
       expect(seeds).toContain(YearsConfig)
     })
   })
 
+  describe('geographySeeds', () => {
+    it('includes geography configs', () => {
+      expect(geographySeeds).toHaveLength(1)
+      expect(geographySeeds).toContain(NationConfig)
+    })
+  })
+
   describe('runSeeds', () => {
     it('should create and manage SeedRunner instance', async () => {
-      // Mock SeedRunner to avoid database issues
-      const mockRunner = {
-        connect: vi.fn().mockResolvedValue(void 0),
-        disconnect: vi.fn().mockResolvedValue(void 0),
-        seed: vi.fn().mockResolvedValue(void 0),
-      }
-
-      // Mock the SeedRunner constructor
-      const SeedRunnerSpy = await createSeedRunnerSpy(mockRunner)
-
-      const customSeedConfigs = [
-        {
-          file: 'summary_levels.json',
-          table: testTableName,
-          dataPath: 'summary_levels',
-          conflictColumn: 'code',
-        },
-      ]
+      const { mockRunner, SeedRunnerSpy } = await setupMockSeedRunner()
 
       try {
-        await runSeeds(databaseUrl, customSeedConfigs)
+        await runSeeds(databaseUrl)
 
-        // Verify SeedRunner was created with correct parameters
         expect(SeedRunnerSpy).toHaveBeenCalledWith(databaseUrl)
-
-        // Verify the runner lifecycle
         expect(mockRunner.connect).toHaveBeenCalledOnce()
         expect(mockRunner.disconnect).toHaveBeenCalledOnce()
 
-        // Verify seed was called with the config
-        expect(mockRunner.seed).toHaveBeenCalledWith(customSeedConfigs[0])
+        // [ 2 Static Configs (Year, Summary Levels) ] + [ 2 Years x 1 Summary Level] = 4
+        expect(mockRunner.seed).toHaveBeenCalledTimes(4)
       } finally {
         SeedRunnerSpy.mockRestore()
       }
     })
 
     it('should handle database connection errors', async () => {
-      const mockRunner = {
-        connect: vi.fn().mockRejectedValue(new Error('Connection failed')),
-        disconnect: vi.fn().mockResolvedValue(void 0),
-      }
-
-      const SeedRunnerSpy = await createSeedRunnerSpy(mockRunner)
-
-      const customSeedConfigs = [
-        {
-          file: 'summary_levels.json',
-          table: testTableName,
-          dataPath: 'summary_levels',
-          conflictColumn: 'code',
-        },
-      ]
+      const manager = await new MockRunnerManager()
+        .withConnectionError()
+        .setup()
 
       try {
-        await expect(runSeeds('bad://url', customSeedConfigs)).rejects.toThrow(
-          'Connection failed',
-        )
-
-        // Verify cleanup was attempted even after error
-        expect(mockRunner.disconnect).toHaveBeenCalledOnce()
+        await expect(runSeeds('bad://url')).rejects.toThrow('Connection failed')
+        expect(manager.mockRunner.disconnect).not.toHaveBeenCalled()
       } finally {
-        SeedRunnerSpy.mockRestore()
-      }
-    })
-
-    it('should pass through seed filtering to runSeedsWithRunner', async () => {
-      const mockRunner = {
-        connect: vi.fn().mockResolvedValue(void 0),
-        disconnect: vi.fn().mockResolvedValue(void 0),
-        seed: vi.fn().mockResolvedValue(void 0),
-      }
-
-      const SeedRunnerSpy = await createSeedRunnerSpy(mockRunner)
-
-      const customSeedConfigs = [
-        {
-          file: 'summary_levels.json',
-          table: testTableName,
-          dataPath: 'summary_levels',
-          conflictColumn: 'code',
-        },
-        {
-          file: 'other_levels.json',
-          table: testTableName,
-          dataPath: 'summary_levels',
-          conflictColumn: 'code',
-        },
-      ]
-
-      try {
-        // Run only the specific seed
-        await runSeeds(databaseUrl, customSeedConfigs, 'summary_levels.json')
-
-        // Should only call seed once with the filtered config
-        expect(mockRunner.seed).toHaveBeenCalledOnce()
-        expect(mockRunner.seed).toHaveBeenCalledWith(customSeedConfigs[0])
-      } finally {
-        SeedRunnerSpy.mockRestore()
+        manager.cleanup()
       }
     })
 
     it('should handle error during seeding and still cleanup', async () => {
-      const mockRunner = {
-        connect: vi.fn().mockResolvedValue(void 0),
-        disconnect: vi.fn().mockResolvedValue(void 0),
-        seed: vi.fn().mockRejectedValue(new Error('Seeding failed')),
-      }
-
-      const SeedRunnerSpy = await createSeedRunnerSpy(mockRunner)
-
-      const customSeedConfigs = [
-        {
-          file: 'summary_levels.json',
-          table: testTableName,
-          dataPath: 'summary_levels',
-          conflictColumn: 'code',
-        },
-      ]
+      const manager = await new MockRunnerManager().withSeedError().setup()
 
       try {
-        await expect(runSeeds(databaseUrl, customSeedConfigs)).rejects.toThrow(
-          'Seeding failed',
-        )
+        await expect(runSeeds(databaseUrl)).rejects.toThrow('Seeding failed')
+        expect(manager.mockRunner.disconnect).toHaveBeenCalledOnce()
+      } finally {
+        manager.cleanup()
+      }
+    })
 
-        // Verify cleanup was attempted even after seeding error
-        expect(mockRunner.disconnect).toHaveBeenCalledOnce()
+    it('should skip geography seeds when targetSeedName provided', async () => {
+      const { mockRunner, SeedRunnerSpy } = await setupMockSeedRunner()
+
+      try {
+        await runSeeds(databaseUrl, 'summary_levels.json')
+
+        // Should only call seed once for the targeted file
+        expect(mockRunner.seed).toHaveBeenCalledTimes(1)
+        // Should not call getAvailableYears for geography seeding
+        expect(mockRunner.getAvailableYears).not.toHaveBeenCalled()
       } finally {
         SeedRunnerSpy.mockRestore()
       }
@@ -367,8 +365,60 @@ describe('Seed Database', () => {
   })
 
   describe('runSeedsWithRunner', () => {
+    it('should run static seed configs', async () => {
+      const { mockRunner, SeedRunnerSpy, mockRunnerInstance } =
+        await setupMockSeedRunner()
+
+      try {
+        await runSeedsWithRunner(mockRunnerInstance)
+
+        expect(mockRunner.seed).toHaveBeenCalledTimes(2)
+        expect(mockRunner.seed).toHaveBeenCalledWith(
+          expect.objectContaining({
+            file: 'summary_levels.json',
+          }),
+        )
+        expect(mockRunner.seed).toHaveBeenCalledWith(
+          expect.objectContaining({
+            file: 'years.json',
+          }),
+        )
+      } finally {
+        SeedRunnerSpy.mockRestore()
+      }
+    })
+
+    it('should filter seeds by target name', async () => {
+      const { mockRunner, SeedRunnerSpy, mockRunnerInstance } =
+        await setupMockSeedRunner()
+
+      try {
+        await runSeedsWithRunner(mockRunnerInstance, 'summary_levels.json')
+
+        expect(mockRunner.seed).toHaveBeenCalledTimes(1)
+        expect(mockRunner.seed).toHaveBeenCalledWith(
+          expect.objectContaining({
+            file: 'summary_levels.json',
+          }),
+        )
+      } finally {
+        SeedRunnerSpy.mockRestore()
+      }
+    })
+
+    it('should throw error for non-existent seed file', async () => {
+      const { SeedRunnerSpy, mockRunnerInstance } = await setupMockSeedRunner()
+
+      try {
+        await expect(
+          runSeedsWithRunner(mockRunnerInstance, 'non_existent.json'),
+        ).rejects.toThrow('Seed file "non_existent.json" not found')
+      } finally {
+        SeedRunnerSpy.mockRestore()
+      }
+    })
+
     it('should run the complete seeding process with provided runner', async () => {
-      // Create the expected summary_levels.json file
       const testGeographyData = {
         summary_levels: [
           {
@@ -392,201 +442,264 @@ describe('Seed Database', () => {
         ],
       }
 
-      const filePath = path.join(__dirname, 'fixtures', 'summary_levels.json')
-      await fs.writeFile(filePath, JSON.stringify(testGeographyData))
-
-      // Create a custom seed config that points to our fixtures directory
-      const testSeedConfigs = [
+      const testConfigs: SeedConfig[] = [
         {
           file: 'summary_levels.json',
           table: testTableName,
           dataPath: 'summary_levels',
           conflictColumn: 'code',
-          beforeSeed: async (
-            client: Client,
-            rawData: unknown[],
-          ): Promise<void> => {
-            console.log(`Not required for this test: ${client}, ${rawData}`)
-          },
-          afterSeed: async (client: Client): Promise<void> => {
-            await client.query(`
-              UPDATE ${testTableName}
-              SET parent_summary_level_id = (
-                SELECT id FROM ${testTableName} parent 
-                WHERE parent.code = ${testTableName}.parent_summary_level
-              )
-              WHERE parent_summary_level IS NOT NULL;
-            `)
-          },
         },
       ]
 
-      // Test the orchestration logic using the existing runner
-      await runSeedsWithRunner(runner, testSeedConfigs)
+      const filePath = path.join(__dirname, 'fixtures', 'summary_levels.json')
+      await fs.writeFile(filePath, JSON.stringify(testGeographyData))
 
-      // Verify the results
+      await runSeedsWithRunner(runner, 'summary_levels.json', testConfigs)
+
       const result = await client.query<GeographyLevelRow>(
         `SELECT * FROM ${testTableName} ORDER BY code`,
       )
       expect(result.rows).toHaveLength(2)
 
       const nation = result.rows.find((row) => row.code === '010')
-      const state = result.rows.find((row) => row.code === '040')
 
       expect(nation?.name).toBe('Nation')
-      expect(state?.parent_summary_level_id).toBe(nation?.id)
+    })
+  })
+
+  describe('runGeographySeeds', () => {
+    let mockRunnerManager: MockRunnerManager
+
+    beforeEach(async () => {
+      mockRunnerManager = await new MockRunnerManager().setup()
     })
 
-    it('should handle specific seed file targeting', async () => {
-      // Create multiple seed files
-      const geographyData = {
-        summary_levels: [
-          {
-            name: 'Nation',
-            description: 'United States total',
-            get_variable: 'NATION',
-            query_name: 'us',
-            on_spine: true,
-            code: '010',
-            parent_summary_level: null,
-          },
-        ],
-      }
-
-      const otherData = {
-        summary_levels: [
-          {
-            name: 'State',
-            description: 'States',
-            get_variable: 'STATE',
-            query_name: 'state',
-            on_spine: true,
-            code: '040',
-            parent_summary_level: null,
-          },
-        ],
-      }
-
-      await fs.writeFile(
-        path.join(__dirname, 'fixtures', 'summary_levels.json'),
-        JSON.stringify(geographyData),
-      )
-
-      await fs.writeFile(
-        path.join(__dirname, 'fixtures', 'other_levels.json'),
-        JSON.stringify(otherData),
-      )
-
-      const testSeedConfigs = [
-        {
-          file: 'summary_levels.json',
-          table: testTableName,
-          dataPath: 'summary_levels',
-          conflictColumn: 'code',
-        },
-        {
-          file: 'other_levels.json',
-          table: testTableName,
-          dataPath: 'summary_levels',
-          conflictColumn: 'code',
-        },
-      ]
-
-      // Test seed filtering logic using the existing runner
-      await runSeedsWithRunner(runner, testSeedConfigs, 'summary_levels.json')
-
-      // Should only have the data from summary_levels.json
-      const result = await client.query<GeographyLevelRow>(
-        `SELECT * FROM ${testTableName}`,
-      )
-      expect(result.rows).toHaveLength(1)
-      expect(result.rows[0].name).toBe('Nation')
+    afterEach(() => {
+      mockRunnerManager.cleanup()
     })
 
-    it('should throw error for non-existent seed file', async () => {
-      const testSeedConfigs = [
+    it('should fetch available years and run seeds for each year', async () => {
+      await runGeographySeeds(mockRunnerManager.mockRunnerInstance)
+
+      expect(
+        mockRunnerManager.mockRunner.getAvailableYears,
+      ).toHaveBeenCalledOnce()
+      // Should call seed for each year * each geography config (2 years * 1 config = 2)
+      expect(mockRunnerManager.mockRunner.seed).toHaveBeenCalledTimes(2)
+
+      const seedCalls = mockRunnerManager.mockRunner.seed.mock.calls
+      expect(seedCalls[0]).toEqual([
+        expect.objectContaining({ table: 'geographies' }),
+        expect.objectContaining({ year: 2020, year_id: 1 }),
+      ])
+      expect(seedCalls[1]).toEqual([
+        expect.objectContaining({ table: 'geographies' }),
+        expect.objectContaining({ year: 2023, year_id: 2 }),
+      ])
+    })
+
+    it('should handle empty years array', async () => {
+      mockRunnerManager.withEmptyYears()
+
+      await runGeographySeeds(mockRunnerManager.mockRunnerInstance)
+
+      expect(
+        mockRunnerManager.mockRunner.getAvailableYears,
+      ).toHaveBeenCalledOnce()
+      expect(mockRunnerManager.mockRunner.seed).not.toHaveBeenCalled()
+    })
+
+    it('should handle errors from getAvailableYears', async () => {
+      mockRunnerManager.withYearsError()
+
+      await expect(
+        runGeographySeeds(mockRunnerManager.mockRunnerInstance),
+      ).rejects.toThrow('Database query failed')
+
+      expect(
+        mockRunnerManager.mockRunner.getAvailableYears,
+      ).toHaveBeenCalledOnce()
+      expect(mockRunnerManager.mockRunner.seed).not.toHaveBeenCalled()
+    })
+
+    it('should handle errors during individual seed operations', async () => {
+      mockRunnerManager.mockRunner.seed
+        .mockResolvedValueOnce(void 0)
+        .mockRejectedValueOnce(new Error('Seed failed'))
+
+      const testSeedConfigs: GeographySeedConfig[] = [
         {
-          file: 'summary_levels.json',
-          table: testTableName,
-          dataPath: 'summary_levels',
-          conflictColumn: 'code',
+          url: (context: GeographyContext) =>
+            `https://api.census.gov/data/${context.year}/config1`,
+          table: 'geographies',
+          conflictColumn: 'ucgid_code',
+          beforeSeed: vi.fn(),
+          afterSeed: vi.fn(),
+        },
+        {
+          url: (context: GeographyContext) =>
+            `https://api.census.gov/data/${context.year}/config2`,
+          table: 'geographies',
+          conflictColumn: 'ucgid_code',
+          beforeSeed: vi.fn(),
+          afterSeed: vi.fn(),
         },
       ]
 
       await expect(
-        runSeedsWithRunner(runner, testSeedConfigs, 'non_existent.json'),
-      ).rejects.toThrow('Seed file "non_existent.json" not found')
+        runGeographySeeds(
+          mockRunnerManager.mockRunnerInstance,
+          testSeedConfigs,
+        ),
+      ).rejects.toThrow('Seed failed')
+
+      expect(
+        mockRunnerManager.mockRunner.getAvailableYears,
+      ).toHaveBeenCalledOnce()
+      expect(mockRunnerManager.mockRunner.seed).toHaveBeenCalledTimes(2)
+    })
+  })
+
+  describe('validation functions', () => {
+    it('should handle validation errors in runGeographySeeds', async () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+      // Create configs that will definitely fail Zod validation
+      const invalidConfigs = [
+        {
+          table: 'geographies',
+          conflictColumn: 'ucgid_code',
+          url: 'not-a-function', // Wrong type - should be function for geography
+          beforeSeed: 'not-a-function', // Wrong type
+          afterSeed: 'not-a-function', // Wrong type
+          extraField: 'should-fail-strict-validation',
+        },
+      ] as unknown[] // Use any instead of type assertion
+
+      const { mockRunnerInstance } = await setupMockSeedRunner()
+
+      await expect(
+        runGeographySeeds(
+          mockRunnerInstance,
+          invalidConfigs as GeographySeedConfig[],
+        ),
+      ).rejects.toThrow('GeographySeedConfig validation failed')
+
+      expect(consoleSpy).toHaveBeenCalled()
+
+      consoleSpy.mockRestore()
     })
 
-    it('should process multiple seeds sequentially', async () => {
-      // Create multiple seed files with different data
-      const firstSeedData = {
-        summary_levels: [
-          {
-            name: 'Nation',
-            description: 'United States total',
-            get_variable: 'NATION',
-            query_name: 'us',
-            on_spine: true,
-            code: '010',
-            parent_summary_level: null,
-          },
-        ],
-      }
+    describe('validateSeedConfig', () => {
+      it('should handle Zod validation errors with detailed output', async () => {
+        const consoleSpy = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
 
-      const secondSeedData = {
-        summary_levels: [
-          {
-            name: 'State',
-            description: 'States and State equivalents',
-            get_variable: 'STATE',
-            query_name: 'state',
-            on_spine: true,
-            code: '040',
-            parent_summary_level: '010',
-          },
-        ],
-      }
+        // Create config that will fail Zod schema validation
+        const invalidConfig = {
+          // Missing required table and conflictColumn
+          file: 'test.json',
+          extraField: 'should-fail-validation',
+          table: 123, // Wrong type - should be string
+          conflictColumn: null, // Wrong type - should be string
+        } as unknown
 
-      await fs.writeFile(
-        path.join(__dirname, 'fixtures', 'first_seed.json'),
-        JSON.stringify(firstSeedData),
-      )
+        const { mockRunnerInstance } = await setupMockSeedRunner()
 
-      await fs.writeFile(
-        path.join(__dirname, 'fixtures', 'second_seed.json'),
-        JSON.stringify(secondSeedData),
-      )
+        await expect(
+          runSeedsWithRunner(mockRunnerInstance, undefined, [invalidConfig]),
+        ).rejects.toThrow('SeedConfig validation failed')
 
-      const testSeedConfigs = [
-        {
-          file: 'first_seed.json',
-          table: testTableName,
-          dataPath: 'summary_levels',
-          conflictColumn: 'code',
-        },
-        {
-          file: 'second_seed.json',
-          table: testTableName,
-          dataPath: 'summary_levels',
-          conflictColumn: 'code',
-        },
-      ]
+        // Verify error logging occurred
+        expect(consoleSpy).toHaveBeenCalledWith('SeedConfig validation failed:')
+        expect(consoleSpy).toHaveBeenCalledWith(
+          expect.stringContaining('table'),
+        )
+        expect(consoleSpy).toHaveBeenCalledWith(
+          expect.stringContaining('conflictColumn'),
+        )
 
-      // Run all seeds
-      await runSeedsWithRunner(runner, testSeedConfigs)
+        consoleSpy.mockRestore()
+      })
 
-      // Should have data from both seeds
-      const result = await client.query<GeographyLevelRow>(
-        `SELECT * FROM ${testTableName} ORDER BY code`,
-      )
-      expect(result.rows).toHaveLength(2)
+      it('should handle constraint validation errors (no file or url)', async () => {
+        const consoleSpy = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
 
-      const nation = result.rows.find((row) => row.code === '010')
-      const state = result.rows.find((row) => row.code === '040')
+        // Create config that passes Zod but fails constraint validation
+        const invalidConfig: SeedConfig = {
+          table: 'test_table',
+          conflictColumn: 'id',
+          // Missing both file and url - should fail validateSeedConfigConstraints
+        }
 
-      expect(nation?.name).toBe('Nation')
-      expect(state?.name).toBe('State')
+        const { mockRunnerInstance } = await setupMockSeedRunner()
+
+        await expect(
+          runSeedsWithRunner(mockRunnerInstance, undefined, [invalidConfig]),
+        ).rejects.toThrow("Either 'file' or 'url' must be provided")
+
+        consoleSpy.mockRestore()
+      })
+
+      it('should handle constraint validation errors (both file and url)', async () => {
+        const consoleSpy = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
+
+        // Create config that passes Zod but fails constraint validation
+        const invalidConfig: SeedConfig = {
+          file: 'test.json',
+          url: 'https://api.example.com/data',
+          table: 'test_table',
+          conflictColumn: 'id',
+          // Both file and url present - should fail validateSeedConfigConstraints
+        }
+
+        const { mockRunnerInstance } = await setupMockSeedRunner()
+
+        await expect(
+          runSeedsWithRunner(mockRunnerInstance, undefined, [invalidConfig]),
+        ).rejects.toThrow("Cannot specify both 'file' and 'url'")
+
+        consoleSpy.mockRestore()
+      })
+
+      it('should handle non-Zod errors', async () => {
+        const consoleSpy = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
+
+        // Spy on the function first, then mock its implementation
+        const validateSpy = vi
+          .spyOn(
+            await import('../../../src/schema/seed-config.schema'),
+            'validateSeedConfigConstraints',
+          )
+          .mockImplementation(() => {
+            throw new Error('Custom constraint error')
+          })
+
+        const validConfig: SeedConfig = {
+          file: 'test.json',
+          table: 'test_table',
+          conflictColumn: 'id',
+        }
+
+        const { mockRunnerInstance } = await setupMockSeedRunner()
+
+        await expect(
+          runSeedsWithRunner(mockRunnerInstance, undefined, [validConfig]),
+        ).rejects.toThrow(
+          'SeedConfig validation failed: Custom constraint error',
+        )
+
+        // Restore the spy
+        validateSpy.mockRestore()
+        consoleSpy.mockRestore()
+      })
     })
   })
 })

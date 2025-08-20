@@ -13,14 +13,24 @@ import fs from 'fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-vi.mock('../../../src/schema/geography.schema', () => ({
-  transformApiGeographyData: vi.fn(),
+vi.mock('../../../src/schema/geography.schema', async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    transformApiGeographyData: vi.fn(),
+  }
+})
+
+vi.mock('../../../src/helpers/geography-years.helper', async () => ({
+  createGeographyYear: vi.fn(),
 }))
 
 import { dbConfig } from '../../helpers/database-config'
 import { NationConfig } from '../../../src/seeds/configs/nation.config'
 import { SeedRunner } from '../../../src/seeds/scripts/seed-runner'
+import { GeographyContext } from '../../../src/schema/seed-config'
 import { transformApiGeographyData } from '../../../src/schema/geography.schema'
+import { createGeographyYear } from '../../../src/helpers/geography-years.helper'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -49,6 +59,7 @@ describe('Nation Config', () => {
   beforeEach(async () => {
     // Clear the mock between tests
     vi.mocked(transformApiGeographyData).mockClear()
+    vi.mocked(createGeographyYear).mockClear()
 
     // Create test fixtures directory
     try {
@@ -99,10 +110,16 @@ describe('Nation Config', () => {
 
   describe('beforeSeed', () => {
     let mockClient: Partial<Client>
+    let mockContext: GeographyContext
 
     beforeEach(() => {
       mockClient = {
         query: vi.fn(),
+      }
+
+      mockContext = {
+        year: 2023,
+        parentGeographies: {},
       }
     })
 
@@ -136,7 +153,7 @@ describe('Nation Config', () => {
         ['United States', '010', '0100000US'],
       ]
 
-      NationConfig.beforeSeed!(mockClient as Client, rawApiData)
+      NationConfig.beforeSeed!(mockClient as Client, rawApiData, mockContext)
 
       expect(transformApiGeographyData).toHaveBeenCalledTimes(1)
       expect(callTracker).toHaveLength(1)
@@ -160,7 +177,7 @@ describe('Nation Config', () => {
 
       vi.mocked(transformApiGeographyData).mockReturnValue(transformedData)
 
-      NationConfig.beforeSeed!(mockClient as Client, rawApiData)
+      NationConfig.beforeSeed!(mockClient as Client, rawApiData, mockContext)
 
       expect(rawApiData).toHaveLength(1)
       expect(rawApiData[0]).toEqual({
@@ -194,7 +211,7 @@ describe('Nation Config', () => {
         return transformedData // Return directly, not wrapped in Promise
       })
 
-      NationConfig.beforeSeed!(mockClient as Client, rawApiData)
+      NationConfig.beforeSeed!(mockClient as Client, rawApiData, mockContext)
 
       expect(callSpy).toHaveBeenCalledTimes(1)
       expect(callSpy).toHaveBeenCalledWith(
@@ -211,18 +228,38 @@ describe('Nation Config', () => {
 
   describe('afterSeed', () => {
     let mockClient: Partial<Client>
+    let mockContext: GeographyContext
 
     beforeEach(() => {
       mockClient = {
         query: vi.fn().mockResolvedValue({ rows: [] }),
+        year_id: 1,
       }
+
+      mockContext = {
+        year: 2023,
+        year_id: 1,
+        parentGeographies: {},
+      }
+
+      vi.mocked(createGeographyYear).mockResolvedValue({ created: true })
     })
 
     it('should execute afterSeed logic if defined', async () => {
-      if (NationConfig.afterSeed) {
-        await NationConfig.afterSeed(mockClient as Client)
+      const geo_ids = [1, 2, 3, 4]
 
-        expect(mockClient.query).toHaveBeenCalled()
+      if (NationConfig.afterSeed) {
+        await NationConfig.afterSeed(mockClient as Client, mockContext, geo_ids)
+
+        expect(createGeographyYear).toHaveBeenCalledTimes(geo_ids.length)
+
+        for (const geo_id of geo_ids) {
+          expect(createGeographyYear).toHaveBeenCalledWith(
+            mockClient,
+            geo_id,
+            mockContext.year_id,
+          )
+        }
       } else {
         expect(NationConfig.afterSeed).toBeUndefined()
       }

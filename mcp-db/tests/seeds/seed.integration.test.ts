@@ -23,11 +23,6 @@ interface MockServer {
   close(): CloseAction
 }
 
-interface QueryParams {
-  format: string
-  limit: string
-}
-
 describe('Seed Database - API Integration Tests', () => {
   let runner: SeedRunner
   let client: Client
@@ -147,40 +142,5 @@ describe('Seed Database - API Integration Tests', () => {
     // Verify no data was inserted due to rollback
     const result = await client.query('SELECT COUNT(*) FROM api_test_data')
     expect(result.rows[0].count).toBe('0')
-  })
-
-  it('should handle query parameters correctly', async () => {
-    // Verify query params are sent to API
-    let receivedParams: QueryParams = {}
-
-    mockServer.get('/test-with-params', (req, res) => {
-      receivedParams = req.query
-      res.json({ data: [{ id: 1, name: 'Test', value: 42 }] })
-    })
-
-    const seedConfig = {
-      url: `http://localhost:${mockServer.port}/test-with-params`,
-      table: 'api_test_data',
-      conflictColumn: 'id',
-      dataPath: 'data',
-      queryParams: {
-        api_key: 'test123',
-        format: 'json',
-        year: '2024',
-      },
-    }
-
-    await runner.seed(seedConfig)
-
-    // Verify query params were sent correctly
-    expect(receivedParams).toMatchObject({
-      api_key: 'test123',
-      format: 'json',
-      year: '2024',
-    })
-
-    // Verify data was inserted
-    const result = await client.query('SELECT * FROM api_test_data')
-    expect(result.rows).toHaveLength(1)
   })
 })
