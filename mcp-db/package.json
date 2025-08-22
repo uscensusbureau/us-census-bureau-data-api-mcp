@@ -3,15 +3,18 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "build": "tsc && shx chmod +x dist/*.js || true",
+    "build": "tsc && tsc -p tsconfig.migrations.json && shx chmod +x dist/*.js || true",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint migrations/ tests/",
     "migrate:create": "npx tsx node_modules/.bin/node-pg-migrate create --migration-file-language ts",
-    "migrate:down": "npx tsx node_modules/.bin/node-pg-migrate down --verbose",
-    "migrate:up": "npx tsx node_modules/.bin/node-pg-migrate up --verbose",
+    "migrate:down": "node-pg-migrate down --verbose --migrations-dir dist/migrations",
+    "migrate:up": "node-pg-migrate up --verbose --migrations-dir dist/migrations",
+    "prod:build": "docker compose --profile prod up --build -d",
+    "prod:down": "docker compose --profile prod down",
     "schema:dump": "docker compose --profile dev exec census-mcp-db-dev pg_dump --schema-only --no-owner --no-privileges --username=mcp_user_dev mcp_db_dev > schema.sql",
     "seed": "npm run build && node dist/seeds/scripts/seed-database.js",
+    "seed:prod": "node dist/seeds/scripts/seed-database.js",
     "test": "vitest --printConsoleTrace=true --silent=false",
     "test:coverage": "vitest --coverage"
   },
@@ -19,7 +22,6 @@
     "dotenv": "^17.1.0",
     "node-pg-migrate": "^8.0.3",
     "pg": "^8.11.3",
-    "typescript": "^5.8.3",
     "zod": "^4.0.5"
   },
   "devDependencies": {
@@ -32,7 +34,8 @@
     "globals": "^16.2.0",
     "prettier": "^3.6.2",
     "shx": "^0.4.0",
-    "tsx": "^4.20.3",
+    "tsx": "^4.20.4",
+    "typescript": "^5.8.3",
     "typescript-eslint": "^8.33.1",
     "vitest": "^3.2.4"
   }

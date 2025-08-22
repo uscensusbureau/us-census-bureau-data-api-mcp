@@ -93,8 +93,11 @@ jobs:
         uses: docker/setup-buildx-action@v3
     
       - name: Build production Docker images
-        run: |
-          docker compose --profile prod build --no-cache
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 5
+          max_attempts: 3
+          command: docker compose --profile prod build --no-cache
     
       - name: Test production environment
         run: |
@@ -149,7 +152,6 @@ jobs:
           echo "=== MCP Server Status ==="
           docker compose --profile prod logs mcp-server | head -20
  
-    
       - name: Cleanup production environment
         if: always()
         run: |

@@ -56,6 +56,16 @@ Note that the `CENSUS_API_KEY` variable is required. This defines the `env` vari
 
 Be sure to update the path to the `mcp-server-census-api` directory in `args` and provide a valid `CENSUS_API_KEY`.
 
+### Updating the MCP Server
+When a new version of this project is released, you will need to manually build the production environment for the latest features. From the `mcp-db/` directory, run the following:
+
+```
+npm run prod:down
+npm run prod:build
+```
+
+After that, you can relaunch your MCP Client and it should connect to the server again.
+
 ## How the MCP Server Works
 
 The U.S. Census Bureau MCP Server uses data from the Census Data API and other official sources to construct contextually rich data and statistics for use with AI Assistants. The Census Data API is the primary source of data but some of the API's data is pulled down to a local postgres container to enable more robust and performant search functionality. Below is an illustration of how user prompts are processed by AI Assistants and the MCP Server.
