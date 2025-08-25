@@ -42,6 +42,7 @@ export const DatasetMetadataJsonSchema = z.object({
     distribution: z.array(z.object({
       "@type": z.string(),
       accessURL: z.string(),
+      description: z.string(),
       format: z.string(),
       mediaType: z.string(),
       title: z.string(),
@@ -64,7 +65,7 @@ export const DatasetMetadataJsonSchema = z.object({
       subOrganizationOf: z.object({
         '@type': z.string(),
         name: z.string(),
-      }),
+      }).optional(),
     }),
   })),
 })
