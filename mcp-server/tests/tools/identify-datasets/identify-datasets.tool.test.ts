@@ -16,7 +16,6 @@ describe('IdentifyDatasetsTool', () => {
   beforeEach(async () => {
     tool = new IdentifyDatasetsTool()
 
-    // Reset the mock before each test
     mockFetch.mockClear()
     
     delete process.env.CENSUS_API_KEY
@@ -91,7 +90,6 @@ describe('IdentifyDatasetsTool', () => {
       const parsedContent = JSON.parse(result.content[0].text)
       expect(parsedContent).toHaveLength(1)
       
-      // Verify the simplification worked correctly with your mock data
       expect(parsedContent[0]).toEqual({
         c_dataset: 'acs/acs1',
         title: 'American Community Survey: 1-Year Estimates: Detailed Tables',
@@ -142,7 +140,7 @@ describe('IdentifyDatasetsTool', () => {
     beforeEach(() => {
       process.env.CENSUS_API_KEY = 'test-api-key'
     })
-    //av.note: passes
+    
     it('should handle invalid schema response', async () => {
       mockFetch.mockResolvedValue({
         ok: true,
@@ -159,7 +157,6 @@ describe('IdentifyDatasetsTool', () => {
       mockFetch.mockClear()
     })
     
-     // //av.note: passes
     it('should simplify dataset with array c_dataset', async () => {
       mockFetch.mockResolvedValue({
         ok: true,
@@ -263,7 +260,6 @@ describe('IdentifyDatasetsTool', () => {
       expect(parsedContent[0]).toHaveProperty('c_isAggregate')
     })
 
-     // //av.note: passes
     it('should omit optional fields when not present', async () => {
       mockFetch.mockResolvedValue({
         ok: true,
@@ -278,7 +274,6 @@ describe('IdentifyDatasetsTool', () => {
       expect(parsedContent[0]).not.toHaveProperty('c_isMicrodata')
     })
 
-    // //av.note: passes
     it('should return empty array when API returns no datasets', async () => {
       const mockApiResponse = { ...sampleDatasetMetadata, dataset: [] };
 
@@ -320,7 +315,6 @@ describe('IdentifyDatasetsTool', () => {
       const tool = new IdentifyDatasetsTool()
       const boundHandler = tool.handler
       
-      // This test ensures the handler is properly bound and won't lose context
       expect(boundHandler).toBeDefined()
       expect(typeof boundHandler).toBe('function')
     })
