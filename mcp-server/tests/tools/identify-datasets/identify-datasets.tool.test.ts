@@ -81,7 +81,6 @@ describe('IdentifyDatasetsTool', () => {
       })
 
       const result = await tool.handler()
-      console.log(result)
 
       expect(mockFetch).toHaveBeenCalledWith('https://api.census.gov/data.json?key=test-api-key')
       expect(result.content).toHaveLength(1)
@@ -255,7 +254,6 @@ describe('IdentifyDatasetsTool', () => {
 
       const result = await tool.handler()
       const parsedContent = JSON.parse(result.content[0].text)
-      console.log(parsedContent[0])
 
       expect(parsedContent[0]).toHaveProperty('c_isAggregate')
     })
