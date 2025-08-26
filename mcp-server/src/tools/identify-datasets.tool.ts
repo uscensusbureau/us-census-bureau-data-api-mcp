@@ -12,7 +12,7 @@ import { BaseTool } from './base.tool.js'
 
 import { ToolContent } from '../types/base.types.js'
 
-export class IdentifyDatasetsTool extends BaseTool<{}> { 
+export class IdentifyDatasetsTool extends BaseTool<object> { 
   name = 'identify-datasets'
   description = 
   `This tool returns a data catalog of available Census datasets from the Census API. 
