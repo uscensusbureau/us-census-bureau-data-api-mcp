@@ -310,10 +310,11 @@ describe('IdentifyDatasetsTool', () => {
 
   describe('Constructor Binding', () => {
     it('should properly bind handler method', () => {
-      // ts-ignore to spy on bind
-      // @ts-ignore
+
+      // @ts-expect-error: spying on prototype method's bind isn't type-safe but is valid for testing
       const handlerBindSpy = vi.spyOn(IdentifyDatasetsTool.prototype.handler, 'bind')
       new IdentifyDatasetsTool()
+
       // This test ensures the handler is properly bound and won't lose context
       expect(handlerBindSpy).toHaveBeenCalled()
       handlerBindSpy.mockRestore()
