@@ -61,8 +61,8 @@ export class IdentifyDatasetsTool extends BaseTool<{}> {
       c_dataset: Array.isArray(dataset.c_dataset) ? dataset.c_dataset.join('/') : dataset.c_dataset,
       title: dataset.title,
       description: dataset.description,
-      c_vintage: dataset.c_vintage,
     }
+    if ('c_vintage' in dataset) simplified.c_vintage = dataset.c_vintage
     if ('c_isAggregate' in dataset) simplified.c_isAggregate = dataset.c_isAggregate
     if ('c_isTimeseries' in dataset) simplified.c_isTimeseries = dataset.c_isTimeseries
     if ('c_isMicrodata' in dataset) simplified.c_isMicrodata = dataset.c_isMicrodata
