@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 // Zod schema for the returned dataset
 export const SimplifiedAPIDatasetSchema = z.object({
-  c_dataset: z.array(z.string()),
+  c_dataset: z.string(),
   c_vintage: z.number().optional(),
   title: z.string(),
   description: z.string(),
