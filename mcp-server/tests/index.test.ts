@@ -1,11 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { MCPServer } from '../src/server'
 
-// vi.mock('../src/tools/describe-dataset.tool.js', () => ({
-//   DescribeDatasetTool: vi
-//     .fn()
-//     .mockImplementation(() => ({ name: 'describe-dataset-tool' })),
-// }))
 
 vi.mock('../src/tools/identify-datasets.tool.js', () => ({
   IdentifyDatasetsTool: vi
@@ -60,7 +55,6 @@ describe('main', () => {
 
     expect(serverSpy).toHaveBeenCalledTimes(4)
 
-    // expect(serverSpy).toHaveBeenCalledWith({ name: 'describe-dataset-tool' })
     expect(serverSpy).toHaveBeenCalledWith({ name: 'identify-datasets-tool' })
     expect(serverSpy).toHaveBeenCalledWith({
       name: 'fetch-dataset-geography-tool',
