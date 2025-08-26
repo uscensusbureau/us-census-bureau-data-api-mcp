@@ -3,9 +3,10 @@ import { z } from 'zod'
 import { Tool } from '@modelcontextprotocol/sdk/types.js'
 
 import {
-  DatasetMetadataJsonSchema,
-  DatasetMetadataJsonResponseType,
+  AllDatasetMetadataJsonSchema,
+  AllDatasetMetadataJsonResponseType,
   SimplifiedAPIDatasetType,
+  DatasetType
 } from '../schema/identify-datasets.schema.js'
 
 import { BaseTool } from './base.tool.js'
@@ -47,16 +48,16 @@ export class IdentifyDatasetsTool extends BaseTool<object> {
     this.handler = this.handler.bind(this)
   }
 
-  private isValidMetadataResponse(data: unknown): data is DatasetMetadataJsonResponseType {
+  private isValidMetadataResponse(data: unknown): data is AllDatasetMetadataJsonResponseType {
     try {
-      DatasetMetadataJsonSchema.parse(data)
+      AllDatasetMetadataJsonSchema.parse(data)
       return true
     } catch {
       return false
     }
   }
 
-  private simplifyDataset(dataset: any) {
+  private simplifyDataset(dataset: DatasetType) {
     const simplified: SimplifiedAPIDatasetType = {
       c_dataset: Array.isArray(dataset.c_dataset) ? dataset.c_dataset.join('/') : dataset.c_dataset,
       title: dataset.title,
