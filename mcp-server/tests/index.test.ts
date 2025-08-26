@@ -8,7 +8,7 @@ import { MCPServer } from '../src/server'
 // }))
 
 vi.mock('../src/tools/identify-datasets.tool.js', () => ({
-  DescribeDatasetTool: vi
+  IdentifyDatasetsTool: vi
     .fn()
     .mockImplementation(() => ({ name: 'identify-datasets-tool' })),
 }))
