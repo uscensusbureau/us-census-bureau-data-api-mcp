@@ -104,14 +104,10 @@ describe('Migration 1754492912609 - Rename Geo Tables', () => {
       expect(dropConstraintSpy).toHaveBeenCalledWith(
         'places',
         'places_geography_level_year_geography_code_unique',
-        {
-          unique: ['geography_level_id', 'year', 'geography_code'],
-        },
       )
       expect(dropConstraintSpy).toHaveBeenCalledWith(
         'places',
         'places_census_geoid_year_unique',
-        'UNIQUE(census_geoid, year)',
       )
     })
 
@@ -263,7 +259,6 @@ describe('Migration 1754492912609 - Rename Geo Tables', () => {
       expect(dropConstraintSpy).toHaveBeenCalledWith(
         'geographies',
         'geographies_fips_code_year_unique',
-        'UNIQUE(fips_code, year)',
       )
     })
 

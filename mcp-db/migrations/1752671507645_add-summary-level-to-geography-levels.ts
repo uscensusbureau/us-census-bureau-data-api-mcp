@@ -3,7 +3,7 @@ import { MigrationBuilder } from 'node-pg-migrate'
 export async function up(pgm: MigrationBuilder): Promise<void> {
   pgm.addColumns('geography_levels', {
     //Summary Levels are codes that define geographic hiearchies for each level.
-    summary_level: { type: 'string', unique: true, null: false },
+    summary_level: { type: 'string', unique: true, notNull: true },
     parent_summary_level: { type: 'string' },
   })
 

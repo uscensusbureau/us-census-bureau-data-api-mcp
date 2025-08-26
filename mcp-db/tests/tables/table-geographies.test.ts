@@ -179,8 +179,8 @@ describe('Geographies Table', () => {
 
     try {
       const result: QueryResult<{ id: bigint }> = await client.query(`
-	      INSERT INTO geographies (name, year, ucgid_code) 
-	      VALUES ('Test City', 2022, 'TEST123') 
+	      INSERT INTO geographies (name, year, ucgid_code, for_param) 
+	      VALUES ('Test City', 2022, 'TEST123', 'us:*') 
 	      RETURNING id;
 	    `)
 

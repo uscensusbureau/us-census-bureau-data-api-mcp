@@ -36,7 +36,7 @@ describe('Migration 1754681809226 - Add Params to Geographies', () => {
 
     it('should add columns to geographies', async () => {
       expect(addColumnsSpy).toHaveBeenCalledWith('geographies', {
-        for_param: { type: 'varchar(25)', null: false },
+        for_param: { type: 'varchar(25)', notNull: true },
         in_param: 'varchar(25)',
         summary_level_code: 'varchar(3)',
       })
@@ -58,7 +58,7 @@ describe('Migration 1754681809226 - Add Params to Geographies', () => {
 
     it('should drop columns from geographies', async () => {
       expect(dropColumnsSpy).toHaveBeenCalledWith('geographies', {
-        for_param: { type: 'varchar(25)', null: false },
+        for_param: { type: 'varchar(25)', notNull: true },
         in_param: 'varchar(25)',
         summary_level_code: 'varchar(3)',
       })

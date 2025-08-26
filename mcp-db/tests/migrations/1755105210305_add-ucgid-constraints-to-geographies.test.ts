@@ -49,7 +49,6 @@ describe('Migration 1755105210305 - Add UCGID to Geographies', () => {
       expect(dropConstraintSpy).toHaveBeenCalledWith(
         'geographies',
         'geographies_ucgid_code_unique',
-        'UNIQUE(ucgid_code)',
       )
     })
   })

@@ -80,10 +80,6 @@ jobs:
             sleep 2
           done
 
-      - name: Build the environment
-        working-directory: ./mcp-db
-        run: npm run build
-
       - name: Run database migrations
         working-directory: ./mcp-db
         run: |

@@ -37,7 +37,7 @@ describe('Migration 1752671507645 - Add Summary Level to Geography Levels Table'
       await up(mockPgm)
 
       expect(addColumnsSpy).toHaveBeenCalledWith('geography_levels', {
-        summary_level: { type: 'string', unique: true, null: false },
+        summary_level: { type: 'string', unique: true, notNull: true },
         parent_summary_level: { type: 'string' },
       })
     })

@@ -44,10 +44,6 @@ jobs:
       - name: Install database dependencies
         working-directory: ./mcp-db
         run: npm ci
-
-      - name: Build the environment
-        working-directory: ./mcp-db
-        run: npm run build
         
       - name: Run database migrations
         working-directory: ./mcp-db

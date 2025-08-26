@@ -39,15 +39,8 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
   pgm.dropConstraint(
     'places',
     'places_geography_level_year_geography_code_unique',
-    {
-      unique: ['geography_level_id', 'year', 'geography_code'],
-    },
   )
-  pgm.dropConstraint(
-    'places',
-    'places_census_geoid_year_unique',
-    'UNIQUE(census_geoid, year)',
-  )
+  pgm.dropConstraint('places', 'places_census_geoid_year_unique')
 
   // Rename geography_code to ucgid_code
   pgm.renameColumn('places', 'geography_code', 'ucgid_code')
@@ -127,11 +120,7 @@ export async function down(pgm: MigrationBuilder): Promise<void> {
   pgm.sql('DROP INDEX IF EXISTS idx_geographies_successor_geoid')
 
   // Drop New Constraint
-  pgm.dropConstraint(
-    'geographies',
-    'geographies_fips_code_year_unique',
-    'UNIQUE(fips_code, year)',
-  )
+  pgm.dropConstraint('geographies', 'geographies_fips_code_year_unique')
 
   // Rename Relational Columns to Original Names
   pgm.renameColumn('geographies', 'summary_level_id', 'geography_level_id')

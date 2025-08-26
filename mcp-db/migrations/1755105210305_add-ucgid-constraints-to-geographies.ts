@@ -9,9 +9,5 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
 }
 
 export async function down(pgm: MigrationBuilder): Promise<void> {
-  pgm.dropConstraint(
-    'geographies',
-    'geographies_ucgid_code_unique',
-    'UNIQUE(ucgid_code)',
-  )
+  pgm.dropConstraint('geographies', 'geographies_ucgid_code_unique')
 }

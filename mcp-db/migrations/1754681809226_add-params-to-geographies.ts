@@ -2,7 +2,7 @@ import { MigrationBuilder } from 'node-pg-migrate'
 
 export async function up(pgm: MigrationBuilder): Promise<void> {
   pgm.addColumns('geographies', {
-    for_param: { type: 'varchar(25)', null: false }, // Store for query arguments
+    for_param: { type: 'varchar(25)', notNull: true }, // Store for query arguments
     in_param: 'varchar(25)', // Store in query arguments
     summary_level_code: 'varchar(3)', // Adds Summary Level Codes for mapping to summary_levels during import
   })
@@ -12,7 +12,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
 
 export async function down(pgm: MigrationBuilder): Promise<void> {
   pgm.dropColumns('geographies', {
-    for_param: { type: 'varchar(25)', null: false },
+    for_param: { type: 'varchar(25)', notNull: true },
     in_param: 'varchar(25)',
     summary_level_code: 'varchar(3)',
   })

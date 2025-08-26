@@ -104,9 +104,7 @@ describe('SeedRunner - Additional Coverage Tests', () => {
                 resolve({
                   ok: true,
                   status: 200,
-                  json: vi
-                    .fn()
-                    .mockResolvedValue({ data: [] }),
+                  json: vi.fn().mockResolvedValue({ data: [] }),
                 }),
               50,
             ),
@@ -164,9 +162,7 @@ describe('SeedRunner - Additional Coverage Tests', () => {
         .mockResolvedValueOnce({
           ok: true,
           status: 200,
-          json: vi
-            .fn()
-            .mockResolvedValue({ data: ['success'] }),
+          json: vi.fn().mockResolvedValue({ data: ['success'] }),
         })
 
       const testUrl = 'https://api.example.com/data'
