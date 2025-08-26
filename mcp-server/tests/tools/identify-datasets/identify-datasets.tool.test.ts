@@ -310,11 +310,13 @@ describe('IdentifyDatasetsTool', () => {
 
   describe('Constructor Binding', () => {
     it('should properly bind handler method', () => {
-      const tool = new IdentifyDatasetsTool()
-      const boundHandler = tool.handler
-      
-      expect(boundHandler).toBeDefined()
-      expect(typeof boundHandler).toBe('function')
+      // ts-ignore to spy on bind
+      // @ts-ignore
+      const handlerBindSpy = vi.spyOn(IdentifyDatasetsTool.prototype.handler, 'bind')
+      new IdentifyDatasetsTool()
+      // This test ensures the handler is properly bound and won't lose context
+      expect(handlerBindSpy).toHaveBeenCalled()
+      handlerBindSpy.mockRestore()
     })
   })
 })
