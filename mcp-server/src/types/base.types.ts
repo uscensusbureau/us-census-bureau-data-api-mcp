@@ -1,4 +1,5 @@
-import { TextContent } from '@modelcontextprotocol/sdk/types.js'
+import { TextContent, Tool} from '@modelcontextprotocol/sdk/types.js'
+import { z } from 'zod'
 
 type JsonContent = {
   type: 'json'
