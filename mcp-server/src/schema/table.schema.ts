@@ -54,6 +54,7 @@ export const geoProperties = {
     description:
       "Geography restriction as comma-separated values. Required if 'ucgid' not defined.",
     examples: [
+      'us:*',
       'state:*',
       'state:01,02,06',
       'county:001',
@@ -77,7 +78,7 @@ export const geoProperties = {
     type: 'string',
     description:
       "Alternative geography specification using Uniform Census Geography Identifier (UCGID). Required if 'for' not defined.",
-    examples: ['0400000US06', '0400000US41'],
+    examples: ['0100000US', '0400000US06', '0400000US41'],
   },
 }
 
