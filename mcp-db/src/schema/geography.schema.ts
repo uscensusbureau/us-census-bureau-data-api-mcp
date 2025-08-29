@@ -7,8 +7,8 @@ export const GeographyMappings: Record<string, keyof GeographyRecord> = {
   SUMLEVEL: 'summary_level_code',
   STATE: 'state_code',
   COUNTY: 'county_code',
-  REGION: 'region_code',
-  DIVISION: 'division_code',
+  region: 'region_code',
+  division: 'division_code',
   INTPTLAT: 'latitude',
   INTPTLON: 'longitude',
 } as const
@@ -20,8 +20,8 @@ export const GeographyValueValidators = {
   SUMLEVEL: z
     .string()
     .regex(/^\d{3}$/, 'Summary level must be exactly 3 digits'),
-  REGION: z.string().regex(/^\d{1}$/, 'Region code must be 1 digit'),
-  DIVISION: z.string().regex(/^\d{1}$/, 'Division code must be 1 digit'),
+  region: z.string().regex(/^\d{1}$/, 'Region code must be 1 digit'),
+  division: z.string().regex(/^\d{1}$/, 'Division code must be 1 digit'),
   STATE: z.string().regex(/^\d{2}$/, 'State code must be 2 digits'),
   COUNTY: z.string().regex(/^\d{3}$/, 'County code must be 3 digits'),
   INTPTLAT: z.number().min(-90).max(90, 'Invalid latitude'),
@@ -44,15 +44,13 @@ export const SummaryLevels = {
   },
   division: {
     summaryLevel: '030',
-    requiredFields: ['NAME', 'SUMLEVEL', 'GEO_ID', 'REGION'],
+    requiredFields: ['NAME', 'SUMLEVEL', 'GEO_ID'],
   },
   state: {
     summaryLevel: '040',
     requiredFields: [
       'NAME',
       'SUMLEVEL',
-      'REGION',
-      'DIVISION',
       'STATE',
       'GEO_ID',
       'INTPTLAT',
@@ -64,8 +62,6 @@ export const SummaryLevels = {
     requiredFields: [
       'NAME',
       'SUMLEVEL',
-      'REGION',
-      'DIVISION',
       'STATE',
       'COUNTY',
       'GEO_ID',
@@ -78,8 +74,6 @@ export const SummaryLevels = {
     requiredFields: [
       'NAME',
       'SUMLEVEL',
-      'REGION',
-      'DIVISION',
       'STATE',
       'GEO_ID',
       'INTPTLAT',
@@ -96,9 +90,9 @@ export const GeographyRecordSchema = z.object({
   in_param: z.string().nullable(),
   latitude: z.number().optional(),
   longitude: z.number().optional(),
-  region_code: z.string().optional(),
-  division_code: z.string().optional(),
-  state_code: z.string().optional(),
+  region_code: z.string().optional().nullable(),
+  division_code: z.string().optional().nullable(),
+  state_code: z.string().optional().nullable(),
   county_code: z.string().optional(),
   created_at: z.string().optional(),
   updated_at: z.string().optional(),

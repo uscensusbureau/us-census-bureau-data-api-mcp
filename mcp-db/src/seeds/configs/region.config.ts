@@ -9,7 +9,7 @@ import { createGeographyYear } from '../../helpers/geography-years.helper.js'
 
 export const RegionConfig: GeographySeedConfig = {
   url: (context: GeographyContext) =>
-    `https://api.census.gov/data/${context.year}/geoinfo?get=NAME,SUMLEVEL,GEO_ID,REGION,INTPTLAT,INTPTLON&for=region:*`,
+    `https://api.census.gov/data/${context.year}/geoinfo?get=NAME,SUMLEVEL,GEO_ID,INTPTLAT,INTPTLON&for=region:*`,
   table: 'geographies',
   conflictColumn: 'ucgid_code',
   beforeSeed: (

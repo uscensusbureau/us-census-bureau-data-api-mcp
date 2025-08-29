@@ -13,16 +13,20 @@ import {
 } from '../../schema/seed-config.schema.js'
 import { SeedRunner } from './seed-runner.js'
 
-import { NationConfig } from '../configs/nation.config.js'
-import { RegionConfig } from '../configs/region.config.js'
-import { SummaryLevelsConfig } from '../configs/summary-levels.config.js'
-import { YearsConfig } from '../configs/years.config.js'
+import {
+  NationConfig,
+  RegionConfig,
+  DivisionConfig,
+  SummaryLevelsConfig,
+  YearsConfig,
+} from '../configs/index.js'
 
 // Seed configurations
 export const seeds: SeedConfig[] = [SummaryLevelsConfig, YearsConfig]
 export const geographySeeds: GeographySeedConfig[] = [
   NationConfig,
   RegionConfig,
+  DivisionConfig
 ]
 
 export async function runSeeds(

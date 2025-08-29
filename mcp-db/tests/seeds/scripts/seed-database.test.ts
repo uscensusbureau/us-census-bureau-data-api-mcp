@@ -22,9 +22,12 @@ import {
 } from '../../../src/schema/seed-config.schema.js'
 import { SeedRunner } from '../../../src/seeds/scripts/seed-runner'
 import { SummaryLevelsConfig } from '../../../src/seeds/configs/summary-levels.config'
-import { YearsConfig } from '../../../src/seeds/configs/years.config'
-import { NationConfig } from '../../../src/seeds/configs/nation.config'
-import { RegionConfig } from '../../../src/seeds/configs/region.config'
+import { 
+  DivisionConfig,
+  NationConfig,
+  RegionConfig,
+  YearsConfig 
+} from '../../../src/seeds/configs/index'
 import {
   runSeedsWithRunner,
   runSeeds,
@@ -302,9 +305,10 @@ describe('Seed Database', () => {
 
   describe('geographySeeds', () => {
     it('includes geography configs', () => {
-      expect(geographySeeds).toHaveLength(2)
+      expect(geographySeeds).toHaveLength(3)
       expect(geographySeeds).toContain(NationConfig)
       expect(geographySeeds).toContain(RegionConfig)
+      expect(geographySeeds).toContain(DivisionConfig)
     })
   })
 
@@ -321,11 +325,12 @@ describe('Seed Database', () => {
 
         // Time for Math!
         //
-        // 2 Static Configs (Year, Summary Levels) ]+
-        // 2 Years x [1 NationConfig + 1 RegionConfig]
+        // 2 Static Configs (Year, Summary Levels) ] = 2
+        // +
+        // 2 Years x [1 NationConfig + 1 RegionConfig + DivisionConfig] = 6
         // ------------
-        // EQUALS 6 Total Config Runs
-        expect(mockRunner.seed).toHaveBeenCalledTimes(6)
+        // EQUALS 8 Total Config Runs
+        expect(mockRunner.seed).toHaveBeenCalledTimes(8)
       } finally {
         SeedRunnerSpy.mockRestore()
       }
@@ -491,8 +496,8 @@ describe('Seed Database', () => {
       expect(
         mockRunnerManager.mockRunner.getAvailableYears,
       ).toHaveBeenCalledOnce()
-      // Should call seed for each year * each geography config (2 years * 2 config = 4)
-      expect(mockRunnerManager.mockRunner.seed).toHaveBeenCalledTimes(4)
+      // Should call seed for each year * each geography config (2 years * 3 config = 6)
+      expect(mockRunnerManager.mockRunner.seed).toHaveBeenCalledTimes(6)
 
       const seedCalls = mockRunnerManager.mockRunner.seed.mock.calls
 
@@ -501,7 +506,7 @@ describe('Seed Database', () => {
         expect.objectContaining({ year: 2020, year_id: 1 }),
       ])
 
-      expect(seedCalls[2]).toEqual([
+      expect(seedCalls[3]).toEqual([
         expect.objectContaining({ table: 'geographies' }),
         expect.objectContaining({ year: 2023, year_id: 2 }),
       ])

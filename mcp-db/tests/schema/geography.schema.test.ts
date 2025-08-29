@@ -28,8 +28,8 @@ describe('Geography Schema', () => {
         NAME: 'name',
         GEO_ID: 'ucgid_code',
         SUMLEVEL: 'summary_level_code',
-        REGION: 'region_code',
-        DIVISION: 'division_code',
+        region: 'region_code',
+        division: 'division_code',
         STATE: 'state_code',
         COUNTY: 'county_code',
         INTPTLAT: 'latitude',
@@ -99,16 +99,16 @@ describe('Geography Schema', () => {
       )
     })
 
-    it('should validate REGION field', () => {
-      expect(GeographyValueValidators.REGION.safeParse('1').success).toBe(true)
-      expect(GeographyValueValidators.REGION.safeParse(1).success).toBe(false)
+    it('should validate region field', () => {
+      expect(GeographyValueValidators.region.safeParse('1').success).toBe(true)
+      expect(GeographyValueValidators.region.safeParse(1).success).toBe(false)
     })
 
-    it('should validate DIVISION field', () => {
-      expect(GeographyValueValidators.DIVISION.safeParse('2').success).toBe(
+    it('should validate division field', () => {
+      expect(GeographyValueValidators.division.safeParse('2').success).toBe(
         true,
       )
-      expect(GeographyValueValidators.DIVISION.safeParse(2).success).toBe(false)
+      expect(GeographyValueValidators.division.safeParse(2).success).toBe(false)
     })
 
     it('should validate STATE field', () => {
