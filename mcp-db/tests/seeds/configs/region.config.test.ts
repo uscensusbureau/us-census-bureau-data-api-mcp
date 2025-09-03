@@ -34,15 +34,13 @@ const cleanupWithRetry = async (client: Client) => {
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      await client.query(
-        'TRUNCATE TABLE geographies RESTART IDENTITY CASCADE',
-      )
+      await client.query('TRUNCATE TABLE geographies RESTART IDENTITY CASCADE')
       return // Success
     } catch (error: unknown) {
       if (error.code === '40P01' && attempt < maxRetries) {
         // Deadlock detected
         console.log(`Deadlock detected on attempt ${attempt}, retrying...`)
-        await new Promise((resolve) => setTimeout(resolve, 100 * (2 ** attempt))) // Exponential Backoff
+        await new Promise((resolve) => setTimeout(resolve, 100 * 2 ** attempt)) // Exponential Backoff
       } else {
         throw error // Re-throw if not a deadlock or max retries exceeded
       }

@@ -17,6 +17,7 @@ import {
   NationConfig,
   RegionConfig,
   DivisionConfig,
+  StateConfig,
   SummaryLevelsConfig,
   YearsConfig,
 } from '../configs/index.js'
@@ -26,7 +27,8 @@ export const seeds: SeedConfig[] = [SummaryLevelsConfig, YearsConfig]
 export const geographySeeds: GeographySeedConfig[] = [
   NationConfig,
   RegionConfig,
-  DivisionConfig
+  DivisionConfig,
+  StateConfig,
 ]
 
 export async function runSeeds(

@@ -24,9 +24,9 @@ vi.mock('../../../src/helpers/geography-years.helper', async () => ({
 
 import { dbConfig } from '../../helpers/database-config'
 import {
-  DivisionConfig,
-  parentDivisionSQL,
-} from '../../../src/seeds/configs/division.config'
+  StateConfig,
+  parentStateSQL,
+} from '../../../src/seeds/configs/state.config'
 import { normalizeSQL } from '../../helpers/normalize-sql'
 import { SeedRunner } from '../../../src/seeds/scripts/seed-runner'
 import { GeographyContext } from '../../../src/schema/seed-config.schema'
@@ -55,17 +55,16 @@ const cleanupWithRetry = async (client: Client) => {
 
 const transformedData = [
   {
-    name: 'New England Division',
-    summary_level_code: '030',
-    ucgid_code: '0300000US1',
-    region_code: null,
-    division_code: '1',
-    latitude: '44.0860059',
-    longitude: '-70.6608882',
+    name: 'Pennsylvania',
+    summary_level_code: '040',
+    ucgid_code: '0400000US42',
+    state_code: '42',
+    latitude: '40.5869403',
+    longitude: '-77.3684875',
   },
 ]
 
-describe('Division Config', () => {
+describe('State Config', () => {
   let runner: SeedRunner
   let client: Client
   let databaseUrl: string
@@ -96,15 +95,15 @@ describe('Division Config', () => {
   })
 
   it('should have valid configuration structure', () => {
-    const divisionConfig = DivisionConfig
+    const stateConfig = StateConfig
     const context = { year: 2023 }
 
-    expect(divisionConfig).toBeDefined()
-    expect(divisionConfig?.table).toBe('geographies')
-    expect(divisionConfig?.conflictColumn).toBe('ucgid_code')
-    expect(divisionConfig?.url(context)).toContain('division:*')
-    expect(divisionConfig?.beforeSeed).toBeDefined()
-    expect(divisionConfig?.afterSeed).toBeDefined()
+    expect(stateConfig).toBeDefined()
+    expect(stateConfig?.table).toBe('geographies')
+    expect(stateConfig?.conflictColumn).toBe('ucgid_code')
+    expect(stateConfig?.url(context)).toContain('state:*')
+    expect(stateConfig?.beforeSeed).toBeDefined()
+    expect(stateConfig?.afterSeed).toBeDefined()
   })
 
   describe('beforeSeed', async () => {
@@ -124,25 +123,14 @@ describe('Division Config', () => {
 
     it('calls transformApiGeographyData with correct raw API data', async () => {
       const rawApiData = [
+        ['NAME', 'SUMLEVEL', 'GEO_ID', 'INTPTLAT', 'INTPTLON', 'state'],
         [
-          'NAME',
-          'SUMLEVEL',
-          'GEO_ID',
-          'REGION',
-          'DIVISION',
-          'INTPTLAT',
-          'INTPTLON',
-          'division',
-        ],
-        [
-          'New England Division',
-          '030',
-          '0300000US1',
-          null,
-          '1',
-          '44.0860059',
-          '-70.6608882',
-          '1',
+          'Pennsylvania',
+          '040',
+          '0400000US42',
+          '40.5869403',
+          '-77.3684875',
+          '42',
         ],
       ]
 
@@ -158,29 +146,18 @@ describe('Division Config', () => {
 
       // Store original data for comparison
       const expectedRawData = [
+        ['NAME', 'SUMLEVEL', 'GEO_ID', 'INTPTLAT', 'INTPTLON', 'state'],
         [
-          'NAME',
-          'SUMLEVEL',
-          'GEO_ID',
-          'REGION',
-          'DIVISION',
-          'INTPTLAT',
-          'INTPTLON',
-          'division',
-        ],
-        [
-          'New England Division',
-          '030',
-          '0300000US1',
-          null,
-          '1',
-          '44.0860059',
-          '-70.6608882',
-          '1',
+          'Pennsylvania',
+          '040',
+          '0400000US42',
+          '40.5869403',
+          '-77.3684875',
+          '42',
         ],
       ]
 
-      await DivisionConfig.beforeSeed!(
+      await StateConfig.beforeSeed!(
         mockClient as Client,
         rawApiData,
         mockContext,
@@ -189,37 +166,26 @@ describe('Division Config', () => {
       expect(transformApiGeographyData).toHaveBeenCalledTimes(1)
       expect(callTracker).toHaveLength(1)
 
-      expect(callTracker[0].type).toBe('division')
+      expect(callTracker[0].type).toBe('state')
       expect(callTracker[0].data).toEqual(expectedRawData)
     })
 
     it('transforms and processes data correctly end-to-end', async () => {
       const rawApiData = [
+        ['NAME', 'SUMLEVEL', 'GEO_ID', 'INTPTLAT', 'INTPTLON', 'state'],
         [
-          'NAME',
-          'SUMLEVEL',
-          'GEO_ID',
-          'REGION',
-          'DIVISION',
-          'INTPTLAT',
-          'INTPTLON',
-          'division',
-        ],
-        [
-          'New England Division',
-          '030',
-          '0300000US1',
-          null,
-          '1',
-          '44.0860059',
-          '-70.6608882',
-          '1',
+          'Pennsylvania',
+          '040',
+          '0400000US42',
+          '40.5869403',
+          '-77.3684875',
+          '42',
         ],
       ]
 
       vi.mocked(transformApiGeographyData).mockReturnValue(transformedData)
 
-      await DivisionConfig.beforeSeed!(
+      await StateConfig.beforeSeed!(
         mockClient as Client,
         rawApiData,
         mockContext,
@@ -227,39 +193,29 @@ describe('Division Config', () => {
 
       expect(rawApiData).toHaveLength(1)
       expect(rawApiData[0]).toEqual({
-        name: 'New England Division',
-        summary_level_code: '030',
-        ucgid_code: '0300000US1',
+        name: 'Pennsylvania',
+        summary_level_code: '040',
+        ucgid_code: '0400000US42',
         region_code: '1',
-        for_param: 'division:1',
+        state_code: '42',
+        for_param: 'state:42',
         in_param: null,
-        division_code: '1',
-        latitude: '44.0860059',
-        longitude: '-70.6608882',
+        division_code: '2',
+        latitude: '40.5869403',
+        longitude: '-77.3684875',
       })
     })
 
     it('verifies the complete workflow step by step', async () => {
       const rawApiData = [
+        ['NAME', 'SUMLEVEL', 'GEO_ID', 'INTPTLAT', 'INTPTLON', 'state'],
         [
-          'NAME',
-          'SUMLEVEL',
-          'GEO_ID',
-          'REGION',
-          'DIVISION',
-          'INTPTLAT',
-          'INTPTLON',
-          'division',
-        ],
-        [
-          'New England Division',
-          '030',
-          '0300000US1',
-          null,
-          '1',
-          '44.0860059',
-          '-70.6608882',
-          '1',
+          'Pennsylvania',
+          '040',
+          '0400000US42',
+          '40.5869403',
+          '-77.3684875',
+          '42',
         ],
       ]
 
@@ -271,7 +227,7 @@ describe('Division Config', () => {
         return transformedData // Return directly, not wrapped in Promise
       })
 
-      await DivisionConfig.beforeSeed!(
+      await StateConfig.beforeSeed!(
         mockClient as Client,
         rawApiData,
         mockContext,
@@ -280,54 +236,32 @@ describe('Division Config', () => {
       expect(callSpy).toHaveBeenCalledTimes(1)
       expect(callSpy).toHaveBeenCalledWith(
         [
+          ['NAME', 'SUMLEVEL', 'GEO_ID', 'INTPTLAT', 'INTPTLON', 'state'],
           [
-            'NAME',
-            'SUMLEVEL',
-            'GEO_ID',
-            'REGION',
-            'DIVISION',
-            'INTPTLAT',
-            'INTPTLON',
-            'division',
-          ],
-          [
-            'New England Division',
-            '030',
-            '0300000US1',
-            null,
-            '1',
-            '44.0860059',
-            '-70.6608882',
-            '1',
+            'Pennsylvania',
+            '040',
+            '0400000US42',
+            '40.5869403',
+            '-77.3684875',
+            '42',
           ],
         ],
-        'division',
+        'state',
       )
-      expect(rawApiData[0]).toHaveProperty('for_param', 'division:1')
+      expect(rawApiData[0]).toHaveProperty('for_param', 'state:42')
       expect(rawApiData[0]).toHaveProperty('in_param', null)
     })
 
-    it('stores the divisions in the parentGeographies', async () => {
+    it('stores the states in the parentGeographies', async () => {
       const rawApiData = [
+        ['NAME', 'SUMLEVEL', 'GEO_ID', 'INTPTLAT', 'INTPTLON', 'state'],
         [
-          'NAME',
-          'SUMLEVEL',
-          'GEO_ID',
-          'REGION',
-          'DIVISION',
-          'INTPTLAT',
-          'INTPTLON',
-          'division',
-        ],
-        [
-          'New England Division',
-          '030',
-          '0300000US1',
-          null,
-          '1',
-          '44.0860059',
-          '-70.6608882',
-          '1',
+          'Pennsylvania',
+          '040',
+          '0400000US42',
+          '40.5869403',
+          '-77.3684875',
+          '42',
         ],
       ]
 
@@ -339,17 +273,50 @@ describe('Division Config', () => {
         return transformedData // Return directly, not wrapped in Promise
       })
 
-      await DivisionConfig.beforeSeed!(
+      await StateConfig.beforeSeed!(
         mockClient as Client,
         rawApiData,
         mockContext,
       )
 
-      expect(mockContext.parentGeographies).toHaveProperty('divisions')
-      expect(mockContext.parentGeographies.divisions.length).toEqual(1)
-      expect(mockContext.parentGeographies.divisions[0].name).toBe(
-        'New England Division',
-      )
+      expect(mockContext.parentGeographies).toHaveProperty('states')
+      expect(mockContext.parentGeographies.states.length).toEqual(1)
+      expect(mockContext.parentGeographies.states[0].name).toBe('Pennsylvania')
+    })
+
+    describe('when a state is missing region and division data', () => {
+      it('does not throw an error', async () => {
+        const rawApiData = [
+          ['NAME', 'SUMLEVEL', 'GEO_ID', 'INTPTLAT', 'INTPTLON', 'state'],
+          [
+            'American Samoa',
+            '040',
+            '0400000US60',
+            '60',
+            '-14.26715900',
+            '-170.66826740',
+            '60',
+          ],
+        ]
+
+        const callSpy = vi.fn()
+
+        // Mock returns synchronous value (no Promise.resolve)
+        vi.mocked(transformApiGeographyData).mockImplementation(
+          (data, type) => {
+            callSpy(JSON.parse(JSON.stringify(data)), type)
+            return transformedData // Return directly, not wrapped in Promise
+          },
+        )
+
+        await expect(
+          StateConfig.beforeSeed!(
+            mockClient as Client,
+            rawApiData,
+            mockContext,
+          ),
+        ).resolves.not.toThrow()
+      })
     })
   })
 
@@ -375,11 +342,7 @@ describe('Division Config', () => {
     it('should establish relationships with vintages', async () => {
       const geo_ids = [1, 2, 3, 4]
 
-      await DivisionConfig.afterSeed!(
-        mockClient as Client,
-        mockContext,
-        geo_ids,
-      )
+      await StateConfig.afterSeed!(mockClient as Client, mockContext, geo_ids)
 
       expect(createGeographyYear).toHaveBeenCalledTimes(geo_ids.length)
 
@@ -395,11 +358,7 @@ describe('Division Config', () => {
     it('should assign a parent geography', async () => {
       const geo_ids = [1, 2, 3, 4]
 
-      await DivisionConfig.afterSeed!(
-        mockClient as Client,
-        mockContext,
-        geo_ids,
-      )
+      await StateConfig.afterSeed!(mockClient as Client, mockContext, geo_ids)
 
       // Get the SQL that was actually called
       const mockQuery = vi.mocked(mockClient.query)
@@ -409,7 +368,7 @@ describe('Division Config', () => {
       const actualSQL = mockQuery.mock.calls[mockQuery.mock.calls.length - 1][0]
 
       // Compare normalized versions
-      expect(normalizeSQL(actualSQL)).toBe(normalizeSQL(parentDivisionSQL))
+      expect(normalizeSQL(actualSQL)).toBe(normalizeSQL(parentStateSQL))
     })
   })
 })

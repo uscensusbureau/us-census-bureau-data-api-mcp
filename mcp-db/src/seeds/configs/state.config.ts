@@ -11,22 +11,22 @@ import {
 import { createGeographyYear } from '../../helpers/geography-years.helper.js'
 import { transformApiGeographyData } from '../../schema/geography.schema.js'
 
-export const parentDivisionSQL = `
+export const parentStateSQL = `
   UPDATE geographies
   SET parent_geography_id = (
     SELECT id FROM geographies parent 
-    WHERE parent.summary_level_code = '020'
-      AND parent.region_code = geographies.region_code
+    WHERE parent.summary_level_code = '030'
+      AND parent.division_code = geographies.division_code
   )
-  WHERE summary_level_code = '030';
+  WHERE summary_level_code = '040';
 `
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-export const DivisionConfig: GeographySeedConfig = {
+export const StateConfig: GeographySeedConfig = {
   url: (context: GeographyContext) =>
-    `https://api.census.gov/data/${context.year}/geoinfo?get=NAME,SUMLEVEL,GEO_ID,INTPTLAT,INTPTLON&for=division:*`,
+    `https://api.census.gov/data/${context.year}/geoinfo?get=NAME,SUMLEVEL,GEO_ID,STATE,INTPTLAT,INTPTLON&for=state:*`,
   table: 'geographies',
   conflictColumn: 'ucgid_code',
   beforeSeed: async (
@@ -34,8 +34,8 @@ export const DivisionConfig: GeographySeedConfig = {
     rawData: unknown[],
     context: GeographyContext,
   ): Promise<void> => {
-    console.log(`Processing division geography data for ${context.year}...`)
-    const transformedData = transformApiGeographyData(rawData, 'division')
+    console.log(`Processing state geography data for ${context.year}...`)
+    const transformedData = transformApiGeographyData(rawData, 'state')
 
     // Import Division < Region Relationship Since API is Missing Data
     const dataPath = path.join(__dirname, '../../../data')
@@ -44,33 +44,47 @@ export const DivisionConfig: GeographySeedConfig = {
     const data = JSON.parse(content)
 
     // Create a Map for Lookup and Record Association During Data Transformation
-    const divisionToRegionMap = new Map<string, string>()
+    const stateToRegionDivisionMap = new Map<
+      string,
+      { region_code: string; division_code: string }
+    >()
+
     data.divisions.forEach((division: DivisionRegionMappingsType) => {
-      divisionToRegionMap.set(division.division_code, division.region_code)
+      division.states.forEach((state: { state_code: string }) => {
+        stateToRegionDivisionMap.set(state.state_code, {
+          region_code: division.region_code,
+          division_code: division.division_code,
+        })
+      })
     })
 
     transformedData.forEach((record) => {
-      record.for_param = `division:${record.division_code}`
+      record.for_param = `state:${record.state_code}`
       record.in_param = null
 
       // Manually Assign the Missing Region Code
-      if (record.division_code !== null) {
-        const divisionCodeStr = String(record.division_code)
-        const regionCode = divisionToRegionMap.get(divisionCodeStr)
-        if (regionCode !== undefined) {
-          record.region_code = regionCode
+      if (record.state_code !== null) {
+        const stateCodeStr = String(record.state_code)
+        const regionDivisionData = stateToRegionDivisionMap.get(stateCodeStr)
+
+        if (regionDivisionData !== undefined) {
+          record.region_code = regionDivisionData.region_code
+          record.division_code = regionDivisionData.division_code
         } else {
-          throw new Error(
-            `No region code found for division: ${record.division_code}`,
+          console.warn(
+            `No region/division data found for state: ${record.state_code}`,
+          )
+          console.warn(
+            'This may be because the geography is a province or territory.',
           )
         }
       } else {
-        throw new Error(`Missing division_code for record`)
+        throw new Error(`Missing state_code for record`)
       }
     })
 
     context.parentGeographies = context.parentGeographies || {}
-    context.parentGeographies.divisions = transformedData
+    context.parentGeographies.states = transformedData
 
     rawData.length = 0
     rawData.push(...transformedData)
@@ -84,10 +98,10 @@ export const DivisionConfig: GeographySeedConfig = {
       await createGeographyYear(client, geography_id, context.year_id)
     }
 
-    await client.query(parentDivisionSQL)
+    await client.query(parentStateSQL)
 
     console.log(
-      `Seeded ${insertedIds.length} division record(s) for ${context.year}`,
+      `Seeded ${insertedIds.length} state record(s) for ${context.year}`,
     )
   },
 }
