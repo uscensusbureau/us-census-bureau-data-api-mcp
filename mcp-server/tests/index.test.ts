@@ -1,7 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { MCPServer } from '../src/server'
 
-
 vi.mock('../src/tools/identify-datasets.tool.js', () => ({
   IdentifyDatasetsTool: vi
     .fn()
@@ -24,6 +23,12 @@ vi.mock('../src/tools/fetch-summary-table.tool.js', () => ({
   FetchSummaryTableTool: vi
     .fn()
     .mockImplementation(() => ({ name: 'fetch-summary-table-tool' })),
+}))
+
+vi.mock('../src/tools/resolve-geography-fips.tool.js', () => ({
+  ResolveGeographyFipsTool: vi
+    .fn()
+    .mockImplementation(() => ({ name: 'resolve-geography-fips-tool' })),
 }))
 
 vi.mock('@modelcontextprotocol/sdk/server/stdio.js', () => ({
@@ -53,7 +58,7 @@ describe('main', () => {
 
     await vi.importActual('../src/index.ts')
 
-    expect(serverSpy).toHaveBeenCalledTimes(4)
+    expect(serverSpy).toHaveBeenCalledTimes(5)
 
     expect(serverSpy).toHaveBeenCalledWith({ name: 'identify-datasets-tool' })
     expect(serverSpy).toHaveBeenCalledWith({
@@ -63,6 +68,9 @@ describe('main', () => {
       name: 'fetch-dataset-variables-tool',
     })
     expect(serverSpy).toHaveBeenCalledWith({ name: 'fetch-summary-table-tool' })
+    expect(serverSpy).toHaveBeenCalledWith({
+      name: 'resolve-geography-fips-tool',
+    })
 
     expect(StdioServerTransport).toHaveBeenCalledTimes(1)
     expect(connectSpy).toHaveBeenCalledTimes(1)

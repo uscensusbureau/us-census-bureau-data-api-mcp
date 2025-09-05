@@ -6,17 +6,16 @@ import {
   AllDatasetMetadataJsonSchema,
   AllDatasetMetadataJsonResponseType,
   SimplifiedAPIDatasetType,
-  DatasetType
+  DatasetType,
 } from '../schema/identify-datasets.schema.js'
 
 import { BaseTool } from './base.tool.js'
 
 import { ToolContent } from '../types/base.types.js'
 
-export class IdentifyDatasetsTool extends BaseTool<object> { 
+export class IdentifyDatasetsTool extends BaseTool<object> {
   name = 'identify-datasets'
-  description = 
-  `This tool returns a data catalog of available Census datasets from the Census API. 
+  description = `This tool returns a data catalog of available Census datasets from the Census API. 
   The LLM should analyze this catalog against the user's request and identify the best dataset match(es).
   The LLM must return at least one dataset name or indicate low confidence if no dataset is a strong match. 
 
@@ -40,7 +39,7 @@ export class IdentifyDatasetsTool extends BaseTool<object> {
   }
 
   get argsSchema() {
-  return z.object({})
+    return z.object({})
   }
 
   constructor() {
@@ -48,7 +47,9 @@ export class IdentifyDatasetsTool extends BaseTool<object> {
     this.handler = this.handler.bind(this)
   }
 
-  private isValidMetadataResponse(data: unknown): data is AllDatasetMetadataJsonResponseType {
+  private isValidMetadataResponse(
+    data: unknown,
+  ): data is AllDatasetMetadataJsonResponseType {
     try {
       AllDatasetMetadataJsonSchema.parse(data)
       return true
@@ -59,14 +60,19 @@ export class IdentifyDatasetsTool extends BaseTool<object> {
 
   private simplifyDataset(dataset: DatasetType) {
     const simplified: SimplifiedAPIDatasetType = {
-      c_dataset: Array.isArray(dataset.c_dataset) ? dataset.c_dataset.join('/') : dataset.c_dataset,
+      c_dataset: Array.isArray(dataset.c_dataset)
+        ? dataset.c_dataset.join('/')
+        : dataset.c_dataset,
       title: dataset.title,
       description: dataset.description,
     }
     if ('c_vintage' in dataset) simplified.c_vintage = dataset.c_vintage
-    if ('c_isAggregate' in dataset) simplified.c_isAggregate = dataset.c_isAggregate
-    if ('c_isTimeseries' in dataset) simplified.c_isTimeseries = dataset.c_isTimeseries
-    if ('c_isMicrodata' in dataset) simplified.c_isMicrodata = dataset.c_isMicrodata
+    if ('c_isAggregate' in dataset)
+      simplified.c_isAggregate = dataset.c_isAggregate
+    if ('c_isTimeseries' in dataset)
+      simplified.c_isTimeseries = dataset.c_isTimeseries
+    if ('c_isMicrodata' in dataset)
+      simplified.c_isMicrodata = dataset.c_isMicrodata
     return simplified
   }
 
@@ -82,12 +88,16 @@ export class IdentifyDatasetsTool extends BaseTool<object> {
 
       const response = await fetch(catalogUrl)
       if (!response.ok) {
-        return this.createErrorResponse(`Failed to fetch catalog: ${response.status} ${response.statusText}`)
+        return this.createErrorResponse(
+          `Failed to fetch catalog: ${response.status} ${response.statusText}`,
+        )
       }
 
       const data = await response.json()
       if (!this.isValidMetadataResponse(data)) {
-        return this.createErrorResponse('Catalog response did not match expected metadata schema')
+        return this.createErrorResponse(
+          'Catalog response did not match expected metadata schema',
+        )
       }
 
       const simplified = data.dataset.map(this.simplifyDataset)
@@ -101,8 +111,11 @@ export class IdentifyDatasetsTool extends BaseTool<object> {
         ],
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
-      return this.createErrorResponse(`Failed to fetch datasets: ${errorMessage}`)
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error occurred'
+      return this.createErrorResponse(
+        `Failed to fetch datasets: ${errorMessage}`,
+      )
     }
   }
 }

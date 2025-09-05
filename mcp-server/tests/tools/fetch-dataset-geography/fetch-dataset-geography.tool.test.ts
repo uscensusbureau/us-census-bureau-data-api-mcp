@@ -113,7 +113,6 @@ describe('FetchDatasetGeographyTool', () => {
       healthCheck: vi.fn(),
       query: vi.fn(),
     }
-
     ;(DatabaseService.getInstance as Mock).mockReturnValue(mockDbService)
   })
 

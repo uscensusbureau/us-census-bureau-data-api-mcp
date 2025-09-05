@@ -54,9 +54,7 @@ export class FetchDatasetGeographyTool extends BaseTool<FetchDatasetGeographyArg
     return result.rows
   }
 
-  private buildGeographyMetadata(
-    levels: SummaryLevelRow[],
-  ): GeographyMetadata {
+  private buildGeographyMetadata(levels: SummaryLevelRow[]): GeographyMetadata {
     const metadata: GeographyMetadata = {}
 
     for (const level of levels) {

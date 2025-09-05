@@ -2,8 +2,10 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 16.9 (Debian 16.9-1.pgdg120+1)
--- Dumped by pg_dump version 16.9 (Debian 16.9-1.pgdg120+1)
+\restrict YDkuXu6v8AfbOjMaaBcIptLxjYKzbkgaGfKuCBoCxtHfYf7rhBZVMc1ovEwHXJf
+
+-- Dumped from database version 16.10 (Debian 16.10-1.pgdg13+1)
+-- Dumped by pg_dump version 16.10 (Debian 16.10-1.pgdg13+1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -59,34 +61,6 @@ CREATE FUNCTION public.cleanup_expired_cache() RETURNS integer
     
     GET DIAGNOSTICS deleted_count = ROW_COUNT;
     RETURN deleted_count;
-  END;
-  $$;
-
-
---
--- Name: fuzzy_search_places(text, real, integer); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.fuzzy_search_places(search_term text, similarity_threshold real DEFAULT 0.3, limit_results integer DEFAULT 10) RETURNS TABLE(id bigint, name character varying, full_name character varying, place_type character varying, state_code character, similarity_score real)
-    LANGUAGE plpgsql
-    AS $$
-  BEGIN
-      RETURN QUERY
-      SELECT 
-          p.id,
-          p.name,
-          p.full_name,
-          p.place_type,
-          p.state_code,
-          similarity(p.name, search_term) as similarity_score
-      FROM places p
-      WHERE 
-          similarity(p.name, search_term) > similarity_threshold
-          OR similarity(COALESCE(p.full_name, ''), search_term) > similarity_threshold
-      ORDER BY 
-          similarity_score DESC,
-          p.population DESC NULLS LAST
-      LIMIT limit_results;
   END;
   $$;
 
@@ -168,77 +142,95 @@ CREATE FUNCTION public.optimize_database() RETURNS text
 
 
 --
--- Name: resolve_geography_by_coordinates(numeric, numeric, numeric); Type: FUNCTION; Schema: public; Owner: -
+-- Name: search_geographies(text, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION public.resolve_geography_by_coordinates(input_latitude numeric, input_longitude numeric, max_distance_km numeric DEFAULT 50.0) RETURNS TABLE(id bigint, name character varying, place_type character varying, state_code character, distance_km numeric)
-    LANGUAGE plpgsql
+CREATE FUNCTION public.search_geographies(search_term text, result_limit integer DEFAULT 10) RETURNS TABLE(id integer, name text, summary_level_name text, latitude numeric, longitude numeric, for_param text, in_param text, weighted_score real)
+    LANGUAGE sql
     AS $$
-  BEGIN
-    RETURN QUERY
-    SELECT 
-      p.id,
-      p.name,
-      p.place_type,
-      p.state_code,
-      -- Simple distance calculation (for more accuracy, use PostGIS)
-      (6371 * acos(
-        cos(radians(input_latitude)) * 
-        cos(radians(p.latitude)) * 
-        cos(radians(p.longitude) - radians(input_longitude)) + 
-        sin(radians(input_latitude)) * 
-        sin(radians(p.latitude))
-      ))::DECIMAL as distance_km
-    FROM places p
-    WHERE 
-      p.latitude IS NOT NULL 
-      AND p.longitude IS NOT NULL
-      AND (6371 * acos(
-        cos(radians(input_latitude)) * 
-        cos(radians(p.latitude)) * 
-        cos(radians(p.longitude) - radians(input_longitude)) + 
-        sin(radians(input_latitude)) * 
-        sin(radians(p.latitude))
-      )) <= max_distance_km
-    ORDER BY distance_km ASC
-    LIMIT 10;
-  END;
-  $$;
+  SELECT 
+    g.id,
+    g.name,
+    sl.name as summary_level_name,
+    g.latitude,
+    g.longitude,
+    g.for_param,
+    g.in_param,
+    -- Weighted score: similarity + hierarchy boost
+    (SIMILARITY(g.name, search_term) + (1.0 - (sl.hierarchy_level::real / 100.0))) as weighted_score
+  FROM geographies g
+  LEFT JOIN summary_levels sl ON g.summary_level_code = sl.code
+  WHERE 
+    g.name % search_term  -- Uses trigram similarity operator
+    OR g.name ILIKE '%' || search_term || '%'  -- Fallback for partial matches
+  ORDER BY 
+    weighted_score DESC,  -- Combined similarity + hierarchy score
+    LENGTH(g.name) ASC,   -- Prefer shorter names when scores are equal
+    g.name ASC
+  LIMIT result_limit;
+$$;
 
 
 --
--- Name: search_places(text, character, text[], integer); Type: FUNCTION; Schema: public; Owner: -
+-- Name: search_geographies_by_summary_level(text, text, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION public.search_places(search_term text, state_filter character DEFAULT NULL::bpchar, place_types text[] DEFAULT NULL::text[], limit_results integer DEFAULT 10) RETURNS TABLE(id bigint, name character varying, full_name character varying, place_type character varying, state_code character, county_name character varying, fips_code character varying, latitude numeric, longitude numeric, population integer, rank real)
-    LANGUAGE plpgsql
+CREATE FUNCTION public.search_geographies_by_summary_level(search_term text, summary_level_code text, result_limit integer DEFAULT 10) RETURNS TABLE(id integer, name text, summary_level_name text, latitude numeric, longitude numeric, for_param text, in_param text, similarity real)
+    LANGUAGE sql
     AS $$
-  BEGIN
-      RETURN QUERY
-      SELECT 
-          p.id,
-          p.name,
-          p.full_name,
-          p.place_type,
-          p.state_code,
-          p.county_name,
-          p.fips_code,
-          p.latitude,
-          p.longitude,
-          p.population,
-          ts_rank(to_tsvector('english', p.name || ' ' || COALESCE(p.full_name, '')), 
-                  plainto_tsquery('english', search_term)) as rank
-      FROM places p
-      WHERE 
-          to_tsvector('english', p.name || ' ' || COALESCE(p.full_name, '')) @@ plainto_tsquery('english', search_term)
-          AND (state_filter IS NULL OR p.state_code = state_filter)
-          AND (place_types IS NULL OR p.place_type = ANY(place_types))
-      ORDER BY 
-          rank DESC,
-          p.population DESC NULLS LAST
-      LIMIT limit_results;
-  END;
-  $$;
+	SELECT 
+	  g.id,
+	  g.name,
+	  sl.name as summary_level_name,
+	  g.latitude,
+	  g.longitude,
+	  g.for_param,
+	  g.in_param,
+	  SIMILARITY(g.name, search_term) as similarity
+	FROM geographies g
+	LEFT JOIN summary_levels sl ON g.summary_level_code = sl.code
+	WHERE 
+	  g.summary_level_code = summary_level_code
+	  AND (
+	    g.name % search_term  -- Uses trigram similarity operator
+	    OR g.name ILIKE '%' || search_term || '%'  -- Fallback for partial matches
+	  )
+	ORDER BY 
+	  SIMILARITY(g.name, search_term) DESC,
+	  LENGTH(g.name) ASC,   -- Prefer shorter names when similarity is equal
+	  g.name ASC
+	LIMIT result_limit;
+$$;
+
+
+--
+-- Name: search_summary_levels(text, integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.search_summary_levels(search_term text, result_limit integer DEFAULT 1) RETURNS TABLE(code text, name text)
+    LANGUAGE sql
+    AS $_$
+  SELECT 
+    sl.code as code,
+    sl.name as name
+  FROM summary_levels sl
+  WHERE 
+    sl.code = LPAD($1, 3, '0')  -- exact code match
+    OR LOWER(sl.name) = LOWER(TRIM($1))  -- exact name match
+    OR SIMILARITY(LOWER(sl.name), LOWER(TRIM($1))) > 0.3  -- fuzzy name match
+  ORDER BY 
+    CASE 
+      WHEN sl.code = LPAD($1, 3, '0') THEN 1.00
+      WHEN LOWER(sl.name) = LOWER(TRIM($1)) THEN 1.00
+      ELSE SIMILARITY(LOWER(sl.name), LOWER(TRIM($1)))
+    END DESC,
+    CASE 
+      WHEN sl.code = LPAD($1, 3, '0') THEN 1
+      WHEN LOWER(sl.name) = LOWER(TRIM($1)) THEN 2
+      ELSE 3
+    END
+  LIMIT COALESCE($2, 5)
+$_$;
 
 
 --
@@ -324,7 +316,7 @@ CREATE TABLE public.geographies (
     full_name character varying(500),
     state_code character(2),
     state_name character varying(100),
-    county_code character varying(3),
+    county_code character(3),
     county_name character varying(100),
     fips_code character varying(15),
     census_geoid character varying(20),
@@ -347,7 +339,9 @@ CREATE TABLE public.geographies (
     summary_level_id bigint,
     for_param character varying(25),
     in_param character varying(25),
-    summary_level_code character varying(3)
+    summary_level_code character varying(3),
+    region_code character(1),
+    division_code character(1)
 );
 
 
@@ -364,7 +358,8 @@ CREATE TABLE public.summary_levels (
     on_spine boolean NOT NULL,
     parent_summary_level_id bigint,
     code text,
-    parent_summary_level text
+    parent_summary_level text,
+    hierarchy_level integer DEFAULT 99
 );
 
 
@@ -385,6 +380,38 @@ CREATE SEQUENCE public.geography_levels_id_seq
 --
 
 ALTER SEQUENCE public.geography_levels_id_seq OWNED BY public.summary_levels.id;
+
+
+--
+-- Name: geography_years; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.geography_years (
+    id bigint NOT NULL,
+    geography_id bigint NOT NULL,
+    year_id bigint NOT NULL,
+    created_at timestamp with time zone DEFAULT now(),
+    updated_at timestamp with time zone DEFAULT now()
+);
+
+
+--
+-- Name: geography_years_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.geography_years_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: geography_years_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.geography_years_id_seq OWNED BY public.geography_years.id;
 
 
 --
@@ -438,6 +465,37 @@ ALTER SEQUENCE public.places_id_seq OWNED BY public.geographies.id;
 
 
 --
+-- Name: years; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.years (
+    id bigint NOT NULL,
+    year integer NOT NULL,
+    created_at timestamp with time zone DEFAULT now(),
+    updated_at timestamp with time zone DEFAULT now()
+);
+
+
+--
+-- Name: years_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.years_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: years_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.years_id_seq OWNED BY public.years.id;
+
+
+--
 -- Name: census_data_cache id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -452,6 +510,13 @@ ALTER TABLE ONLY public.geographies ALTER COLUMN id SET DEFAULT nextval('public.
 
 
 --
+-- Name: geography_years id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.geography_years ALTER COLUMN id SET DEFAULT nextval('public.geography_years_id_seq'::regclass);
+
+
+--
 -- Name: pgmigrations id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -463,6 +528,13 @@ ALTER TABLE ONLY public.pgmigrations ALTER COLUMN id SET DEFAULT nextval('public
 --
 
 ALTER TABLE ONLY public.summary_levels ALTER COLUMN id SET DEFAULT nextval('public.geography_levels_id_seq'::regclass);
+
+
+--
+-- Name: years id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.years ALTER COLUMN id SET DEFAULT nextval('public.years_id_seq'::regclass);
 
 
 --
@@ -487,6 +559,14 @@ ALTER TABLE ONLY public.census_data_cache
 
 ALTER TABLE ONLY public.geographies
     ADD CONSTRAINT geographies_fips_code_year_unique UNIQUE (fips_code, year);
+
+
+--
+-- Name: geographies geographies_ucgid_code_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.geographies
+    ADD CONSTRAINT geographies_ucgid_code_unique UNIQUE (ucgid_code);
 
 
 --
@@ -530,6 +610,22 @@ ALTER TABLE ONLY public.summary_levels
 
 
 --
+-- Name: geography_years geography_years_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.geography_years
+    ADD CONSTRAINT geography_years_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: geography_years geography_years_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.geography_years
+    ADD CONSTRAINT geography_years_unique UNIQUE (geography_id, year_id);
+
+
+--
 -- Name: pgmigrations pgmigrations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -543,6 +639,22 @@ ALTER TABLE ONLY public.pgmigrations
 
 ALTER TABLE ONLY public.geographies
     ADD CONSTRAINT places_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: years years_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.years
+    ADD CONSTRAINT years_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: years years_year_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.years
+    ADD CONSTRAINT years_year_key UNIQUE (year);
 
 
 --
@@ -574,6 +686,13 @@ CREATE INDEX census_data_cache_request_hash_index ON public.census_data_cache US
 
 
 --
+-- Name: geographies_division_code_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX geographies_division_code_index ON public.geographies USING btree (division_code);
+
+
+--
 -- Name: geographies_fips_code_index; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -592,6 +711,13 @@ CREATE INDEX geographies_latitude_longitude_index ON public.geographies USING bt
 --
 
 CREATE INDEX geographies_parent_geography_id_index ON public.geographies USING btree (parent_geography_id);
+
+
+--
+-- Name: geographies_region_code_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX geographies_region_code_index ON public.geographies USING btree (region_code);
 
 
 --
@@ -644,6 +770,20 @@ CREATE INDEX geography_levels_summary_level_index ON public.summary_levels USING
 
 
 --
+-- Name: geography_years_geography_id_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX geography_years_geography_id_index ON public.geography_years USING btree (geography_id);
+
+
+--
+-- Name: geography_years_year_id_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX geography_years_year_id_index ON public.geography_years USING btree (year_id);
+
+
+--
 -- Name: idx_census_data_cache_geography; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -693,6 +833,20 @@ CREATE INDEX idx_geographies_successor_geoid ON public.geographies USING btree (
 
 
 --
+-- Name: idx_summary_levels_code; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_summary_levels_code ON public.summary_levels USING btree (code);
+
+
+--
+-- Name: idx_summary_levels_name_gin; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_summary_levels_name_gin ON public.summary_levels USING gin (name public.gin_trgm_ops);
+
+
+--
 -- Name: summary_levels_parent_summary_level_id_index; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -722,6 +876,22 @@ ALTER TABLE ONLY public.summary_levels
 
 
 --
+-- Name: geography_years geography_years_geography_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.geography_years
+    ADD CONSTRAINT geography_years_geography_id_fkey FOREIGN KEY (geography_id) REFERENCES public.geographies(id) ON DELETE CASCADE;
+
+
+--
+-- Name: geography_years geography_years_year_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.geography_years
+    ADD CONSTRAINT geography_years_year_id_fkey FOREIGN KEY (year_id) REFERENCES public.years(id) ON DELETE CASCADE;
+
+
+--
 -- Name: geographies places_geography_level_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -740,4 +910,6 @@ ALTER TABLE ONLY public.geographies
 --
 -- PostgreSQL database dump complete
 --
+
+\unrestrict YDkuXu6v8AfbOjMaaBcIptLxjYKzbkgaGfKuCBoCxtHfYf7rhBZVMc1ovEwHXJf
 

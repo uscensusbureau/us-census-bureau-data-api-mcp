@@ -96,31 +96,5 @@ describe('Database Schema', () => {
 
       expect(result.rows[0].exists).toBe(true)
     })
-
-    it('should have search_places function', async () => {
-      const result: QueryResult<{ exists: boolean }> = await client.query(`
-        SELECT EXISTS (
-          SELECT FROM information_schema.routines 
-          WHERE routine_schema = 'public' 
-          AND routine_name = 'search_places'
-          AND routine_type = 'FUNCTION'
-        );
-      `)
-
-      expect(result.rows[0].exists).toBe(true)
-    })
-
-    it('should have fuzzy_search_places function', async () => {
-      const result: QueryResult<{ exists: boolean }> = await client.query(`
-        SELECT EXISTS (
-          SELECT FROM information_schema.routines 
-          WHERE routine_schema = 'public' 
-          AND routine_name = 'fuzzy_search_places'
-          AND routine_type = 'FUNCTION'
-        );
-      `)
-
-      expect(result.rows[0].exists).toBe(true)
-    })
   })
 })

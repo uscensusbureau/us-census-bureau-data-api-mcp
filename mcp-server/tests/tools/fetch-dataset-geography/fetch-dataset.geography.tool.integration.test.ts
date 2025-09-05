@@ -6,6 +6,7 @@ import {
   afterAll,
   beforeEach,
   afterEach,
+  vi,
 } from 'vitest'
 import { Client } from 'pg'
 import { FetchDatasetGeographyTool } from '../../../src/tools/fetch-dataset-geography.tool.js'
@@ -21,7 +22,6 @@ describe('FetchDatasetGeographyTool - Integration Tests', () => {
     // Use test database
     testClient = new Client(databaseConfig)
     await testClient.connect()
-
     ;(
       DatabaseService as typeof DatabaseService & { instance: unknown }
     ).instance = undefined
@@ -35,14 +35,26 @@ describe('FetchDatasetGeographyTool - Integration Tests', () => {
 
   afterEach(async () => {
     // Clean up test data after each test
-    await testClient.query('TRUNCATE summary_levels RESTART IDENTITY CASCADE')
+    try {
+      console.log('Starting cleanup...')
+
+      // Clean up in correct dependency order (children first)
+      await testClient.query('DELETE FROM summary_levels WHERE true')
+
+      // Reset sequences
+      await testClient.query(
+        'ALTER SEQUENCE IF EXISTS summary_levels_id_seq RESTART WITH 1',
+      )
+
+      console.log('Cleanup completed successfully')
+    } catch (error) {
+      console.error('Cleanup failed:', error)
+      throw error
+    }
   })
 
   beforeEach(async () => {
     tool = new FetchDatasetGeographyTool()
-
-    // Clean and seed fresh test data before each test
-    await testClient.query('TRUNCATE summary_levels RESTART IDENTITY CASCADE')
 
     // Insert known test data
     await testClient.query(`
@@ -68,8 +80,29 @@ describe('FetchDatasetGeographyTool - Integration Tests', () => {
 
   describe('Real Database Integration', () => {
     it('should successfully connect to database and retrieve geography levels', async () => {
-      const isHealthy = await databaseService.healthCheck()
-      expect(isHealthy).toBe(true)
+      try {
+        const isHealthy = await databaseService.healthCheck()
+        console.log('Health check result:', isHealthy)
+
+        if (!isHealthy) {
+          // Try to get more details about the connection
+          console.log(
+            'Health check failed, attempting direct connection test...',
+          )
+
+          try {
+            const testResult = await databaseService.query('SELECT 1 as test')
+            console.log('Direct query test result:', testResult)
+          } catch (error) {
+            console.error('Direct query failed:', error)
+          }
+        }
+
+        expect(isHealthy).toBe(true)
+      } catch (error) {
+        console.error('Health check threw an error:', error)
+        throw error
+      }
 
       const result = await databaseService.query(`
         SELECT name, query_name, code, on_spine, parent_summary_level

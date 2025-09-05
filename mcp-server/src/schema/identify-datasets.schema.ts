@@ -11,7 +11,6 @@ export const SimplifiedAPIDatasetSchema = z.object({
   c_isMicrodata: z.boolean().optional(),
 })
 
-
 export const DatasetSchema = z.object({
   c_vintage: z.number().optional(),
   c_dataset: z.array(z.string()),
@@ -32,14 +31,16 @@ export const DatasetSchema = z.object({
   accessLevel: z.string(),
   bureauCode: z.array(z.string()),
   description: z.string(),
-  distribution: z.array(z.object({
-    "@type": z.string(),
-    accessURL: z.string(),
-    description: z.string(),
-    format: z.string(),
-    mediaType: z.string(),
-    title: z.string(),
-  })),
+  distribution: z.array(
+    z.object({
+      '@type': z.string(),
+      accessURL: z.string(),
+      description: z.string(),
+      format: z.string(),
+      mediaType: z.string(),
+      title: z.string(),
+    }),
+  ),
   contactPoint: z.object({
     fn: z.string(),
     hasEmail: z.string(),
@@ -55,10 +56,12 @@ export const DatasetSchema = z.object({
   publisher: z.object({
     '@type': z.string(),
     name: z.string(),
-    subOrganizationOf: z.object({
-      '@type': z.string(),
-      name: z.string(),
-    }).optional(),
+    subOrganizationOf: z
+      .object({
+        '@type': z.string(),
+        name: z.string(),
+      })
+      .optional(),
   }),
 })
 
@@ -69,11 +72,14 @@ export const AllDatasetMetadataJsonSchema = z.object({
   '@type': z.string(),
   conformsTo: z.string(),
   describedBy: z.string(),
-  dataset: z.array(DatasetSchema)
+  dataset: z.array(DatasetSchema),
 })
 
-
 // Infer TypeScript types from Zod schemas
-export type SimplifiedAPIDatasetType = z.infer<typeof SimplifiedAPIDatasetSchema>;
-export type AllDatasetMetadataJsonResponseType = z.infer<typeof AllDatasetMetadataJsonSchema>;
+export type SimplifiedAPIDatasetType = z.infer<
+  typeof SimplifiedAPIDatasetSchema
+>
+export type AllDatasetMetadataJsonResponseType = z.infer<
+  typeof AllDatasetMetadataJsonSchema
+>
 export type DatasetType = z.infer<typeof DatasetSchema>
