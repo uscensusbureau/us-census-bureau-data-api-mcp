@@ -6,6 +6,7 @@ import {
   AllDatasetMetadataJsonSchema,
   AllDatasetMetadataJsonResponseType,
   SimplifiedAPIDatasetType,
+  AggregatedResultType,
   DatasetType,
 } from '../schema/identify-datasets.schema.js'
 
@@ -76,6 +77,60 @@ export class IdentifyDatasetsTool extends BaseTool<object> {
     return simplified
   }
 
+  private cleanTitle(title: string, vintage?: number): string {
+    if (vintage === undefined) return title;
+
+    const vintageStr = vintage.toString();
+
+    // Match the vintage surrounded by optional whitespace or punctuation
+    const regex = new RegExp(`\\b${vintageStr}\\b`);
+    
+    // Replace vintage while preserving spacing
+    return title.replace(regex, '').replace(/\s{2,}/g, ' ').trim();
+  }
+
+  //aggregate by c_dataset and describe, create a list of years (c_vintages)
+  private aggregateDatasets(data: SimplifiedAPIDatasetType[]): AggregatedResultType[] {
+    const grouped = new Map<string, AggregatedResultType>();
+
+    for (const entry of data) {
+      const key = `${entry.c_dataset}|${entry.description}`;
+      const vintage = entry.c_vintage;
+
+      if (!grouped.has(key)) {
+        grouped.set(key, {
+          c_dataset: entry.c_dataset,
+          title: this.cleanTitle(entry.title, vintage),
+          description: entry.description,
+          c_vintages: vintage !== undefined ? [vintage] : [],
+          c_isAggregate: entry.c_isAggregate,
+          c_isTimeseries: entry.c_isTimeseries,
+          c_isMicrodata: entry.c_isMicrodata
+        });
+      } else {
+        const existing = grouped.get(key)!;
+        if (vintage !== undefined && !existing.c_vintages.includes(vintage)) {
+          existing.c_vintages.push(vintage);
+        }
+      }
+    }
+
+    // Optionally sort vintages
+    for (const entry of grouped.values()) {
+      entry.c_vintages.sort((a, b) => a - b);
+    }
+
+      return Array.from(grouped.values()).map(entry => {
+      // Remove c_vintages if it is empty
+      if (entry.c_vintages.length === 0) {
+          const { c_vintages, ...rest } = entry;
+          return rest;
+      }
+      return entry;
+      });
+  }
+
+
   async handler(): Promise<{ content: ToolContent[] }> {
     try {
       const apiKey = process.env.CENSUS_API_KEY
@@ -101,12 +156,15 @@ export class IdentifyDatasetsTool extends BaseTool<object> {
       }
 
       const simplified = data.dataset.map(this.simplifyDataset)
+      const aggregated = this.aggregateDatasets(simplified)
+
+      console.log(JSON.stringify(aggregated, null, 2));
 
       return {
         content: [
           {
             type: 'text',
-            text: JSON.stringify(simplified, null, 2),
+            text: JSON.stringify(aggregated, null, 2),
           },
         ],
       }
