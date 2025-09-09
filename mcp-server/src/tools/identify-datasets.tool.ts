@@ -89,6 +89,15 @@ export class IdentifyDatasetsTool extends BaseTool<object> {
     return title.replace(regex, '').replace(/\s{2,}/g, ' ').trim();
   }
 
+  private cleanUndefinedKeys<T extends object>(obj: T): Partial<T> {
+  return Object.entries(obj).reduce((acc, [key, value]) => {
+    if (value !== undefined) {
+      acc[key as keyof T] = value;
+    }
+    return acc;
+  }, {} as Partial<T>);
+  }
+
   //aggregate by c_dataset and describe, create a list of years (c_vintages)
   private aggregateDatasets(data: SimplifiedAPIDatasetType[]): AggregatedResultType[] {
     const grouped = new Map<string, AggregatedResultType>();
@@ -117,17 +126,16 @@ export class IdentifyDatasetsTool extends BaseTool<object> {
 
     // Optionally sort vintages
     for (const entry of grouped.values()) {
-      entry.c_vintages.sort((a, b) => a - b);
+    entry.c_vintages.sort((a, b) => a - b);
     }
 
-      return Array.from(grouped.values()).map(entry => {
-      // Remove c_vintages if it is empty
-      if (entry.c_vintages.length === 0) {
-          const { c_vintages, ...rest } = entry;
-          return rest;
-      }
-      return entry;
-      });
+    return Array.from(grouped.values()).map(entry => {
+    if (entry.c_vintages.length === 0) {
+        const { c_vintages, ...rest } = entry;
+        return this.cleanUndefinedKeys(rest);
+    }
+    return this.cleanUndefinedKeys(entry);
+    });
   }
 
 
@@ -157,8 +165,6 @@ export class IdentifyDatasetsTool extends BaseTool<object> {
 
       const simplified = data.dataset.map(this.simplifyDataset)
       const aggregated = this.aggregateDatasets(simplified)
-
-      console.log(JSON.stringify(aggregated, null, 2));
 
       return {
         content: [
