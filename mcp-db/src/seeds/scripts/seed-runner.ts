@@ -4,6 +4,8 @@ import { Client } from 'pg'
 import { fileURLToPath } from 'url'
 import { z } from 'zod'
 
+import { GeographyRecord } from '../../schema/geography.schema'
+
 import {
   GeographySeedConfig,
   GeographyContext,
@@ -72,6 +74,27 @@ export class SeedRunner {
       id: parseInt(row.id, 10),
       year: parseInt(row.year, 10),
     }))
+  }
+
+  getStateCodesForYear(context: GeographyContext, year: number): string[] {
+    if (context?.parentGeographies?.[year]?.states) {
+      console.log(`Using state data from parentGeographies for year ${year}`)
+      const stateCodes = context.parentGeographies[year].states
+        .map((state: GeographyRecord) => state.state_code)
+        .filter((code): code is string => code != null)
+        .map((code: string) => String(code).padStart(2, '0')) // Ensure 2-digit format
+        .sort()
+
+      if (stateCodes.length > 0) {
+        console.log(
+          `Found ${stateCodes.length} states in parentGeographies for year ${year}`,
+        )
+        console.log(`States for ${year}: ${stateCodes.join(', ')}`)
+        return stateCodes
+      }
+    }
+
+    throw Error(`No states found in context of year ${year}`)
   }
 
   private async waitForQueueToEmpty(): Promise<void> {

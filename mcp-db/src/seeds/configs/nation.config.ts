@@ -25,10 +25,6 @@ export const NationConfig: GeographySeedConfig = {
       record.in_param = null
     })
 
-    // Store nation data in context for potential use by child geographies
-    context.parentGeographies = context.parentGeographies || {}
-    context.parentGeographies.nation = transformedData
-
     rawData.length = 0
     rawData.push(...transformedData)
   },

@@ -26,9 +26,6 @@ export const RegionConfig: GeographySeedConfig = {
       record.in_param = null
     })
 
-    context.parentGeographies = context.parentGeographies || {}
-    context.parentGeographies.regions = transformedData
-
     rawData.length = 0
     rawData.push(...transformedData)
   },

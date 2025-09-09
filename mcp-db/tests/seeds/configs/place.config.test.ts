@@ -214,28 +214,6 @@ describe('Place Config', () => {
       expect(rawApiData[0]).toHaveProperty('in_param', 'state:01')
     })
 
-    it('stores the states in the parentGeographies', async () => {
-      const callSpy = vi.fn()
-
-      // Mock returns synchronous value (no Promise.resolve)
-      vi.mocked(transformApiGeographyData).mockImplementation((data, type) => {
-        callSpy(JSON.parse(JSON.stringify(data)), type)
-        return transformedData // Return directly, not wrapped in Promise
-      })
-
-      await PlaceConfig.beforeSeed!(
-        mockClient as Client,
-        rawApiData,
-        mockContext,
-      )
-
-      expect(mockContext.parentGeographies).toHaveProperty('states')
-      expect(mockContext.parentGeographies.states.length).toEqual(1)
-      expect(mockContext.parentGeographies.states[0].name).toBe(
-        'Abanda CDP, Alabama',
-      )
-    })
-
     describe('when a state is missing region and division data', () => {
       it('does not throw an error', async () => {
         const callSpy = vi.fn()

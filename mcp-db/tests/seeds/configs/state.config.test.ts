@@ -233,38 +233,6 @@ describe('State Config', () => {
       expect(rawApiData[0]).toHaveProperty('in_param', null)
     })
 
-    it('stores the states in the parentGeographies', async () => {
-      const rawApiData = [
-        ['NAME', 'SUMLEVEL', 'GEO_ID', 'INTPTLAT', 'INTPTLON', 'state'],
-        [
-          'Pennsylvania',
-          '040',
-          '0400000US42',
-          '40.5869403',
-          '-77.3684875',
-          '42',
-        ],
-      ]
-
-      const callSpy = vi.fn()
-
-      // Mock returns synchronous value (no Promise.resolve)
-      vi.mocked(transformApiGeographyData).mockImplementation((data, type) => {
-        callSpy(JSON.parse(JSON.stringify(data)), type)
-        return transformedData // Return directly, not wrapped in Promise
-      })
-
-      await StateConfig.beforeSeed!(
-        mockClient as Client,
-        rawApiData,
-        mockContext,
-      )
-
-      expect(mockContext.parentGeographies).toHaveProperty('states')
-      expect(mockContext.parentGeographies.states.length).toEqual(1)
-      expect(mockContext.parentGeographies.states[0].name).toBe('Pennsylvania')
-    })
-
     describe('when a state is missing region and division data', () => {
       it('does not throw an error', async () => {
         const rawApiData = [

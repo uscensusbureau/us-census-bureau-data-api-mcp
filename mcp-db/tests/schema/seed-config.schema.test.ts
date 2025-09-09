@@ -101,19 +101,21 @@ describe('GeographyContextSchema', () => {
       year: 2023,
       year_id: 1,
       parentGeographies: {
-        states: [
-          {
-            name: 'Alabama',
-            ucgid_code: '0400000US01',
-            geo_id: '0400000US01',
-            summary_level_code: '040',
-            for_param: 'state:*', // Fixed: should be 'state:*', not 'state:01'
-            in_param: null,
-            year: 2023,
-            intptlat: 32.31823,
-            intptlon: -86.902298,
-          },
-        ],
+        '2023': {
+          states: [
+            {
+              name: 'Alabama',
+              ucgid_code: '0400000US01',
+              geo_id: '0400000US01',
+              summary_level_code: '040',
+              for_param: 'state:*', // Fixed: should be 'state:*', not 'state:01'
+              in_param: null,
+              year: 2023,
+              intptlat: 32.31823,
+              intptlon: -86.902298,
+            },
+          ],
+        },
       },
     }
 
@@ -121,7 +123,9 @@ describe('GeographyContextSchema', () => {
 
     expect(result.success).toBe(true)
     if (result.success) {
-      expect(result.data.parentGeographies?.states?.[0].name).toBe('Alabama')
+      expect(result.data.parentGeographies?.[2023]?.states?.[0].name).toBe(
+        'Alabama',
+      )
     }
   })
 

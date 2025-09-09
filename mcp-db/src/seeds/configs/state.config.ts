@@ -83,8 +83,11 @@ export const StateConfig: GeographySeedConfig = {
       }
     })
 
+    //Organize State data by Year for Use in Geographies Requiring State 'in' Param
     context.parentGeographies = context.parentGeographies || {}
-    context.parentGeographies.states = transformedData
+    context.parentGeographies[context.year] =
+      context.parentGeographies[context.year] || {}
+    context.parentGeographies[context.year].states = transformedData
 
     rawData.length = 0
     rawData.push(...transformedData)

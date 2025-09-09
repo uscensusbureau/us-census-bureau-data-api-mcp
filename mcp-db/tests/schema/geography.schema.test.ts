@@ -32,6 +32,8 @@ describe('Geography Schema', () => {
         division: 'division_code',
         STATE: 'state_code',
         COUNTY: 'county_code',
+        COUSUB: 'county_subdivision_code',
+        PLACE: 'place_code',
         INTPTLAT: 'latitude',
         INTPTLON: 'longitude',
       })
@@ -121,6 +123,20 @@ describe('Geography Schema', () => {
         true,
       )
       expect(GeographyValueValidators.COUNTY.safeParse(100).success).toBe(false)
+    })
+
+    it('should validate COUSUB field', () => {
+      expect(GeographyValueValidators.COUSUB.safeParse('00001').success).toBe(
+        true,
+      )
+      expect(GeographyValueValidators.COUSUB.safeParse(100).success).toBe(false)
+    })
+
+    it('should validate PLACE field', () => {
+      expect(GeographyValueValidators.PLACE.safeParse('00001').success).toBe(
+        true,
+      )
+      expect(GeographyValueValidators.PLACE.safeParse(100).success).toBe(false)
     })
 
     it('should validate INTPTLAT field', () => {

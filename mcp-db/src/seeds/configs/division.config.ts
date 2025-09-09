@@ -69,9 +69,6 @@ export const DivisionConfig: GeographySeedConfig = {
       }
     })
 
-    context.parentGeographies = context.parentGeographies || {}
-    context.parentGeographies.divisions = transformedData
-
     rawData.length = 0
     rawData.push(...transformedData)
   },

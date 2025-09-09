@@ -24,6 +24,17 @@ export const GeographySeedConfigSchema = BaseSeedConfigSchema.extend({
   afterSeed: z.any(),
 }).strict()
 
+const MultiStateGeographySeedConfigSchema = GeographySeedConfigSchema.extend({
+  urlGenerator: z.any(), // Function validation handled in TypeScript
+  requiresStateIteration: z.literal(true),
+})
+
+// Union schema for validation
+export const EnhancedGeographySeedConfigSchema = z.union([
+  GeographySeedConfigSchema,
+  MultiStateGeographySeedConfigSchema,
+])
+
 // TypeScript Type extending Zod schema needed due to Zod constraints validating functions
 export type SeedConfig = Omit<
   z.infer<typeof BaseSeedConfigSchema>,
@@ -54,11 +65,31 @@ export const GeographyContextSchema = z.object({
   year: z.number().int().min(1776),
   year_id: z.number(),
   parentGeographies: z
-    .record(z.string(), z.array(GeographyRecordSchema))
+    .record(z.string(), z.record(z.string(), z.array(GeographyRecordSchema)))
     .optional(),
 })
 
 export type GeographyContext = z.infer<typeof GeographyContextSchema>
+
+export function validateEnhancedGeographySeedConfigConstraints(
+  config: EnhancedGeographySeedConfig,
+): void {
+  if (isMultiStateConfig(config)) {
+    if (!config.urlGenerator || typeof config.urlGenerator !== 'function') {
+      throw new Error(
+        "MultiStateGeographySeedConfig must have 'urlGenerator' function",
+      )
+    }
+    if (config.requiresStateIteration !== true) {
+      throw new Error(
+        "MultiStateGeographySeedConfig must have 'requiresStateIteration' set to true",
+      )
+    }
+    // MultiState configs don't need file/url validation since they use urlGenerator
+  } else {
+    validateSeedConfigConstraints(config) // Use existing validation for regular configs
+  }
+}
 
 export function validateSeedConfigConstraints(
   config: SeedConfig | GeographySeedConfig,
@@ -73,4 +104,23 @@ export function validateSeedConfigConstraints(
   if (hasFile && hasUrl) {
     throw new Error("Cannot specify both 'file' and 'url'")
   }
+}
+
+//For handling Summary Levels Requiring State In Param
+export interface MultiStateGeographySeedConfig
+  extends Omit<GeographySeedConfig, 'url'> {
+  urlGenerator: (context: GeographyContext, stateCode: string) => string
+  requiresStateIteration: true
+}
+
+export type EnhancedGeographySeedConfig =
+  | GeographySeedConfig
+  | MultiStateGeographySeedConfig
+
+export function isMultiStateConfig(
+  config: EnhancedGeographySeedConfig,
+): config is MultiStateGeographySeedConfig {
+  return (
+    'requiresStateIteration' in config && config.requiresStateIteration === true
+  )
 }

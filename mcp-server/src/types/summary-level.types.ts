@@ -3,7 +3,7 @@ interface SummaryLevelMetadata {
   code: string
   queryExample: string
   requiresFIPS: boolean
-  onSpine: level.boolean
+  onSpine: boolean
 }
 
 export interface SummaryLevelRow {
@@ -13,6 +13,7 @@ export interface SummaryLevelRow {
   get_variable: string
   query_name: string
   on_spine: boolean
+  code: string
   summary_level: string
   parent_summary_level: string | null
   parent_geography_level_id: number | null

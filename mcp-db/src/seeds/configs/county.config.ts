@@ -83,9 +83,6 @@ export const CountyConfig: GeographySeedConfig = {
       }
     })
 
-    context.parentGeographies = context.parentGeographies || {}
-    context.parentGeographies.states = transformedData
-
     rawData.length = 0
     rawData.push(...transformedData)
   },

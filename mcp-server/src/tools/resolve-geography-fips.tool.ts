@@ -10,6 +10,7 @@ import {
 
 import { GeographySearchResultRow } from '../types/geography.types.js'
 import { SummaryLevelRow } from '../types/summary-level.types.js'
+import { ToolContent } from '../types/base.types.js'
 
 export const toolDescription = `
 	Provides potential matches for Census Bureau geographies. Includes Nation, Region, Division, and State-level 
@@ -17,7 +18,7 @@ export const toolDescription = `
 	FIPS code for constructing fetching data with other tools, and what years (vintages) the geography is available in.
 `
 
-export class ResolveGeographyFipsTool extends BaseTool<ResolveGeographyFipsArgsSchema> {
+export class ResolveGeographyFipsTool extends BaseTool<ResolveGeographyFipsArgs> {
   name = 'resolve-geography-fips'
   description = toolDescription
 

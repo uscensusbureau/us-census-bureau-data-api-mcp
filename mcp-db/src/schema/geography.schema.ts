@@ -7,6 +7,7 @@ export const GeographyMappings: Record<string, keyof GeographyRecord> = {
   SUMLEVEL: 'summary_level_code',
   STATE: 'state_code',
   COUNTY: 'county_code',
+  COUSUB: 'county_subdivision_code',
   PLACE: 'place_code',
   region: 'region_code',
   division: 'division_code',
@@ -17,7 +18,7 @@ export const GeographyMappings: Record<string, keyof GeographyRecord> = {
 // Field validators for Census API data
 export const GeographyValueValidators = {
   NAME: z.string().min(1, 'Name is required'),
-  GEO_ID: z.string().min(1, 'UCGID code is required'),
+  GEO_ID: z.string().min(1, 'UCGID code is required').max(100),
   SUMLEVEL: z
     .string()
     .regex(/^\d{3}$/, 'Summary level must be exactly 3 digits'),
@@ -25,6 +26,7 @@ export const GeographyValueValidators = {
   division: z.string().regex(/^\d{1}$/, 'Division code must be 1 digit'),
   STATE: z.string().regex(/^\d{2}$/, 'State code must be 2 digits'),
   COUNTY: z.string().regex(/^\d{3}$/, 'County code must be 3 digits'),
+  COUSUB: z.string().regex(/^\d{5}$/, 'County code must be 5 digits'),
   PLACE: z.string().regex(/^\d{5}$/, 'Place code must be 5 digits'),
   INTPTLAT: z.number().min(-90).max(90, 'Invalid latitude'),
   INTPTLON: z.number().min(-180).max(180, 'Invalid longitude'),
@@ -71,6 +73,19 @@ export const SummaryLevels = {
       'INTPTLON',
     ],
   },
+  county_subdivision: {
+    summaryLevel: '060',
+    requiredFields: [
+      'NAME',
+      'SUMLEVEL',
+      'STATE',
+      'COUNTY',
+      'COUSUB',
+      'GEO_ID',
+      'INTPTLAT',
+      'INTPTLON',
+    ],
+  },
   place: {
     summaryLevel: '160',
     requiredFields: [
@@ -89,7 +104,7 @@ export const GeographyRecordSchema = z.object({
   name: z.string(),
   for_param: z.string(),
   summary_level_code: z.string().optional(),
-  ucgid_code: z.string().optional(),
+  ucgid_code: z.string().max(100).optional(),
   in_param: z.string().nullable(),
   latitude: z.number().optional(),
   longitude: z.number().optional(),
@@ -97,6 +112,7 @@ export const GeographyRecordSchema = z.object({
   division_code: z.string().optional().nullable(),
   state_code: z.string().optional().nullable(),
   county_code: z.string().optional(),
+  county_subdivision_code: z.string().optional(),
   place_code: z.string().optional(),
   created_at: z.string().optional(),
   updated_at: z.string().optional(),

@@ -295,6 +295,182 @@ describe('SeedRunner - Additional Coverage Tests', () => {
     })
   })
 
+  describe('getStateCodesForYear', () => {
+    it('returns an array of state codes from the context', () => {
+      const context: GeographyContext = {
+        year: 2023,
+        year_id: 1,
+        parentGeographies: {
+          2023: {
+            states: [
+              {
+                name: 'California',
+                state_code: '06',
+                ucgid_code: '0400000US06',
+                geo_id: '0400000US06',
+                summary_level_code: '040',
+                for_param: 'state:06',
+                in_param: null,
+                year: 2023,
+                intptlat: 36.7783,
+                intptlon: -119.4179,
+              },
+              {
+                name: 'Texas',
+                state_code: '48',
+                ucgid_code: '0400000US48',
+                geo_id: '0400000US48',
+                summary_level_code: '040',
+                for_param: 'state:48',
+                in_param: null,
+                year: 2023,
+                intptlat: 31.9686,
+                intptlon: -99.9018,
+              },
+              {
+                name: 'New York',
+                state_code: '36',
+                ucgid_code: '0400000US36',
+                geo_id: '0400000US36',
+                summary_level_code: '040',
+                for_param: 'state:36',
+                in_param: null,
+                year: 2023,
+                intptlat: 42.9538,
+                intptlon: -75.5268,
+              },
+              {
+                name: 'Alaska',
+                state_code: '2', // Test single digit padding
+                ucgid_code: '0400000US02',
+                geo_id: '0400000US02',
+                summary_level_code: '040',
+                for_param: 'state:02',
+                in_param: null,
+                year: 2023,
+                intptlat: 64.0685,
+                intptlon: -152.2782,
+              },
+            ],
+          },
+        },
+      }
+
+      const result = runner.getStateCodesForYear(context, 2023)
+
+      expect(result).toEqual(['02', '06', '36', '48']) // Should be sorted and zero-padded
+      expect(result).toHaveLength(4)
+
+      // Verify all codes are 2-digit strings
+      result.forEach((code) => {
+        expect(typeof code).toBe('string')
+        expect(code).toHaveLength(2)
+        expect(code).toMatch(/^\d{2}$/)
+      })
+    })
+
+    it('throws an error when no states are found', () => {
+      // Test with empty context
+      const emptyContext: GeographyContext = {
+        year: 2023,
+        year_id: 1,
+        parentGeographies: {},
+      }
+
+      expect(() => runner.getStateCodesForYear(emptyContext, 2023)).toThrow(
+        'No states found in context of year 2023',
+      )
+
+      // Test with context missing the specific year
+      const contextMissingYear: GeographyContext = {
+        year: 2023,
+        year_id: 1,
+        parentGeographies: {
+          2022: {
+            states: [
+              {
+                name: 'California',
+                state_code: '06',
+                ucgid_code: '0400000US06',
+                geo_id: '0400000US06',
+                summary_level_code: '040',
+                for_param: 'state:06',
+                in_param: null,
+                year: 2022,
+                intptlat: 36.7783,
+                intptlon: -119.4179,
+              },
+            ],
+          },
+        },
+      }
+
+      expect(() =>
+        runner.getStateCodesForYear(contextMissingYear, 2023),
+      ).toThrow('No states found in context of year 2023')
+
+      // Test with context having the year but empty states array
+      const contextEmptyStates: GeographyContext = {
+        year: 2023,
+        year_id: 1,
+        parentGeographies: {
+          2023: {
+            states: [],
+          },
+        },
+      }
+
+      expect(() =>
+        runner.getStateCodesForYear(contextEmptyStates, 2023),
+      ).toThrow('No states found in context of year 2023')
+
+      // Test with context having states with null/undefined state_code values
+      const contextNullStateCodes: GeographyContext = {
+        year: 2023,
+        year_id: 1,
+        parentGeographies: {
+          2023: {
+            states: [
+              {
+                name: 'Invalid State 1',
+                state_code: null,
+                ucgid_code: '0400000US00',
+                geo_id: '0400000US00',
+                summary_level_code: '040',
+                for_param: 'state:00',
+                in_param: null,
+                year: 2023,
+                intptlat: 0,
+                intptlon: 0,
+              },
+              {
+                name: 'Invalid State 2',
+                state_code: undefined,
+                ucgid_code: '0400000US01',
+                geo_id: '0400000US01',
+                summary_level_code: '040',
+                for_param: 'state:01',
+                in_param: null,
+                year: 2023,
+                intptlat: 0,
+                intptlon: 0,
+              },
+            ],
+          },
+        },
+      }
+
+      expect(() =>
+        runner.getStateCodesForYear(contextNullStateCodes, 2023),
+      ).toThrow('No states found in context of year 2023')
+
+      // Test with undefined context
+      expect(() => runner.getStateCodesForYear(undefined, 2023)).toThrow(
+        'No states found in context of year 2023',
+      )
+    })
+  })
+
   describe('insertOrSkip edge cases', () => {
     beforeEach(async () => {
       await client.query(`

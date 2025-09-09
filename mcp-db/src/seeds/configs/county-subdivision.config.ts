@@ -5,37 +5,42 @@ import { promises as fs } from 'fs'
 
 import { DivisionRegionMappingsType } from '../../schema/division_region_mappings.schema.js'
 import {
-  GeographySeedConfig,
   GeographyContext,
+  MultiStateGeographySeedConfig,
 } from '../../schema/seed-config.schema.js'
 import { createGeographyYear } from '../../helpers/geography-years.helper.js'
 import { transformApiGeographyData } from '../../schema/geography.schema.js'
 
-export const parentPlaceSQL = `
+export const parentCountySubdivisionSQL = `
   UPDATE geographies
   SET parent_geography_id = (
     SELECT id FROM geographies parent 
-    WHERE parent.summary_level_code = '040'
+    WHERE parent.summary_level_code = '050'
       AND parent.state_code = geographies.state_code
+      AND parent.county_code = geographies.county_code
   )
-  WHERE summary_level_code = '160';
+  WHERE summary_level_code = '060';
 `
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-export const PlaceConfig: GeographySeedConfig = {
-  url: (context: GeographyContext) =>
-    `https://api.census.gov/data/${context.year}/geoinfo?get=NAME,SUMLEVEL,GEO_ID,STATE,PLACE,INTPTLAT,INTPTLON&for=place:*`,
+export const CountySubdivisionConfig: MultiStateGeographySeedConfig = {
+  urlGenerator: (context: GeographyContext, stateCode: string) =>
+    `https://api.census.gov/data/${context.year}/geoinfo?get=NAME,SUMLEVEL,GEO_ID,STATE,COUNTY,COUSUB,INTPTLAT,INTPTLON&for=county%20subdivision:*&in=state:${stateCode}`,
   table: 'geographies',
   conflictColumn: 'ucgid_code',
+  requiresStateIteration: true,
   beforeSeed: async (
     client: Client,
     rawData: unknown[],
     context: GeographyContext,
   ): Promise<void> => {
-    console.log(`Processing place geography data for ${context.year}...`)
-    const transformedData = transformApiGeographyData(rawData, 'place')
+    console.log(`Processing county geography data for ${context.year}...`)
+    const transformedData = transformApiGeographyData(
+      rawData,
+      'county_subdivision',
+    )
 
     // Import Division < Region Relationship Since API is Missing Data
     const dataPath = path.join(__dirname, '../../../data')
@@ -50,8 +55,8 @@ export const PlaceConfig: GeographySeedConfig = {
     >()
 
     data.divisions.forEach((division: DivisionRegionMappingsType) => {
-      division.states.forEach((place: { state_code: string }) => {
-        stateToRegionDivisionMap.set(place.state_code, {
+      division.states.forEach((county_subdivision: { state_code: string }) => {
+        stateToRegionDivisionMap.set(county_subdivision.state_code, {
           region_code: division.region_code,
           division_code: division.division_code,
         })
@@ -59,8 +64,8 @@ export const PlaceConfig: GeographySeedConfig = {
     })
 
     transformedData.forEach((record) => {
-      record.for_param = `place:${record.place_code}`
-      record.in_param = `state:${record.state_code}`
+      record.for_param = `county%20subdivision:${record.county_subdivision_code}`
+      record.in_param = `state:${record.state_code}%20county:${record.county_code}`
 
       // Manually Assign the Missing Region Code
       if (record.state_code !== null) {
@@ -72,14 +77,16 @@ export const PlaceConfig: GeographySeedConfig = {
           record.division_code = regionDivisionData.division_code
         } else {
           console.warn(
-            `No region/division data found for place: ${record.place_code}`,
+            `No region/division data found for county subdivision: ${record.state_code}`,
           )
           console.warn(
-            'This may be because the place is in a province or territory.',
+            'This may be because the county subdivision is in a province or territory.',
           )
         }
       } else {
-        throw new Error(`Missing state_code for place: ${record.place_code}`)
+        throw new Error(
+          `Missing state_code for county subdivision: ${record.county_subdivision_code}`,
+        )
       }
     })
 
@@ -95,10 +102,10 @@ export const PlaceConfig: GeographySeedConfig = {
       await createGeographyYear(client, geography_id, context.year_id)
     }
 
-    await client.query(parentPlaceSQL)
+    await client.query(parentCountySubdivisionSQL)
 
     console.log(
-      `Seeded ${insertedIds.length} place record(s) for ${context.year}`,
+      `Seeded ${insertedIds.length} county subdivision record(s) for ${context.year}`,
     )
   },
 }

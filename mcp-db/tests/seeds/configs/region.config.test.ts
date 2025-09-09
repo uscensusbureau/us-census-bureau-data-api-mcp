@@ -271,53 +271,6 @@ describe('Region Config', () => {
       expect(rawApiData[0]).toHaveProperty('for_param', 'region:1')
       expect(rawApiData[0]).toHaveProperty('in_param', null)
     })
-
-    it('stores the regions in the parentGeographies', () => {
-      const rawApiData = [
-        [
-          'NAME',
-          'SUMLEVEL',
-          'GEO_ID',
-          'REGION',
-          'INTPTLAT',
-          'INTPTLON',
-          'region',
-        ],
-        [
-          'Northeast Region',
-          '020',
-          '0200000US1',
-          '1',
-          '42.7778249',
-          '-74.2123732',
-          '1',
-        ],
-      ]
-
-      const transformedData = [
-        {
-          name: 'Northeast Region',
-          code: '020',
-          region_code: 1,
-        },
-      ]
-
-      const callSpy = vi.fn()
-
-      // Mock returns synchronous value (no Promise.resolve)
-      vi.mocked(transformApiGeographyData).mockImplementation((data, type) => {
-        callSpy(JSON.parse(JSON.stringify(data)), type)
-        return transformedData // Return directly, not wrapped in Promise
-      })
-
-      RegionConfig.beforeSeed!(mockClient as Client, rawApiData, mockContext)
-
-      expect(mockContext.parentGeographies).toHaveProperty('regions')
-      expect(mockContext.parentGeographies.regions.length).toEqual(1)
-      expect(mockContext.parentGeographies.regions[0].name).toBe(
-        'Northeast Region',
-      )
-    })
   })
 
   describe('afterSeed', () => {

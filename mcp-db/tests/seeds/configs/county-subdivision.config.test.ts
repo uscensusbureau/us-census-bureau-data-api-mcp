@@ -24,9 +24,9 @@ vi.mock('../../../src/helpers/geography-years.helper', async () => ({
 
 import { dbConfig } from '../../helpers/database-config'
 import {
-  CountyConfig,
-  parentCountySQL,
-} from '../../../src/seeds/configs/county.config'
+  CountySubdivisionConfig,
+  parentCountySubdivisionSQL,
+} from '../../../src/seeds/configs/county-subdivision.config'
 import { cleanupWithRetry } from '../../helpers/database-cleanup'
 import { normalizeSQL } from '../../helpers/normalize-sql'
 import { SeedRunner } from '../../../src/seeds/scripts/seed-runner'
@@ -35,33 +35,50 @@ import { transformApiGeographyData } from '../../../src/schema/geography.schema'
 import { createGeographyYear } from '../../../src/helpers/geography-years.helper'
 
 const rawApiData = [
-  ['NAME', 'SUMLEVEL', 'GEO_ID', 'INTPTLAT', 'INTPTLON', 'state', 'county'],
   [
-    'Delaware County, Pennsylvania',
-    '050',
-    '0500000US42045',
-    '39.9166853',
-    '-75.3988178',
+    'NAME',
+    'SUMLEVEL',
+    'GEO_ID',
+    'STATE',
+    'COUNTY',
+    'COUSUB',
+    'INTPTLAT',
+    'INTPTLON',
+    'state',
+    'county',
+    'county subdivision',
+  ],
+  [
+    'Abbottstown borough, Adams County, Pennsylvania',
+    '060',
+    '0600000US4200100116',
     '42',
-    '045',
+    '001',
+    '00116',
+    '39.8817661',
+    '-76.9927769',
+    '42',
+    '001',
+    '00116',
   ],
 ]
 
 const transformedData = [
   {
-    name: 'Delaware County, Pennsylvania',
-    summary_level_code: '050',
-    ucgid_code: '0400000US42',
+    name: 'Abbottstown borough, Adams County, Pennsylvania',
+    summary_level_code: '060',
+    ucgid_code: '0600000US4200100116',
     state_code: '42',
-    county_code: '045',
+    county_code: '001',
+    county_subdivision_code: '00116',
     region_code: '1',
     division_code: '2',
-    latitude: '39.9166853',
-    longitude: '-75.3988178',
+    latitude: '39.8817661',
+    longitude: '-76.9927769',
   },
 ]
 
-describe('County Config', () => {
+describe('County Subdivision Config', () => {
   let runner: SeedRunner
   let client: Client
   let databaseUrl: string
@@ -92,15 +109,21 @@ describe('County Config', () => {
   })
 
   it('should have valid configuration structure', () => {
-    const countyConfig = CountyConfig
+    const countySubdivisionConfig = CountySubdivisionConfig
     const context = { year: 2023 }
+    const stateCode = 42
 
-    expect(countyConfig).toBeDefined()
-    expect(countyConfig?.table).toBe('geographies')
-    expect(countyConfig?.conflictColumn).toBe('ucgid_code')
-    expect(countyConfig?.url(context)).toContain('county:*')
-    expect(countyConfig?.beforeSeed).toBeDefined()
-    expect(countyConfig?.afterSeed).toBeDefined()
+    expect(countySubdivisionConfig).toBeDefined()
+    expect(countySubdivisionConfig?.table).toBe('geographies')
+    expect(countySubdivisionConfig?.conflictColumn).toBe('ucgid_code')
+    expect(countySubdivisionConfig?.urlGenerator(context, stateCode)).toContain(
+      'for=county%20subdivision:*',
+    )
+    expect(countySubdivisionConfig?.urlGenerator(context, stateCode)).toContain(
+      'in=state:42',
+    )
+    expect(countySubdivisionConfig?.beforeSeed).toBeDefined()
+    expect(countySubdivisionConfig?.afterSeed).toBeDefined()
   })
 
   describe('beforeSeed', async () => {
@@ -125,19 +148,27 @@ describe('County Config', () => {
           'NAME',
           'SUMLEVEL',
           'GEO_ID',
+          'STATE',
+          'COUNTY',
+          'COUSUB',
           'INTPTLAT',
           'INTPTLON',
           'state',
           'county',
+          'county subdivision',
         ],
         [
-          'Delaware County, Pennsylvania',
-          '050',
-          '0500000US42045',
-          '39.9166853',
-          '-75.3988178',
+          'Abbottstown borough, Adams County, Pennsylvania',
+          '060',
+          '0600000US4200100116',
           '42',
-          '045',
+          '001',
+          '00116',
+          '39.8817661',
+          '-76.9927769',
+          '42',
+          '001',
+          '00116',
         ],
       ]
 
@@ -151,7 +182,7 @@ describe('County Config', () => {
         return transformedData
       })
 
-      await CountyConfig.beforeSeed!(
+      await CountySubdivisionConfig.beforeSeed!(
         mockClient as Client,
         rawApiData,
         mockContext,
@@ -160,14 +191,14 @@ describe('County Config', () => {
       expect(transformApiGeographyData).toHaveBeenCalledTimes(1)
       expect(callTracker).toHaveLength(1)
 
-      expect(callTracker[0].type).toBe('county')
+      expect(callTracker[0].type).toBe('county_subdivision')
       expect(callTracker[0].data).toEqual(expectedRawData)
     })
 
     it('transforms and processes data correctly end-to-end', async () => {
       vi.mocked(transformApiGeographyData).mockReturnValue(transformedData)
 
-      await CountyConfig.beforeSeed!(
+      await CountySubdivisionConfig.beforeSeed!(
         mockClient as Client,
         rawApiData,
         mockContext,
@@ -186,16 +217,22 @@ describe('County Config', () => {
         return transformedData // Return directly, not wrapped in Promise
       })
 
-      await CountyConfig.beforeSeed!(
+      await CountySubdivisionConfig.beforeSeed!(
         mockClient as Client,
         rawApiData,
         mockContext,
       )
 
       expect(callSpy).toHaveBeenCalledTimes(1)
-      expect(callSpy).toHaveBeenCalledWith([...rawApiData], 'county')
-      expect(rawApiData[0]).toHaveProperty('for_param', 'county:045')
-      expect(rawApiData[0]).toHaveProperty('in_param', 'state:42')
+      expect(callSpy).toHaveBeenCalledWith(
+        [...rawApiData],
+        'county_subdivision',
+      )
+      expect(rawApiData[0]).toHaveProperty(
+        'for_param',
+        'county%20subdivision:00116',
+      )
+      expect(rawApiData[0]).toHaveProperty('in_param', 'state:42%20county:001')
     })
 
     describe('when a state is missing region and division data', () => {
@@ -211,7 +248,7 @@ describe('County Config', () => {
         )
 
         await expect(
-          CountyConfig.beforeSeed!(
+          CountySubdivisionConfig.beforeSeed!(
             mockClient as Client,
             rawApiData,
             mockContext,
@@ -243,7 +280,11 @@ describe('County Config', () => {
     it('should establish relationships with vintages', async () => {
       const geo_ids = [1, 2, 3, 4]
 
-      await CountyConfig.afterSeed!(mockClient as Client, mockContext, geo_ids)
+      await CountySubdivisionConfig.afterSeed!(
+        mockClient as Client,
+        mockContext,
+        geo_ids,
+      )
 
       expect(createGeographyYear).toHaveBeenCalledTimes(geo_ids.length)
 
@@ -259,7 +300,11 @@ describe('County Config', () => {
     it('should assign a parent geography', async () => {
       const geo_ids = [1, 2, 3, 4]
 
-      await CountyConfig.afterSeed!(mockClient as Client, mockContext, geo_ids)
+      await CountySubdivisionConfig.afterSeed!(
+        mockClient as Client,
+        mockContext,
+        geo_ids,
+      )
 
       // Get the SQL that was actually called
       const mockQuery = vi.mocked(mockClient.query)
@@ -269,7 +314,9 @@ describe('County Config', () => {
       const actualSQL = mockQuery.mock.calls[mockQuery.mock.calls.length - 1][0]
 
       // Compare normalized versions
-      expect(normalizeSQL(actualSQL)).toBe(normalizeSQL(parentCountySQL))
+      expect(normalizeSQL(actualSQL)).toBe(
+        normalizeSQL(parentCountySubdivisionSQL),
+      )
     })
   })
 })

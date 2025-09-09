@@ -70,7 +70,6 @@ export const geoProperties = {
       'state:01',
       'state:01,02',
       'county:075',
-      'state:01 county:001',
       'state:01%20county:001',
     ],
   },

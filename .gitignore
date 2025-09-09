@@ -4,7 +4,8 @@ build/
 node_modules/
 
 #Test Folders
-mcp-db/tests/db/seeds/fixtures
+mcp-db/tests/seeds/scripts/fixtures/
+mcp-db/tests/seeds/configs/fixtures/
 mcp-db/coverage/
 mcp-server/coverage/
 

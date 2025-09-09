@@ -4,17 +4,23 @@ import 'dotenv/config'
 import { DATABASE_URL } from '../../helpers/database.helper.js'
 import {
   BaseSeedConfigSchema,
+  EnhancedGeographySeedConfig,
+  EnhancedGeographySeedConfigSchema,
   GeographySeedConfig,
   GeographySeedConfigSchema,
   GeographyContext,
   GeographyContextSchema,
+  isMultiStateConfig,
+  MultiStateGeographySeedConfig,
   SeedConfig,
+  validateEnhancedGeographySeedConfigConstraints,
   validateSeedConfigConstraints,
 } from '../../schema/seed-config.schema.js'
 import { SeedRunner } from './seed-runner.js'
 
 import {
   CountyConfig,
+  CountySubdivisionConfig,
   DivisionConfig,
   NationConfig,
   PlaceConfig,
@@ -26,12 +32,13 @@ import {
 
 // Seed configurations
 export const seeds: SeedConfig[] = [SummaryLevelsConfig, YearsConfig]
-export const geographySeeds: GeographySeedConfig[] = [
+export const geographySeeds: EnhancedGeographySeedConfig[] = [
   NationConfig,
   RegionConfig,
   DivisionConfig,
   StateConfig,
   CountyConfig,
+  CountySubdivisionConfig,
   PlaceConfig,
 ]
 
@@ -90,10 +97,10 @@ export async function runSeedsWithRunner(
 
 export async function runGeographySeeds(
   runner: SeedRunner,
-  seedConfigs: GeographySeedConfig[] = geographySeeds,
+  seedConfigs: EnhancedGeographySeedConfig[] = geographySeeds,
 ): Promise<void> {
   seedConfigs.forEach((config) => {
-    validateGeographySeedConfig(config) // New function
+    validateGeographySeedConfig(config)
   })
 
   const years = await runner.getAvailableYears()
@@ -112,7 +119,24 @@ export async function runGeographySeeds(
     const validContext = validateGeographyContext(context)
 
     for (const config of seedConfigs) {
-      await runner.seed(config, validContext)
+      if (isMultiStateConfig(config)) {
+        // Use cached state data to iterate over sub geographies
+        const stateCodes = await runner.getStateCodesForYear(
+          validContext,
+          validContext.year,
+        )
+
+        for (const stateCode of stateCodes) {
+          // Use a config that handles dynamically assigned states in the URL
+          const stateSpecificConfig: GeographySeedConfig = {
+            ...config,
+            url: (ctx: GeographyContext) => config.urlGenerator(ctx, stateCode),
+          }
+          await runner.seed(stateSpecificConfig, validContext)
+        }
+      } else {
+        await runner.seed(config, validContext)
+      }
     }
   }
 }
@@ -134,20 +158,20 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   main()
 }
 
-function validateGeographySeedConfig(config: GeographySeedConfig): void {
+export function validateGeographySeedConfig(
+  config: EnhancedGeographySeedConfig,
+): void {
   try {
-    GeographySeedConfigSchema.parse(config)
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      console.error('GeographySeedConfig validation failed:')
-      error.issues.forEach((issue, i) => {
-        const path = issue.path.length > 0 ? issue.path.join('.') : 'root'
-        console.error(`${i + 1}. ${path}: ${issue.message}`)
-      })
+    EnhancedGeographySeedConfigSchema.parse(config)
+    const fullConfig = config as EnhancedGeographySeedConfig
+
+    if (isMultiStateConfig(fullConfig)) {
+      validateEnhancedGeographySeedConfigConstraints(fullConfig)
+    } else {
+      validateSeedConfigConstraints(fullConfig)
     }
-    throw new Error(
-      `GeographySeedConfig validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
-    )
+  } catch (error) {
+    zodErrorHandling(error, 'GeographySeedConfig validation failed')
   }
 }
 
@@ -156,35 +180,32 @@ function validateSeedConfig(config: SeedConfig): void {
     BaseSeedConfigSchema.parse(config)
     const fullConfig = config as SeedConfig
 
-    // Custom validation for url/file requirement
     validateSeedConfigConstraints(fullConfig)
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      console.error('SeedConfig validation failed:')
-      error.issues.forEach((issue, i) => {
-        const path = issue.path.length > 0 ? issue.path.join('.') : 'root'
-        console.error(`${i + 1}. ${path}: ${issue.message}`)
-      })
-    }
-    throw new Error(
-      `SeedConfig validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
-    )
+    zodErrorHandling(error, 'SeedConfig validation failed')
   }
 }
 
-function validateGeographyContext(context: unknown): GeographyContext {
+export function validateGeographyContext(context: unknown): GeographyContext {
   try {
     return GeographyContextSchema.parse(context)
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      console.error('GeographyContext validation failed:')
-      error.issues.forEach((issue, i) => {
-        const path = issue.path.length > 0 ? issue.path.join('.') : 'root'
-        console.error(`${i + 1}. ${path}: ${issue.message}`)
-      })
-    }
+    zodErrorHandling(error, 'GeographyContext validation failed')
+  }
+}
+
+export function zodErrorHandling(error: unknown, error_message: string): never {
+  if (error instanceof z.ZodError) {
+    console.error(`${error_message}:`)
+    error.issues.forEach((issue, i) => {
+      const path = issue.path.length > 0 ? issue.path.join('.') : 'root'
+      console.error(`${i + 1}. ${path}: ${issue.message}`)
+    })
     throw new Error(
-      `GeographyContext validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      `${error_message}: ${JSON.stringify(error.issues, null, 2)}`,
     )
   }
+
+  const errorMessage = error instanceof Error ? error.message : String(error)
+  throw new Error(`${error_message}: ${errorMessage}`)
 }

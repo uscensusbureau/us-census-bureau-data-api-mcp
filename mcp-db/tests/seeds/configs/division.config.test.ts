@@ -277,51 +277,6 @@ describe('Division Config', () => {
       expect(rawApiData[0]).toHaveProperty('for_param', 'division:1')
       expect(rawApiData[0]).toHaveProperty('in_param', null)
     })
-
-    it('stores the divisions in the parentGeographies', async () => {
-      const rawApiData = [
-        [
-          'NAME',
-          'SUMLEVEL',
-          'GEO_ID',
-          'REGION',
-          'DIVISION',
-          'INTPTLAT',
-          'INTPTLON',
-          'division',
-        ],
-        [
-          'New England Division',
-          '030',
-          '0300000US1',
-          null,
-          '1',
-          '44.0860059',
-          '-70.6608882',
-          '1',
-        ],
-      ]
-
-      const callSpy = vi.fn()
-
-      // Mock returns synchronous value (no Promise.resolve)
-      vi.mocked(transformApiGeographyData).mockImplementation((data, type) => {
-        callSpy(JSON.parse(JSON.stringify(data)), type)
-        return transformedData // Return directly, not wrapped in Promise
-      })
-
-      await DivisionConfig.beforeSeed!(
-        mockClient as Client,
-        rawApiData,
-        mockContext,
-      )
-
-      expect(mockContext.parentGeographies).toHaveProperty('divisions')
-      expect(mockContext.parentGeographies.divisions.length).toEqual(1)
-      expect(mockContext.parentGeographies.divisions[0].name).toBe(
-        'New England Division',
-      )
-    })
   })
 
   describe('afterSeed', () => {
