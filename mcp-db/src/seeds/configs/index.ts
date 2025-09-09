@@ -1,6 +1,7 @@
 export { CountyConfig } from './county.config.js'
 export { DivisionConfig } from './division.config.js'
 export { NationConfig } from './nation.config.js'
+export { PlaceConfig } from './place.config.js'
 export { RegionConfig } from './region.config.js'
 export { StateConfig } from './state.config.js'
 export { SummaryLevelsConfig } from './summary-levels.config.js'

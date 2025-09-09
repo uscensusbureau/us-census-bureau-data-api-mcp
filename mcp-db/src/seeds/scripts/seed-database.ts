@@ -17,6 +17,7 @@ import {
   CountyConfig,
   DivisionConfig,
   NationConfig,
+  PlaceConfig,
   RegionConfig,
   StateConfig,
   SummaryLevelsConfig,
@@ -31,6 +32,7 @@ export const geographySeeds: GeographySeedConfig[] = [
   DivisionConfig,
   StateConfig,
   CountyConfig,
+  PlaceConfig,
 ]
 
 export async function runSeeds(

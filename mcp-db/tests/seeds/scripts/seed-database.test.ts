@@ -26,6 +26,7 @@ import {
   CountyConfig,
   DivisionConfig,
   NationConfig,
+  PlaceConfig,
   RegionConfig,
   StateConfig,
   YearsConfig,
@@ -307,12 +308,13 @@ describe('Seed Database', () => {
 
   describe('geographySeeds', () => {
     it('includes geography configs', () => {
-      expect(geographySeeds).toHaveLength(5)
+      expect(geographySeeds).toHaveLength(6)
       expect(geographySeeds).toContain(NationConfig)
       expect(geographySeeds).toContain(RegionConfig)
       expect(geographySeeds).toContain(DivisionConfig)
       expect(geographySeeds).toContain(StateConfig)
       expect(geographySeeds).toContain(CountyConfig)
+      expect(geographySeeds).toContain(PlaceConfig)
     })
   })
 
@@ -331,10 +333,10 @@ describe('Seed Database', () => {
         //
         // 2 Static Configs (Year, Summary Levels) ] = 2
         // +
-        // 2 Years x 5[Nation + Region + Division + State + County] = 10 Geo Configs
+        // 2 Years x 6[Nation + Region + Division + State + County + Place] = 12 Geo Config Runs
         // ------------
-        // EQUALS 10 Total Config Runs
-        expect(mockRunner.seed).toHaveBeenCalledTimes(12)
+        // EQUALS 14 Total Config Runs
+        expect(mockRunner.seed).toHaveBeenCalledTimes(14)
       } finally {
         SeedRunnerSpy.mockRestore()
       }
@@ -500,8 +502,8 @@ describe('Seed Database', () => {
       expect(
         mockRunnerManager.mockRunner.getAvailableYears,
       ).toHaveBeenCalledOnce()
-      // Should call seed for each year * each geography config (2 years * 5 configs = 10)
-      expect(mockRunnerManager.mockRunner.seed).toHaveBeenCalledTimes(10)
+      // Should call seed for each year * each geography config (2 years * 6 configs = 12)
+      expect(mockRunnerManager.mockRunner.seed).toHaveBeenCalledTimes(12)
 
       const seedCalls = mockRunnerManager.mockRunner.seed.mock.calls
 
@@ -510,7 +512,7 @@ describe('Seed Database', () => {
         expect.objectContaining({ year: 2020, year_id: 1 }),
       ])
 
-      expect(seedCalls[5]).toEqual([
+      expect(seedCalls[6]).toEqual([
         expect.objectContaining({ table: 'geographies' }),
         expect.objectContaining({ year: 2023, year_id: 2 }),
       ])
