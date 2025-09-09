@@ -28,21 +28,61 @@ interface SummaryLevelRow extends SummaryLevel {
   updated_at: Date
 }
 
-describe('Summary Levels Config', () => {
+describe.sequential('Summary Levels Config', () => {
   let runner: SeedRunner
   let client: Client
   let databaseUrl: string
 
+  const testId = `${process.pid}_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`
+  const testSchema = `test_schema_${testId}`
+
   beforeAll(async () => {
+    console.log(`🔧 Setting up test schema: ${testSchema}`)
+
     // Initialize client once for the entire test suite
     client = new Client(dbConfig)
     await client.connect()
 
-    // Construct database URL for SeedRunner
-    databaseUrl = `postgresql://${dbConfig.user}:${dbConfig.password}@${dbConfig.host}:${dbConfig.port}/${dbConfig.database}`
+    // Create isolated test schema
+    await client.query(`CREATE SCHEMA IF NOT EXISTS ${testSchema}`)
+    await client.query(`SET search_path TO ${testSchema}`)
+
+    // Create the summary_levels table structure in test schema
+    await client.query(`
+      CREATE TABLE summary_levels (
+        id BIGSERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        description TEXT,
+        get_variable VARCHAR(255) NOT NULL,
+        query_name VARCHAR(255) NOT NULL,
+        on_spine BOOLEAN NOT NULL DEFAULT false,
+        code VARCHAR(10) NOT NULL UNIQUE,
+        parent_summary_level VARCHAR(10),
+        parent_summary_level_id BIGINT REFERENCES summary_levels(id),
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `)
+
+    // Create indexes
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_summary_levels_code ON summary_levels(code);
+      CREATE INDEX IF NOT EXISTS idx_summary_levels_parent_summary_level ON summary_levels(parent_summary_level);
+    `)
+
+    // Construct database URL for SeedRunner with schema
+    databaseUrl = `postgresql://${dbConfig.user}:${dbConfig.password}@${dbConfig.host}:${dbConfig.port}/${dbConfig.database}?options=-c%20search_path%3D${testSchema}`
+
+    console.log(`✅ Test schema ${testSchema} setup complete`)
   })
 
   afterAll(async () => {
+    try {
+      console.log(`🧹 Cleaning up schema: ${testSchema}`)
+      await client.query(`DROP SCHEMA IF EXISTS ${testSchema} CASCADE`)
+    } catch (error) {
+      console.log('Schema cleanup failed:', error)
+    }
     await client.end()
   })
 
@@ -55,34 +95,27 @@ describe('Summary Levels Config', () => {
       console.log('Directory already exists.')
     }
 
+    // Initialize SeedRunner with schema-aware connection
     runner = new SeedRunner(databaseUrl, fixturesPath)
     await runner.connect()
 
-    // Clean up summary_levels table before each test and handle deadlocks gracefully
-    const cleanupWithRetry = async (maxRetries = 3) => {
-      for (let attempt = 1; attempt <= maxRetries; attempt++) {
-        try {
-          await client.query(
-            'TRUNCATE TABLE summary_levels RESTART IDENTITY CASCADE',
-          )
-          return // Success
-        } catch (error: unknown) {
-          if (error.code === '40P01' && attempt < maxRetries) {
-            // Deadlock detected
-            console.log(`Deadlock detected on attempt ${attempt}, retrying...`)
-            await new Promise((resolve) => setTimeout(resolve, attempt * 100)) // Exponential backoff
-          } else {
-            throw error // Re-throw if not a deadlock or max retries exceeded
-          }
-        }
-      }
-    }
-
-    await cleanupWithRetry()
+    // Ensure we're in the right schema
+    await client.query(`SET search_path TO ${testSchema}`)
   })
 
   afterEach(async () => {
-    await runner.disconnect()
+    // Clean only the data in our isolated schema
+    try {
+      await client.query(
+        `TRUNCATE TABLE ${testSchema}.summary_levels RESTART IDENTITY CASCADE`,
+      )
+    } catch (error) {
+      console.log('Table cleanup failed:', error)
+    }
+
+    if (runner) {
+      await runner.disconnect()
+    }
   })
 
   it('should have valid configuration structure', () => {
@@ -185,7 +218,7 @@ describe('Summary Levels Config', () => {
 
   describe('afterSeed logic', () => {
     beforeEach(async () => {
-      // Insert test data first
+      // Insert test data in our isolated schema (this runs for each test in this describe block)
       await client.query(`
         INSERT INTO summary_levels (name, description, get_variable, query_name, on_spine, code, parent_summary_level)
         VALUES 
@@ -360,27 +393,19 @@ describe('Summary Levels Config', () => {
         ],
       }
 
-      const filePath = path.join(__dirname, 'fixtures', 'summary_levels.json')
+      const filePath = path.join(
+        __dirname,
+        'fixtures',
+        `summary_levels_${testId}.json`,
+      )
       await fs.writeFile(filePath, JSON.stringify(testGeographyData))
 
       // Run the seed with the simplified configuration
       const seedConfig = {
-        file: 'summary_levels.json',
+        file: `summary_levels_${testId}.json`,
         table: 'summary_levels',
         conflictColumn: 'code',
         dataPath: 'summary_levels',
-        beforeSeed: async (client: Client) => {
-          // Create indexes
-          await client.query(`
-            CREATE INDEX IF NOT EXISTS idx_summary_levels_summary_level 
-            ON summary_levels(code);
-          `)
-
-          await client.query(`
-            CREATE INDEX IF NOT EXISTS idx_summary_levels_parent_summary_level 
-            ON summary_levels(parent_summary_level);
-          `)
-        },
         afterSeed: async (client: Client) => {
           // Update parent relationships
           await client.query(`
@@ -416,6 +441,9 @@ describe('Summary Levels Config', () => {
 
       expect(county?.name).toBe('County')
       expect(county?.parent_summary_level_id).toBe(state?.id)
+
+      // Clean up the test file
+      await fs.unlink(filePath).catch(() => {})
     })
 
     it('should handle idempotent seeding (skip existing records)', async () => {
@@ -446,12 +474,12 @@ describe('Summary Levels Config', () => {
       const filePath = path.join(
         __dirname,
         'fixtures',
-        'summary_levels_idempotent.json',
+        `summary_levels_idempotent_${testId}.json`,
       )
       await fs.writeFile(filePath, JSON.stringify(testGeographyData))
 
       const seedConfig = {
-        file: 'summary_levels_idempotent.json',
+        file: `summary_levels_idempotent_${testId}.json`,
         table: 'summary_levels',
         conflictColumn: 'code',
         dataPath: 'summary_levels',
@@ -477,6 +505,7 @@ describe('Summary Levels Config', () => {
       const result = await client.query<SummaryLevelRow>(
         'SELECT * FROM summary_levels ORDER BY code',
       )
+
       expect(result.rows).toHaveLength(2)
 
       // Verify the records are correct
@@ -486,6 +515,9 @@ describe('Summary Levels Config', () => {
       expect(nation?.name).toBe('Nation')
       expect(state?.name).toBe('State')
       expect(state?.parent_summary_level_id).toBe(nation?.id)
+
+      // Clean up the test file
+      await fs.unlink(filePath).catch(() => {})
     })
   })
 })

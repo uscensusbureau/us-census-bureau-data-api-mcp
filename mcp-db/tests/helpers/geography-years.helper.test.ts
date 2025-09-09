@@ -1,18 +1,24 @@
 import { afterAll, beforeAll, beforeEach, describe, it, expect } from 'vitest'
 import { Client } from 'pg'
 
+import { cleanupWithRetry } from '../helpers/database-cleanup'
 import { dbConfig } from '../helpers/database-config'
 import { createGeographyYear } from '../../src/helpers/geography-years.helper'
 
 describe('createGeographyYear', () => {
   let client: Client
 
+  const testId = `${process.pid}_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`
+  const testSchema = `test_schema_${testId}`
+
   beforeAll(async () => {
     client = new Client(dbConfig)
     await client.connect()
 
     try {
-      await client.query('DROP TABLE IF EXISTS geography_years CASCADE')
+      //Using a schema here due to conflicts with other tests
+      await client.query(`CREATE SCHEMA IF NOT EXISTS ${testSchema}`)
+      await client.query(`SET search_path TO ${testSchema}`)
 
       await client.query(`
         CREATE TABLE geography_years (
@@ -32,7 +38,7 @@ describe('createGeographyYear', () => {
 
   afterAll(async () => {
     try {
-      await client.query('DROP TABLE IF EXISTS geography_years CASCADE')
+      await client.query(`DROP SCHEMA IF EXISTS ${testSchema} CASCADE`)
     } catch (error) {
       console.log('Cleanup failed:', error)
     }
@@ -40,9 +46,7 @@ describe('createGeographyYear', () => {
   })
 
   beforeEach(async () => {
-    await client.query(
-      'TRUNCATE TABLE geography_years RESTART IDENTITY CASCADE',
-    )
+    await cleanupWithRetry(client, [`${testSchema}.geography_years`])
   })
 
   it('creates a geography_years record', async () => {

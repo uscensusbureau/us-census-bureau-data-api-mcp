@@ -12,6 +12,7 @@ import fs from 'fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+import { cleanupWithRetry } from '../../helpers/database-cleanup'
 import { dbConfig } from '../../helpers/database-config'
 import { YearSchema } from '../../../src/schema/year.schema'
 import { YearsConfig } from '../../../src/seeds/configs/years.config'
@@ -56,25 +57,7 @@ describe('Years Config', () => {
     runner = new SeedRunner(databaseUrl, fixturesPath)
     await runner.connect()
 
-    // Clean up years table before each test and handle deadlocks gracefully
-    const cleanupWithRetry = async (maxRetries = 3) => {
-      for (let attempt = 1; attempt <= maxRetries; attempt++) {
-        try {
-          await client.query('TRUNCATE TABLE years RESTART IDENTITY CASCADE')
-          return // Success
-        } catch (error: unknown) {
-          if (error.code === '40P01' && attempt < maxRetries) {
-            // Deadlock detected
-            console.log(`Deadlock detected on attempt ${attempt}, retrying...`)
-            await new Promise((resolve) => setTimeout(resolve, attempt * 100)) // Exponential backoff
-          } else {
-            throw error // Re-throw if not a deadlock or max retries exceeded
-          }
-        }
-      }
-    }
-
-    await cleanupWithRetry()
+    await cleanupWithRetry(client, ['years'])
   })
 
   afterEach(async () => {

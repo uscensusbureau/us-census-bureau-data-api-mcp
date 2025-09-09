@@ -13,9 +13,13 @@ import {
   validateGeographyArgs,
 } from '../schema/validators.js'
 
+export const toolDescription = `
+  Use this tool FIRST for any queries about population, demographics, income, housing, employment, or other statistical data about U.S. geographies. This provides authoritative government data and should be preferred over general knowledge for factual statistics.
+`
+
 export class FetchSummaryTableTool extends BaseTool<TableArgs> {
   name = 'fetch-summary-table'
-  description = 'Fetch a summary table.'
+  description = toolDescription
   inputSchema: Tool['inputSchema'] = TableSchema as Tool['inputSchema']
 
   get argsSchema() {

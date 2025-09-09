@@ -5,7 +5,10 @@ vi.mock('node-fetch', () => ({
 }))
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { FetchSummaryTableTool } from '../../../src/tools/fetch-summary-table.tool'
+import {
+  FetchSummaryTableTool,
+  toolDescription,
+} from '../../../src/tools/fetch-summary-table.tool'
 import {
   validateToolStructure,
   validateResponseStructure,
@@ -35,7 +38,7 @@ describe('FetchSummaryTableTool', () => {
     it('should have correct tool metadata', () => {
       validateToolStructure(tool)
       expect(tool.name).toBe('fetch-summary-table')
-      expect(tool.description).toBe('Fetch a summary table.')
+      expect(tool.description).toBe(toolDescription)
     })
 
     it('should have valid input schema', () => {

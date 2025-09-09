@@ -14,9 +14,10 @@ import {
 import { SeedRunner } from './seed-runner.js'
 
 import {
+  CountyConfig,
+  DivisionConfig,
   NationConfig,
   RegionConfig,
-  DivisionConfig,
   StateConfig,
   SummaryLevelsConfig,
   YearsConfig,
@@ -29,6 +30,7 @@ export const geographySeeds: GeographySeedConfig[] = [
   RegionConfig,
   DivisionConfig,
   StateConfig,
+  CountyConfig,
 ]
 
 export async function runSeeds(

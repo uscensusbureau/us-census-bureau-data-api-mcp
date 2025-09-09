@@ -153,7 +153,11 @@ export function transformApiGeographyData(
       )
     }
 
-    const record: Record<string, string | number | null> = {}
+    const record: Record<string, string | number | null> = {
+      name: '',
+      for_param: '',
+      in_param: null,
+    }
 
     // Map standard fields by header name (order-independent)
     headers.forEach((header, columnIndex) => {

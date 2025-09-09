@@ -27,31 +27,12 @@ import {
   DivisionConfig,
   parentDivisionSQL,
 } from '../../../src/seeds/configs/division.config'
+import { cleanupWithRetry } from '../../helpers/database-cleanup'
 import { normalizeSQL } from '../../helpers/normalize-sql'
 import { SeedRunner } from '../../../src/seeds/scripts/seed-runner'
 import { GeographyContext } from '../../../src/schema/seed-config.schema'
 import { transformApiGeographyData } from '../../../src/schema/geography.schema'
 import { createGeographyYear } from '../../../src/helpers/geography-years.helper'
-
-// Clean Up Geographies Table
-const cleanupWithRetry = async (client: Client) => {
-  const maxRetries = 3
-
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      await client.query('TRUNCATE TABLE geographies RESTART IDENTITY CASCADE')
-      return // Success
-    } catch (error: unknown) {
-      if (error.code === '40P01' && attempt < maxRetries) {
-        // Deadlock code detected
-        console.log(`Deadlock detected on attempt ${attempt}, retrying...`)
-        await new Promise((resolve) => setTimeout(resolve, attempt * 100)) // Exponential backoff
-      } else {
-        throw error // Re-throw if not a deadlock or max retries exceeded
-      }
-    }
-  }
-}
 
 const transformedData = [
   {
@@ -86,7 +67,7 @@ describe('Division Config', () => {
     runner = new SeedRunner(databaseUrl)
     await runner.connect()
 
-    await cleanupWithRetry(client)
+    await cleanupWithRetry(client, ['geographies', 'summary_levels', 'years'])
   })
 
   afterEach(async () => {
@@ -226,17 +207,7 @@ describe('Division Config', () => {
       )
 
       expect(rawApiData).toHaveLength(1)
-      expect(rawApiData[0]).toEqual({
-        name: 'New England Division',
-        summary_level_code: '030',
-        ucgid_code: '0300000US1',
-        region_code: '1',
-        for_param: 'division:1',
-        in_param: null,
-        division_code: '1',
-        latitude: '44.0860059',
-        longitude: '-70.6608882',
-      })
+      expect(rawApiData[0]).toEqual(transformedData[0])
     })
 
     it('verifies the complete workflow step by step', async () => {

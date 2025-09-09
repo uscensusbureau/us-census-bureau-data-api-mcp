@@ -22,30 +22,46 @@ vi.mock('../../../src/helpers/geography-years.helper', async () => ({
   createGeographyYear: vi.fn(),
 }))
 
-import { cleanupWithRetry } from '../../helpers/database-cleanup'
 import { dbConfig } from '../../helpers/database-config'
 import {
-  StateConfig,
-  parentStateSQL,
-} from '../../../src/seeds/configs/state.config'
+  CountyConfig,
+  parentCountySQL,
+} from '../../../src/seeds/configs/county.config'
+import { cleanupWithRetry } from '../../helpers/database-cleanup'
 import { normalizeSQL } from '../../helpers/normalize-sql'
 import { SeedRunner } from '../../../src/seeds/scripts/seed-runner'
 import { GeographyContext } from '../../../src/schema/seed-config.schema'
 import { transformApiGeographyData } from '../../../src/schema/geography.schema'
 import { createGeographyYear } from '../../../src/helpers/geography-years.helper'
 
+const rawApiData = [
+  ['NAME', 'SUMLEVEL', 'GEO_ID', 'INTPTLAT', 'INTPTLON', 'state', 'county'],
+  [
+    'Delaware County, Pennsylvania',
+    '050',
+    '0500000US42045',
+    '39.9166853',
+    '-75.3988178',
+    '42',
+    '045',
+  ],
+]
+
 const transformedData = [
   {
-    name: 'Pennsylvania',
-    summary_level_code: '040',
+    name: 'Delaware County, Pennsylvania',
+    summary_level_code: '050',
     ucgid_code: '0400000US42',
     state_code: '42',
-    latitude: '40.5869403',
-    longitude: '-77.3684875',
+    county_code: '045',
+    region_code: '1',
+    division_code: '2',
+    latitude: '39.9166853',
+    longitude: '-75.3988178',
   },
 ]
 
-describe('State Config', () => {
+describe('County Config', () => {
   let runner: SeedRunner
   let client: Client
   let databaseUrl: string
@@ -76,15 +92,15 @@ describe('State Config', () => {
   })
 
   it('should have valid configuration structure', () => {
-    const stateConfig = StateConfig
+    const countyConfig = CountyConfig
     const context = { year: 2023 }
 
-    expect(stateConfig).toBeDefined()
-    expect(stateConfig?.table).toBe('geographies')
-    expect(stateConfig?.conflictColumn).toBe('ucgid_code')
-    expect(stateConfig?.url(context)).toContain('state:*')
-    expect(stateConfig?.beforeSeed).toBeDefined()
-    expect(stateConfig?.afterSeed).toBeDefined()
+    expect(countyConfig).toBeDefined()
+    expect(countyConfig?.table).toBe('geographies')
+    expect(countyConfig?.conflictColumn).toBe('ucgid_code')
+    expect(countyConfig?.url(context)).toContain('county:*')
+    expect(countyConfig?.beforeSeed).toBeDefined()
+    expect(countyConfig?.afterSeed).toBeDefined()
   })
 
   describe('beforeSeed', async () => {
@@ -103,15 +119,25 @@ describe('State Config', () => {
     })
 
     it('calls transformApiGeographyData with correct raw API data', async () => {
-      const rawApiData = [
-        ['NAME', 'SUMLEVEL', 'GEO_ID', 'INTPTLAT', 'INTPTLON', 'state'],
+      // Store original data for comparison
+      const expectedRawData = [
         [
-          'Pennsylvania',
-          '040',
-          '0400000US42',
-          '40.5869403',
-          '-77.3684875',
+          'NAME',
+          'SUMLEVEL',
+          'GEO_ID',
+          'INTPTLAT',
+          'INTPTLON',
+          'state',
+          'county',
+        ],
+        [
+          'Delaware County, Pennsylvania',
+          '050',
+          '0500000US42045',
+          '39.9166853',
+          '-75.3988178',
           '42',
+          '045',
         ],
       ]
 
@@ -125,20 +151,7 @@ describe('State Config', () => {
         return transformedData
       })
 
-      // Store original data for comparison
-      const expectedRawData = [
-        ['NAME', 'SUMLEVEL', 'GEO_ID', 'INTPTLAT', 'INTPTLON', 'state'],
-        [
-          'Pennsylvania',
-          '040',
-          '0400000US42',
-          '40.5869403',
-          '-77.3684875',
-          '42',
-        ],
-      ]
-
-      await StateConfig.beforeSeed!(
+      await CountyConfig.beforeSeed!(
         mockClient as Client,
         rawApiData,
         mockContext,
@@ -147,59 +160,24 @@ describe('State Config', () => {
       expect(transformApiGeographyData).toHaveBeenCalledTimes(1)
       expect(callTracker).toHaveLength(1)
 
-      expect(callTracker[0].type).toBe('state')
+      expect(callTracker[0].type).toBe('county')
       expect(callTracker[0].data).toEqual(expectedRawData)
     })
 
     it('transforms and processes data correctly end-to-end', async () => {
-      const rawApiData = [
-        ['NAME', 'SUMLEVEL', 'GEO_ID', 'INTPTLAT', 'INTPTLON', 'state'],
-        [
-          'Pennsylvania',
-          '040',
-          '0400000US42',
-          '40.5869403',
-          '-77.3684875',
-          '42',
-        ],
-      ]
-
       vi.mocked(transformApiGeographyData).mockReturnValue(transformedData)
 
-      await StateConfig.beforeSeed!(
+      await CountyConfig.beforeSeed!(
         mockClient as Client,
         rawApiData,
         mockContext,
       )
 
       expect(rawApiData).toHaveLength(1)
-      expect(rawApiData[0]).toEqual({
-        name: 'Pennsylvania',
-        summary_level_code: '040',
-        ucgid_code: '0400000US42',
-        region_code: '1',
-        state_code: '42',
-        for_param: 'state:42',
-        in_param: null,
-        division_code: '2',
-        latitude: '40.5869403',
-        longitude: '-77.3684875',
-      })
+      expect(rawApiData[0]).toEqual(transformedData[0])
     })
 
     it('verifies the complete workflow step by step', async () => {
-      const rawApiData = [
-        ['NAME', 'SUMLEVEL', 'GEO_ID', 'INTPTLAT', 'INTPTLON', 'state'],
-        [
-          'Pennsylvania',
-          '040',
-          '0400000US42',
-          '40.5869403',
-          '-77.3684875',
-          '42',
-        ],
-      ]
-
       const callSpy = vi.fn()
 
       // Mock returns synchronous value (no Promise.resolve)
@@ -208,44 +186,19 @@ describe('State Config', () => {
         return transformedData // Return directly, not wrapped in Promise
       })
 
-      await StateConfig.beforeSeed!(
+      await CountyConfig.beforeSeed!(
         mockClient as Client,
         rawApiData,
         mockContext,
       )
 
       expect(callSpy).toHaveBeenCalledTimes(1)
-      expect(callSpy).toHaveBeenCalledWith(
-        [
-          ['NAME', 'SUMLEVEL', 'GEO_ID', 'INTPTLAT', 'INTPTLON', 'state'],
-          [
-            'Pennsylvania',
-            '040',
-            '0400000US42',
-            '40.5869403',
-            '-77.3684875',
-            '42',
-          ],
-        ],
-        'state',
-      )
-      expect(rawApiData[0]).toHaveProperty('for_param', 'state:42')
-      expect(rawApiData[0]).toHaveProperty('in_param', null)
+      expect(callSpy).toHaveBeenCalledWith([...rawApiData], 'county')
+      expect(rawApiData[0]).toHaveProperty('for_param', 'county:045')
+      expect(rawApiData[0]).toHaveProperty('in_param', 'state:42')
     })
 
     it('stores the states in the parentGeographies', async () => {
-      const rawApiData = [
-        ['NAME', 'SUMLEVEL', 'GEO_ID', 'INTPTLAT', 'INTPTLON', 'state'],
-        [
-          'Pennsylvania',
-          '040',
-          '0400000US42',
-          '40.5869403',
-          '-77.3684875',
-          '42',
-        ],
-      ]
-
       const callSpy = vi.fn()
 
       // Mock returns synchronous value (no Promise.resolve)
@@ -254,7 +207,7 @@ describe('State Config', () => {
         return transformedData // Return directly, not wrapped in Promise
       })
 
-      await StateConfig.beforeSeed!(
+      await CountyConfig.beforeSeed!(
         mockClient as Client,
         rawApiData,
         mockContext,
@@ -262,24 +215,13 @@ describe('State Config', () => {
 
       expect(mockContext.parentGeographies).toHaveProperty('states')
       expect(mockContext.parentGeographies.states.length).toEqual(1)
-      expect(mockContext.parentGeographies.states[0].name).toBe('Pennsylvania')
+      expect(mockContext.parentGeographies.states[0].name).toBe(
+        'Delaware County, Pennsylvania',
+      )
     })
 
     describe('when a state is missing region and division data', () => {
       it('does not throw an error', async () => {
-        const rawApiData = [
-          ['NAME', 'SUMLEVEL', 'GEO_ID', 'INTPTLAT', 'INTPTLON', 'state'],
-          [
-            'American Samoa',
-            '040',
-            '0400000US60',
-            '60',
-            '-14.26715900',
-            '-170.66826740',
-            '60',
-          ],
-        ]
-
         const callSpy = vi.fn()
 
         // Mock returns synchronous value (no Promise.resolve)
@@ -291,7 +233,7 @@ describe('State Config', () => {
         )
 
         await expect(
-          StateConfig.beforeSeed!(
+          CountyConfig.beforeSeed!(
             mockClient as Client,
             rawApiData,
             mockContext,
@@ -323,7 +265,7 @@ describe('State Config', () => {
     it('should establish relationships with vintages', async () => {
       const geo_ids = [1, 2, 3, 4]
 
-      await StateConfig.afterSeed!(mockClient as Client, mockContext, geo_ids)
+      await CountyConfig.afterSeed!(mockClient as Client, mockContext, geo_ids)
 
       expect(createGeographyYear).toHaveBeenCalledTimes(geo_ids.length)
 
@@ -339,7 +281,7 @@ describe('State Config', () => {
     it('should assign a parent geography', async () => {
       const geo_ids = [1, 2, 3, 4]
 
-      await StateConfig.afterSeed!(mockClient as Client, mockContext, geo_ids)
+      await CountyConfig.afterSeed!(mockClient as Client, mockContext, geo_ids)
 
       // Get the SQL that was actually called
       const mockQuery = vi.mocked(mockClient.query)
@@ -349,7 +291,7 @@ describe('State Config', () => {
       const actualSQL = mockQuery.mock.calls[mockQuery.mock.calls.length - 1][0]
 
       // Compare normalized versions
-      expect(normalizeSQL(actualSQL)).toBe(normalizeSQL(parentStateSQL))
+      expect(normalizeSQL(actualSQL)).toBe(normalizeSQL(parentCountySQL))
     })
   })
 })

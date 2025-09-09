@@ -22,31 +22,13 @@ vi.mock('../../../src/helpers/geography-years.helper', async () => ({
   createGeographyYear: vi.fn(),
 }))
 
+import { cleanupWithRetry } from '../../helpers/database-cleanup'
 import { dbConfig } from '../../helpers/database-config'
 import { RegionConfig } from '../../../src/seeds/configs/region.config'
 import { SeedRunner } from '../../../src/seeds/scripts/seed-runner'
 import { GeographyContext } from '../../../src/schema/seed-config.schema'
 import { transformApiGeographyData } from '../../../src/schema/geography.schema'
 import { createGeographyYear } from '../../../src/helpers/geography-years.helper'
-
-const cleanupWithRetry = async (client: Client) => {
-  const maxRetries = 3
-
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      await client.query('TRUNCATE TABLE geographies RESTART IDENTITY CASCADE')
-      return // Success
-    } catch (error: unknown) {
-      if (error.code === '40P01' && attempt < maxRetries) {
-        // Deadlock detected
-        console.log(`Deadlock detected on attempt ${attempt}, retrying...`)
-        await new Promise((resolve) => setTimeout(resolve, 100 * 2 ** attempt)) // Exponential Backoff
-      } else {
-        throw error // Re-throw if not a deadlock or max retries exceeded
-      }
-    }
-  }
-}
 
 describe('Region Config', () => {
   let runner: SeedRunner
@@ -74,7 +56,7 @@ describe('Region Config', () => {
     await runner.connect()
 
     // Clean Up Geographies Table
-    await cleanupWithRetry(client)
+    await cleanupWithRetry(client, ['geographies', 'summary_levels', 'years'])
   })
 
   afterEach(async () => {
