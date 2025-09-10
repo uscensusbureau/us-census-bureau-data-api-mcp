@@ -83,7 +83,7 @@ export class IdentifyDatasetsTool extends BaseTool<object> {
     const vintageStr = vintage.toString();
 
     // Match the vintage surrounded by optional whitespace or punctuation
-    const regex = new RegExp(`\\b${vintageStr}\\b`);
+    const regex = new RegExp(`\\b${vintageStr}\\b`, 'g');
     
     // Replace vintage while preserving spacing
     return title.replace(regex, '').replace(/\s{2,}/g, ' ').trim();

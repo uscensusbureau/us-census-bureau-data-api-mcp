@@ -93,10 +93,10 @@ describe('IdentifyDatasetsTool', () => {
 
       expect(parsedContent[0]).toEqual({
         c_dataset: 'acs/acs1',
-        title: 'American Community Survey: 1-Year Estimates: Detailed Tables',
+        title: ['American Community Survey: 1-Year Estimates: Detailed Tables'],
         description:
-          'The American Community Survey (ACS) is an ongoing survey that provides vital information on a yearly basis about our nation and its people.',
-        c_vintage: 2022,
+          ['The American Community Survey (ACS) is an ongoing survey that provides vital information on a yearly basis about our nation and its people.'],
+        c_vintages: [2022],
       })
     })
 
@@ -301,6 +301,98 @@ describe('IdentifyDatasetsTool', () => {
       expect(parsedContent).toEqual([])
     })
   })
+
+    // Extend the class to expose private methods for testing
+  class TestableIdentifyDatasetsTool extends IdentifyDatasetsTool {
+    public testCleanTitle(title: string, vintage?: number): string {
+      return (this as any).cleanTitle(title, vintage);
+    }
+
+    public testAggregateDatasets(data: SimplifiedAPIDatasetType[]): AggregatedResultType[] {
+      return (this as any).aggregateDatasets(data);
+    }
+  }
+
+  describe('cleanTitle', () => {
+    let tool: TestableIdentifyDatasetsTool;
+
+    beforeEach(() => {
+      process.env.CENSUS_API_KEY = 'test-api-key'
+      tool = new TestableIdentifyDatasetsTool();
+    });
+
+    it('should return original title when vintage is undefined', () => {
+      const title = 'American Community Survey 2020';
+      const result = tool.testCleanTitle(title);
+      expect(result).toBe(title);
+    });
+
+    it('should remove vintage year from title', () => {
+      const title = 'American Community Survey 2020';
+      const result = tool.testCleanTitle(title, 2020);
+      expect(result).toBe('American Community Survey');
+    });
+
+    it('should remove vintage at the beginning of title', () => {
+      const title = '2019 American Community Survey';
+      const result = tool.testCleanTitle(title, 2019);
+      expect(result).toBe('American Community Survey');
+    });
+
+    it('should remove vintage in the middle of title', () => {
+      const title = 'Survey 2021 Data';
+      const result = tool.testCleanTitle(title, 2021);
+      expect(result).toBe('Survey Data');
+    });
+
+    it('should handle multiple spaces after vintage removal', () => {
+      const title = 'Survey    2020    Data';
+      const result = tool.testCleanTitle(title, 2020);
+      expect(result).toBe('Survey Data');
+    });
+
+    it('should not remove partial matches', () => {
+      const title = 'Survey 20201 Data';
+      const result = tool.testCleanTitle(title, 2020);
+      expect(result).toBe('Survey 20201 Data');
+    });
+
+    it('should handle vintage with punctuation', () => {
+      const title = 'Survey (2020) Data';
+      const result = tool.testCleanTitle(title, 2020);
+      expect(result).toBe('Survey () Data');
+    });
+
+    it('should trim whitespace from result', () => {
+      const title = '   2020   ';
+      const result = tool.testCleanTitle(title, 2020);
+      expect(result).toBe('');
+    });
+
+    it('should handle empty title', () => {
+      const result = tool.testCleanTitle('', 2020);
+      expect(result).toBe('');
+    });
+
+    it('should handle title that is only the vintage', () => {
+      const result = tool.testCleanTitle('2020', 2020);
+      expect(result).toBe('');
+    });
+
+    it('should handle word boundaries correctly', () => {
+      const title = 'Dataset 2020s Analysis';
+      const result = tool.testCleanTitle(title, 2020);
+      expect(result).toBe('Dataset 2020s Analysis');
+    });
+
+    it('should handle multiple occurrences of vintage', () => {
+      const title = '2020 Survey 2020 Data';
+      const result = tool.testCleanTitle(title, 2020);
+      console.log(result)
+      expect(result).toBe('Survey Data');
+    });
+  });
+
 
   describe('JSON Parsing Errors', () => {
     beforeEach(() => {
