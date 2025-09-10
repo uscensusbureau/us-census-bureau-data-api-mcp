@@ -35,12 +35,12 @@ import {
   YearsConfig,
 } from '../../../src/seeds/configs/index'
 import {
-  validateGeographyContext,
+  geographySeeds,
   runSeedsWithRunner,
   runSeeds,
   runGeographySeeds,
   seeds,
-  geographySeeds,
+  validateGeographyContext,
   zodErrorHandling,
 } from '../../../src/seeds/scripts/seed-database'
 
@@ -314,14 +314,21 @@ describe('Seed Database', () => {
 
   describe('geographySeeds', () => {
     it('includes geography configs', () => {
-      expect(geographySeeds).toHaveLength(7)
-      expect(geographySeeds).toContain(NationConfig)
-      expect(geographySeeds).toContain(RegionConfig)
-      expect(geographySeeds).toContain(DivisionConfig)
-      expect(geographySeeds).toContain(StateConfig)
-      expect(geographySeeds).toContain(CountyConfig)
-      expect(geographySeeds).toContain(CountySubdivisionConfig)
-      expect(geographySeeds).toContain(PlaceConfig)
+      expect(geographySeeds()).toHaveLength(7)
+      expect(geographySeeds()).toContain(NationConfig)
+      expect(geographySeeds()).toContain(RegionConfig)
+      expect(geographySeeds()).toContain(DivisionConfig)
+      expect(geographySeeds()).toContain(StateConfig)
+      expect(geographySeeds()).toContain(CountyConfig)
+      expect(geographySeeds()).toContain(CountySubdivisionConfig)
+      expect(geographySeeds()).toContain(PlaceConfig)
+    })
+
+    it('does not include time intensive configs when set to slim', () => {
+      process.env.SEED_MODE = 'slim'
+      expect(geographySeeds).not.toContain(CountySubdivisionConfig)
+      expect(geographySeeds).not.toContain(PlaceConfig)
+      delete process.env.SEED_MODE
     })
   })
 

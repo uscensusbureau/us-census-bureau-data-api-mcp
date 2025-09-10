@@ -32,7 +32,8 @@ import {
 
 // Seed configurations
 export const seeds: SeedConfig[] = [SummaryLevelsConfig, YearsConfig]
-export const geographySeeds: EnhancedGeographySeedConfig[] = [
+
+let baseGeographySeeds: EnhancedGeographySeedConfig[] = [
   NationConfig,
   RegionConfig,
   DivisionConfig,
@@ -41,6 +42,17 @@ export const geographySeeds: EnhancedGeographySeedConfig[] = [
   CountySubdivisionConfig,
   PlaceConfig,
 ]
+
+export function geographySeeds(): EnhancedGeographySeedConfig[] {
+  if (process.env.SEED_MODE === 'slim') {
+    // Remove Configs That Take Forever to Run if SEED_MODE Set to Slim (For Testing Builds)
+    baseGeographySeeds = baseGeographySeeds
+      .filter((config) => config !== CountySubdivisionConfig)
+      .filter((config) => config !== PlaceConfig)
+  }
+
+  return baseGeographySeeds
+}
 
 export async function runSeeds(
   databaseUrl: string = DATABASE_URL,
@@ -57,7 +69,7 @@ export async function runSeeds(
     await runSeedsWithRunner(runner, targetSeedName)
 
     if (!targetSeedName) {
-      await runGeographySeeds(runner, geographySeeds)
+      await runGeographySeeds(runner, geographySeeds())
     }
 
     console.log('Seeding completed successfully!')
@@ -97,7 +109,7 @@ export async function runSeedsWithRunner(
 
 export async function runGeographySeeds(
   runner: SeedRunner,
-  seedConfigs: EnhancedGeographySeedConfig[] = geographySeeds,
+  seedConfigs: EnhancedGeographySeedConfig[] = geographySeeds(),
 ): Promise<void> {
   seedConfigs.forEach((config) => {
     validateGeographySeedConfig(config)

@@ -85,6 +85,9 @@ jobs:
   docker-prod-build:
     name: Docker Production Build Test
     runs-on: ubuntu-latest
+    env:
+      #Skip Time-consuming Seeding Operations Defined in seed-database 
+      SEED_MODE: slim
     
     steps:
       - uses: actions/checkout@v4
@@ -97,12 +100,15 @@ jobs:
         with:
           timeout_minutes: 5
           max_attempts: 3
-          command: docker compose --profile prod build --no-cache
+          command: SEED_MODE=$SEED_MODE docker compose --profile prod build --no-cache
     
       - name: Test production environment
         run: |
+          echo "=== Seeding Configuration ==="
+          echo "SEED_MODE: $SEED_MODE"
+
           echo "Starting production environment..."
-          docker compose --profile prod up -d
+          SEED_MODE=$SEED_MODE docker compose --profile prod up -d
           sleep 20
           
           echo "=== Production Container Status ==="
