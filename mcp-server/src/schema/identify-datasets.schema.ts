@@ -5,8 +5,8 @@ import { z } from 'zod'
 export const AggregatedResultSchema = z.object({
   c_dataset: z.string(),
   c_vintages: z.array(z.number()).optional(),
-  title: z.string(),
-  description: z.string(),
+  title: z.array(z.string()),
+  description: z.array(z.string()),
   c_isAggregate: z.boolean().optional(),
   c_isTimeseries: z.boolean().optional(),
   c_isMicrodata: z.boolean().optional(),
@@ -89,7 +89,7 @@ export const AllDatasetMetadataJsonSchema = z.object({
 })
 
 // Infer TypeScript types from Zod schemas
-export type SimplifiedAPIDatasetType = z.infer<typeof SimplifiedAPIDatasetSchema>
-export type AllDatasetMetadataJsonResponseType = z.infer<typeof AllDatasetMetadataJsonSchema>
 export type AggregatedResultType = z.infer<typeof AggregatedResultSchema>
+export type SimplifiedAPIDatasetType = z.infer<typeof SimplifiedAPIDatasetSchema>
 export type DatasetType = z.infer<typeof DatasetSchema>
+export type AllDatasetMetadataJsonResponseType = z.infer<typeof AllDatasetMetadataJsonSchema>

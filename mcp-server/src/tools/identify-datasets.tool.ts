@@ -89,55 +89,63 @@ export class IdentifyDatasetsTool extends BaseTool<object> {
     return title.replace(regex, '').replace(/\s{2,}/g, ' ').trim();
   }
 
-  private cleanUndefinedKeys<T extends object>(obj: T): Partial<T> {
-  return Object.entries(obj).reduce((acc, [key, value]) => {
-    if (value !== undefined) {
-      acc[key as keyof T] = value;
-    }
-    return acc;
-  }, {} as Partial<T>);
-  }
+//aggregate by c_dataset, create lists of titles, descriptions, and vintages
+private aggregateDatasets(data: SimplifiedAPIDatasetType[]): AggregatedResultType[] {
+  const grouped = new Map<string, AggregatedResultType>();
 
-  //aggregate by c_dataset and describe, create a list of years (c_vintages)
-  private aggregateDatasets(data: SimplifiedAPIDatasetType[]): AggregatedResultType[] {
-    const grouped = new Map<string, AggregatedResultType>();
+  for (const entry of data) {
+    const key = entry.c_dataset;
+    const vintage = entry.c_vintage;
+    const cleanedTitle = this.cleanTitle(entry.title, vintage);
 
-    for (const entry of data) {
-      const key = `${entry.c_dataset}|${entry.description}`;
-      const vintage = entry.c_vintage;
-
-      if (!grouped.has(key)) {
-        grouped.set(key, {
-          c_dataset: entry.c_dataset,
-          title: this.cleanTitle(entry.title, vintage),
-          description: entry.description,
-          c_vintages: vintage !== undefined ? [vintage] : [],
-          c_isAggregate: entry.c_isAggregate,
-          c_isTimeseries: entry.c_isTimeseries,
-          c_isMicrodata: entry.c_isMicrodata
-        });
-      } else {
-        const existing = grouped.get(key)!;
-        if (vintage !== undefined && !existing.c_vintages.includes(vintage)) {
-          existing.c_vintages.push(vintage);
-        }
+    if (!grouped.has(key)) {
+      grouped.set(key, {
+        c_dataset: entry.c_dataset,
+        title: [cleanedTitle],
+        description: [entry.description],
+        c_vintages: vintage !== undefined && typeof vintage === 'number' ? [vintage] : [],
+        ...(entry.c_isAggregate !== undefined && { c_isAggregate: entry.c_isAggregate }),
+        ...(entry.c_isTimeseries !== undefined && { c_isTimeseries: entry.c_isTimeseries }),
+        ...(entry.c_isMicrodata !== undefined && { c_isMicrodata: entry.c_isMicrodata })
+      });
+    } else {
+      const existing = grouped.get(key)!;
+      
+      // Add title if not already present
+      if (!existing.title.includes(cleanedTitle)) {
+        existing.title.push(cleanedTitle);
+      }
+      
+      // Add description if not already present
+      if (!existing.description.includes(entry.description)) {
+        existing.description.push(entry.description);
+      }
+      
+      // Add vintage if it's a number and not already present
+      if (vintage !== undefined && typeof vintage === 'number' && !existing.c_vintages.includes(vintage)) {
+        existing.c_vintages.push(vintage);
+      }
+      
+      // Keep boolean values if they exist
+      if (entry.c_isAggregate !== undefined) {
+        existing.c_isAggregate = entry.c_isAggregate;
+      }
+      if (entry.c_isTimeseries !== undefined) {
+        existing.c_isTimeseries = entry.c_isTimeseries;
+      }
+      if (entry.c_isMicrodata !== undefined) {
+        existing.c_isMicrodata = entry.c_isMicrodata;
       }
     }
-
-    // Optionally sort vintages
-    for (const entry of grouped.values()) {
-    entry.c_vintages.sort((a, b) => a - b);
-    }
-
-    return Array.from(grouped.values()).map(entry => {
-    if (entry.c_vintages.length === 0) {
-        const { c_vintages, ...rest } = entry;
-        return this.cleanUndefinedKeys(rest);
-    }
-    return this.cleanUndefinedKeys(entry);
-    });
   }
 
+  // Sort vintages for each entry
+  for (const entry of grouped.values()) {
+    entry.c_vintages.sort((a, b) => a - b);
+  }
+
+  return Array.from(grouped.values());
+}
 
   async handler(): Promise<{ content: ToolContent[] }> {
     try {
