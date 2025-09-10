@@ -517,34 +517,30 @@ describe('IdentifyDatasetsTool', () => {
     });
   });
 
-  //av.note: this shouldn't happen!
-  // it('should handle optional boolean fields', () => {
-  //   const data: SimplifiedAPIDatasetType[] = [
-  //     {
-  //       c_dataset: 'acs/acs1',
-  //       c_vintage: 2020,
-  //       title: 'Survey',
-  //       description: 'Description',
-  //       c_isAggregate: true,
-  //       c_isTimeseries: false,
-  //       c_isMicrodata: true
-  //     }
-  //   ];
+  it('should handle datasets with missing boolean fields', () => {
+    const data: SimplifiedAPIDatasetType[] = [
+      {
+        c_dataset: 'acs/acs1',
+        c_vintage: 2022,
+        title: 'American Community Survey',
+        description: 'ACS estimates'
+        // boolean fields omitted
+      }
+    ];
 
-  //   const result = tool.testAggregateDatasets(data);
-
-  //   expect(result[0]).toEqual({
-  //     c_dataset: 'acs/acs1',
-  //     title: ['Survey'],
-  //     description: ['Description'],
-  //     c_vintages: [2020],
-  //     c_isAggregate: true,
-  //     c_isTimeseries: false,
-  //     c_isMicrodata: true
-  //   });
-  // });
-
-  //av.note: this shouldn't happen either!
+    const result = tool.testAggregateDatasets(data);
+    
+    expect(result[0]).toEqual({
+      c_dataset: 'acs/acs1',
+      title: ['American Community Survey'],
+      description: ['ACS estimates'],
+      c_vintages: [2022],
+      c_isAggregate: undefined,
+      c_isTimeseries: undefined,
+      c_isMicrodata: undefined
+    });
+  });
+ 
   it('should overwrite boolean fields with later values', () => {
     const data: SimplifiedAPIDatasetType[] = [
       {
