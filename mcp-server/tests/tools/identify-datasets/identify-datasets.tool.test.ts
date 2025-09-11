@@ -31,11 +31,11 @@ describe('IdentifyDatasetsTool', () => {
   // Extend the class to expose private methods for testing
   class TestableIdentifyDatasetsTool extends IdentifyDatasetsTool {
     public testCleanTitle(title: string, vintage?: number): string {
-      return (this as any).cleanTitle(title, vintage);
+      return (this as IdentifyDatasetsTool).cleanTitle(title, vintage);
     }
 
     public testAggregateDatasets(data: SimplifiedAPIDatasetType[]): AggregatedResultType[] {
-      return (this as any).aggregateDatasets(data);
+      return (this as IdentifyDatasetsTool).aggregateDatasets(data);
     }
   }
 
