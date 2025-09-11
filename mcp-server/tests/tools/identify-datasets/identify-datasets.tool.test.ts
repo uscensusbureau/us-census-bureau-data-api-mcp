@@ -28,6 +28,17 @@ describe('IdentifyDatasetsTool', () => {
     vi.clearAllMocks()
   })
 
+  // Extend the class to expose private methods for testing
+  class TestableIdentifyDatasetsTool extends IdentifyDatasetsTool {
+    public testCleanTitle(title: string, vintage?: number): string {
+      return (this as any).cleanTitle(title, vintage);
+    }
+
+    public testAggregateDatasets(data: SimplifiedAPIDatasetType[]): AggregatedResultType[] {
+      return (this as any).aggregateDatasets(data);
+    }
+  }
+
   describe('Tool Configuration', () => {
     it('should have correct name and description', () => {
       expect(tool.name).toBe('identify-datasets')
@@ -306,17 +317,6 @@ describe('IdentifyDatasetsTool', () => {
     })
   })
 
-    // Extend the class to expose private methods for testing
-  class TestableIdentifyDatasetsTool extends IdentifyDatasetsTool {
-    public testCleanTitle(title: string, vintage?: number): string {
-      return (this as any).cleanTitle(title, vintage);
-    }
-
-    public testAggregateDatasets(data: SimplifiedAPIDatasetType[]): AggregatedResultType[] {
-      return (this as any).aggregateDatasets(data);
-    }
-  }
-
   describe('Cleaning title', () => {
     let tool: TestableIdentifyDatasetsTool;
 
@@ -397,7 +397,7 @@ describe('IdentifyDatasetsTool', () => {
     });
   });
 
-  describe('Aggregating datasets', () => {
+  describe('Aggregating simplified dataset metadata', () => {
   let tool: TestableIdentifyDatasetsTool;
 
   beforeEach(() => {
