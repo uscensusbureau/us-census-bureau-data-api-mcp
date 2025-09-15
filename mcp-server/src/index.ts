@@ -15,11 +15,16 @@ import { FetchSummaryTableTool } from './tools/fetch-summary-table.tool.js'
 import { IdentifyDatasetsTool } from './tools/identify-datasets.tool.js'
 import { ResolveGeographyFipsTool } from './tools/resolve-geography-fips.tool.js'
 
+import { PopulationPrompt } from './prompts/population.prompt.js'
+
 // MCP Server Setup
 async function main() {
   const mcpServer = new MCPServer('census-api', '0.1.0')
 
-  // Register tools here
+  // Register prompts
+  mcpServer.registerPrompt(new PopulationPrompt())
+
+  // Register tools
   mcpServer.registerTool(new FetchDatasetGeographyTool())
   mcpServer.registerTool(new FetchDatasetVariablesTool())
   mcpServer.registerTool(new FetchSummaryTableTool())

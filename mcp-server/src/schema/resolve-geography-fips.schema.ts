@@ -18,12 +18,13 @@ export const ResolveGeographyFipsArgsSchema = {
         'Philadelphia city, Pennsylvania',
         'Philadelphia County, Pennsylvania',
         'Philadelphia, Pennsylvania',
-        'Philadelphia'
-      ]
+        'Philadelphia',
+      ],
     },
     summary_level: {
       type: 'string',
-      description: 'Filters the geography resolution by the name or summary level code of a matching summary level.',
+      description:
+        'Filters the geography resolution by the name or summary level code of a matching summary level.',
       examples: [
         'Place',
         '160',
@@ -33,7 +34,7 @@ export const ResolveGeographyFipsArgsSchema = {
         '040',
         'Division',
         'Region',
-      ]
+      ],
     },
   },
   required: ['geography_name'],
