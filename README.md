@@ -159,7 +159,7 @@ The `fetch-summary-table` tool is used for fetching a summary table from the Cen
 * Year (Required) - The vintage of the dataset, e.g. `1987`
 * Get (Required) - An object that is required that accepts 2 optional arguments:
 	* Variables (optional) - An array of variables for filtering responses by attributes and rows, e.g. `'NAME'`, `'B01001_001E'`
-	* Group (optional) - A string that returns a larger collecton of variables, e.g. `S0101`
+	* Group (Optional) - A string that returns a larger collecton of variables, e.g. `S0101`
 * For (Optional) - A string that testricts geography to various levels and is required in most datasets
 * In (Optional) - A string that restricts geography to smaller areas than state level
 * UCGID (Optional) - A string that restricts geography by Uniform Census Geography Identifier (UCGID), e.g. `0400000US41`
@@ -169,6 +169,17 @@ The `fetch-summary-table` tool is used for fetching a summary table from the Cen
 #### How to Run via CLI
 ```
 echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"fetch-summary-table","arguments":{"dataset":"acs/acs1","year":2022, "get": { "variables":["NAME","B01001_001E"] },"for":"state:01,13"}}}' \
+| docker exec -i mcp-server node dist/index.js
+```
+
+### Resolve Geography FIPS Tool
+The `resolve-geography-fips` tool is used to search across all Census Bureau geographies to return a list of potential matches and the correct FIPS codes and parameters used to query data in them. This tool accepts the following arguments:
+* Geography Name (Required) - The name of the geography to search, e.g. `Philadelphia`
+* Summary Level (Optional) - The summary level to search. Accepts name or summary level code, e.g. `Place`, `160`
+
+#### How to Run via CLI
+```
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"resolve-geography-fips","arguments":{"geography_name":"Philadelphia, Pennsylvania",}}}' \
 | docker exec -i mcp-server node dist/index.js
 ```
 

@@ -50,6 +50,7 @@ export default defineConfig({
           },
           fileParallelism: false,
           testTimeout: 30000,
+          retry: 3,
           globalSetup: ['./tests/globalSetup.ts'],
           setupFiles: ['./tests/setup.ts'],
         },

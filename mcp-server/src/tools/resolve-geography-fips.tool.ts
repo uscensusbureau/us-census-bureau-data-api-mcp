@@ -13,7 +13,7 @@ import { SummaryLevelRow } from '../types/summary-level.types.js'
 import { ToolContent } from '../types/base.types.js'
 
 export const toolDescription = `
-	Provides potential matches for Census Bureau geographies. Includes Nation, Region, Division, and State-level 
+	Provides potential matches for Census Bureau geographies. Includes Nation, Region, Division, State, Counties, and County Subdivision 
 	geographies. For each result, it returns information about the geography, for and in parameters with the correct
 	FIPS code for constructing fetching data with other tools, and what years (vintages) the geography is available in.
 `
