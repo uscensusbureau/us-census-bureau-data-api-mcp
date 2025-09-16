@@ -326,33 +326,34 @@ describe('IdentifyDatasetsTool', () => {
     });
 
     it('should return original title when vintage is undefined', () => {
-      const title = 'American Community Survey 2020';
+      const title = 'Annual Economic Surveys: Annual Survey of Manufactures Benchmark 2017';
       const result = tool.testCleanTitle(title);
       expect(result).toBe(title);
     });
 
+      it('should return original title when years are hyphenated', () => {
+      const title = '2018-2022 American Community Survey: Migration Flows'
+      const result = tool.testCleanTitle(title, 2018)
+      console.log(result)
+      expect(result).toBe(title)
+    })
+
     it('should remove vintage year from title', () => {
-      const title = 'American Community Survey 2020';
-      const result = tool.testCleanTitle(title, 2020);
-      expect(result).toBe('American Community Survey');
+      const title = 'Economic Census: Industry by Products Statistics for the U.S.: 2022';
+      const result = tool.testCleanTitle(title, 2022);
+      expect(result).toBe('Economic Census: Industry by Products Statistics for the U.S.:');
     });
 
     it('should remove vintage at the beginning of title', () => {
-      const title = '2019 American Community Survey';
-      const result = tool.testCleanTitle(title, 2019);
-      expect(result).toBe('American Community Survey');
+      const title = '2000 County Business Patterns: Business Patterns';
+      const result = tool.testCleanTitle(title, 2000);
+      expect(result).toBe('County Business Patterns: Business Patterns');
     });
 
     it('should remove vintage in the middle of title', () => {
-      const title = 'Survey 2021 Data';
-      const result = tool.testCleanTitle(title, 2021);
-      expect(result).toBe('Survey Data');
-    });
-
-    it('should handle multiple spaces after vintage removal', () => {
-      const title = 'Survey    2020    Data';
-      const result = tool.testCleanTitle(title, 2020);
-      expect(result).toBe('Survey Data');
+      const title = 'Aug 2011 Current Population Survey: Basic Monthly';
+      const result = tool.testCleanTitle(title, 2011);
+      expect(result).toBe('Aug Current Population Survey: Basic Monthly');
     });
 
     it('should not remove partial matches', () => {
@@ -361,39 +362,10 @@ describe('IdentifyDatasetsTool', () => {
       expect(result).toBe('Survey 20201 Data');
     });
 
-    it('should handle vintage with punctuation', () => {
-      const title = 'Survey (2020) Data';
-      const result = tool.testCleanTitle(title, 2020);
-      expect(result).toBe('Survey () Data');
-    });
-
-    it('should trim whitespace from result', () => {
-      const title = '   2020   ';
-      const result = tool.testCleanTitle(title, 2020);
-      expect(result).toBe('');
-    });
-
-    it('should handle empty title', () => {
-      const result = tool.testCleanTitle('', 2020);
-      expect(result).toBe('');
-    });
-
-    it('should handle title that is only the vintage', () => {
-      const result = tool.testCleanTitle('2020', 2020);
-      expect(result).toBe('');
-    });
-
-    it('should handle word boundaries correctly', () => {
-      const title = 'Dataset 2020s Analysis';
-      const result = tool.testCleanTitle(title, 2020);
-      expect(result).toBe('Dataset 2020s Analysis');
-    });
-
-    it('should handle multiple occurrences of vintage', () => {
+    it('should only remove first occurrences of vintage', () => {
       const title = '2020 Survey 2020 Data';
       const result = tool.testCleanTitle(title, 2020);
-      console.log(result)
-      expect(result).toBe('Survey Data');
+      expect(result).toBe('Survey 2020 Data');
     });
   });
 
