@@ -77,17 +77,17 @@ export class IdentifyDatasetsTool extends BaseTool<object> {
     return simplified
   }
 
-  private cleanTitle(title: string, vintage?: number): string {
+private cleanTitle(title: string, vintage?: number): string {
     if (vintage === undefined) return title;
 
     const vintageStr = vintage.toString();
 
-    // Match the vintage surrounded by optional whitespace or punctuation
-    const regex = new RegExp(`\\b${vintageStr}\\b`, 'g');
-    
-    // Replace vintage while preserving spacing
+    // Avoid matching vintage if it's part of a number-number pattern including spaces between dash
+    const regex = new RegExp(`(?<!\\d\\s*-\\s*)\\b${vintageStr}\\b(?!\\s*-\\s*\\d)`);
+
+    // Replace only the first vintage while preserving spacing
     return title.replace(regex, '').replace(/\s{2,}/g, ' ').trim();
-  }
+}
 
 //aggregate by c_dataset, create lists of titles, descriptions, and vintages
 private aggregateDatasets(data: SimplifiedAPIDatasetType[]): AggregatedResultType[] {
