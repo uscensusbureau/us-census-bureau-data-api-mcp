@@ -82,14 +82,14 @@ private cleanTitle(title: string, vintage?: number): string {
 
     const vintageStr = vintage.toString();
 
-    // Avoid matching vintage if it's part of a number-number pattern including spaces between dash
+    // Avoid matching vintage if it's part of a number-number pattern (like 2018-2022)
     const regex = new RegExp(`(?<!\\d\\s*-\\s*)\\b${vintageStr}\\b(?!\\s*-\\s*\\d)`);
 
     // Replace only the first vintage while preserving spacing
     return title.replace(regex, '').replace(/\s{2,}/g, ' ').trim();
 }
 
-//aggregate by c_dataset, create lists of titles, descriptions, and vintages
+// Aggregate by c_dataset, create arrays of titles, descriptions, and vintages
 private aggregateDatasets(data: SimplifiedAPIDatasetType[]): AggregatedResultType[] {
   const grouped = new Map<string, AggregatedResultType>();
 

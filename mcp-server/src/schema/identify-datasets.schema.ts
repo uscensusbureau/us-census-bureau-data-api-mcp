@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 
-// Zode schema for the returned dataset
+// Zod schema for the returned dataset
 export const AggregatedResultSchema = z.object({
   c_dataset: z.string(),
   c_vintages: z.array(z.number()).optional(),

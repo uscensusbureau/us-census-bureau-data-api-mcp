@@ -334,7 +334,6 @@ describe('IdentifyDatasetsTool', () => {
       it('should return original title when years are hyphenated', () => {
       const title = '2018-2022 American Community Survey: Migration Flows'
       const result = tool.testCleanTitle(title, 2018)
-      console.log(result)
       expect(result).toBe(title)
     })
 
