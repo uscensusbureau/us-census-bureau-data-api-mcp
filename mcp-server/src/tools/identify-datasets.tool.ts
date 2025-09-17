@@ -6,6 +6,7 @@ import {
   AllDatasetMetadataJsonSchema,
   AllDatasetMetadataJsonResponseType,
   SimplifiedAPIDatasetType,
+  AggregatedResultType,
   DatasetType,
 } from '../schema/identify-datasets.schema.js'
 
@@ -76,6 +77,76 @@ export class IdentifyDatasetsTool extends BaseTool<object> {
     return simplified
   }
 
+private cleanTitle(title: string, vintage?: number): string {
+    if (vintage === undefined) return title;
+
+    const vintageStr = vintage.toString();
+
+    // Avoid matching vintage if it's part of a number-number pattern (like 2018-2022)
+    const regex = new RegExp(`(?<!\\d\\s*-\\s*)\\b${vintageStr}\\b(?!\\s*-\\s*\\d)`);
+
+    // Replace only the first vintage while preserving spacing
+    return title.replace(regex, '').replace(/\s{2,}/g, ' ').trim();
+}
+
+// Aggregate by c_dataset, create arrays of titles, descriptions, and vintages
+private aggregateDatasets(data: SimplifiedAPIDatasetType[]): AggregatedResultType[] {
+  const grouped = new Map<string, AggregatedResultType>();
+
+  for (const entry of data) {
+    const key = entry.c_dataset;
+    const vintage = entry.c_vintage;
+    const cleanedTitle = this.cleanTitle(entry.title, vintage);
+
+    if (!grouped.has(key)) {
+      grouped.set(key, {
+        c_dataset: entry.c_dataset,
+        title: [cleanedTitle],
+        description: [entry.description],
+        c_vintages: vintage !== undefined && typeof vintage === 'number' ? [vintage] : [],
+        ...(entry.c_isAggregate !== undefined && { c_isAggregate: entry.c_isAggregate }),
+        ...(entry.c_isTimeseries !== undefined && { c_isTimeseries: entry.c_isTimeseries }),
+        ...(entry.c_isMicrodata !== undefined && { c_isMicrodata: entry.c_isMicrodata })
+      });
+    } else {
+      const existing = grouped.get(key)!;
+      
+      // Add title if not already present
+      if (!existing.title.includes(cleanedTitle)) {
+        existing.title.push(cleanedTitle);
+      }
+      
+      // Add description if not already present
+      if (!existing.description.includes(entry.description)) {
+        existing.description.push(entry.description);
+      }
+      
+      // Add vintage if it's a number and not already present
+      if (vintage !== undefined && typeof vintage === 'number' && !existing.c_vintages.includes(vintage)) {
+        existing.c_vintages.push(vintage);
+      }
+      
+      // Keep boolean values if they exist
+      if (entry.c_isAggregate !== undefined) {
+        existing.c_isAggregate = entry.c_isAggregate;
+      }
+      if (entry.c_isTimeseries !== undefined) {
+        existing.c_isTimeseries = entry.c_isTimeseries;
+      }
+      if (entry.c_isMicrodata !== undefined) {
+        existing.c_isMicrodata = entry.c_isMicrodata;
+      }
+    }
+  }
+
+  // Sort vintages for each entry
+  for (const entry of grouped.values()) {
+    entry.c_vintages.sort((a, b) => a - b);
+  }
+
+  return Array.from(grouped.values());
+}
+
   async handler(): Promise<{ content: ToolContent[] }> {
     try {
       const apiKey = process.env.CENSUS_API_KEY
@@ -101,12 +172,13 @@ export class IdentifyDatasetsTool extends BaseTool<object> {
       }
 
       const simplified = data.dataset.map(this.simplifyDataset)
+      const aggregated = this.aggregateDatasets(simplified)
 
       return {
         content: [
           {
             type: 'text',
-            text: JSON.stringify(simplified, null, 2),
+            text: JSON.stringify(aggregated, null, 2),
           },
         ],
       }
