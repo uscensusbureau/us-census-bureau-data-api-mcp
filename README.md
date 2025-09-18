@@ -1,9 +1,9 @@
 # U.S. Census Bureau MCP Server
-[![License: CC0-1.0](https://img.shields.io/badge/License-CC0%201.0-lightgrey.svg)](https://github.com/uscensusbureau/mcp-server-census-api/blob/main/LICENSE)
-[![MCP Project Build](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/build.yml/badge.svg)](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/build.yml)
-[![MCP Project - Lint](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/lint.yml/badge.svg)](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/lint.yml)
-[![MCP Server - Tests](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/test.yml/badge.svg)](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/test.yml)
-[![MCP Database - Tests](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/test-db.yml/badge.svg)](https://github.com/uscensusbureau/mcp-server-census-api/actions/workflows/test-db.yml)
+[![License: CC0-1.0](https://img.shields.io/badge/License-CC0%201.0-lightgrey.svg)](https://github.com/uscensusbureau/us-census-bureau-data-api-mcp/blob/main/LICENSE)
+[![MCP Project Build](https://github.com/uscensusbureau/us-census-bureau-data-api-mcp/actions/workflows/build.yml/badge.svg)](https://github.com/uscensusbureau/us-census-bureau-data-api-mcp/actions/workflows/build.yml)
+[![MCP Project - Lint](https://github.com/uscensusbureau/us-census-bureau-data-api-mcp/actions/workflows/lint.yml/badge.svg)](https://github.com/uscensusbureau/us-census-bureau-data-api-mcp/actions/workflows/lint.yml)
+[![MCP Server - Tests](https://github.com/uscensusbureau/us-census-bureau-data-api-mcp/actions/workflows/test.yml/badge.svg)](https://github.com/uscensusbureau/us-census-bureau-data-api-mcp/actions/workflows/test.yml)
+[![MCP Database - Tests](https://github.com/uscensusbureau/us-census-bureau-data-api-mcp/actions/workflows/test-db.yml/badge.svg)](https://github.com/uscensusbureau/us-census-bureau-data-api-mcp/actions/workflows/test-db.yml)
 ![MCP Server - Test Coverage](https://raw.githubusercontent.com/gist/luke-keller-census/0589e2c69696f077eef7d6af818a108b/raw/badge.svg)
 ![MCP Database - Test Coverage](https://raw.githubusercontent.com/gist/luke-keller-census/ae50d82d94893c2e674f7f742aea958e/raw/badge.svg)
 
@@ -42,7 +42,7 @@ Here is an example configuration file that includes the appropriate scripts for 
     "mcp-census-api": {
       "command": "bash",
       "args": [
-        "/Path/To/Server/mcp-server-census-api/scripts/mcp-connect.sh"
+        "/Path/To/Server/us-census-bureau-data-api-mcp/scripts/mcp-connect.sh"
       ],
       "env": {
         "CENSUS_API_KEY": "YOUR_CENSUS_API_KEY"
@@ -54,7 +54,7 @@ Here is an example configuration file that includes the appropriate scripts for 
 
 Note that the `CENSUS_API_KEY` variable is required. This defines the `env` variable in the MCP Client and passes it to the MCP server via the `mcp-connect` script.
 
-Be sure to update the path to the `mcp-server-census-api` directory in `args` and provide a valid `CENSUS_API_KEY`.
+Be sure to update the path to the `us-census-bureau-data-api-mcp` directory in `args` and provide a valid `CENSUS_API_KEY`.
 
 ### Updating the MCP Server
 When a new version of this project is released, you will need to manually build the production environment for the latest features. From the `mcp-db/` directory, run the following:
