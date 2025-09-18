@@ -1,4 +1,4 @@
-# U.S. Census Bureau MCP Server
+# U.S. Census Bureau Data API MCP
 [![License: CC0-1.0](https://img.shields.io/badge/License-CC0%201.0-lightgrey.svg)](https://github.com/uscensusbureau/us-census-bureau-data-api-mcp/blob/main/LICENSE)
 [![MCP Project Build](https://github.com/uscensusbureau/us-census-bureau-data-api-mcp/actions/workflows/build.yml/badge.svg)](https://github.com/uscensusbureau/us-census-bureau-data-api-mcp/actions/workflows/build.yml)
 [![MCP Project - Lint](https://github.com/uscensusbureau/us-census-bureau-data-api-mcp/actions/workflows/lint.yml/badge.svg)](https://github.com/uscensusbureau/us-census-bureau-data-api-mcp/actions/workflows/lint.yml)
@@ -9,7 +9,7 @@
 
 Bringing _official_ Census Bureau statistics to AI assistants everywhere.
 
-The *U.S. Census Bureau MCP Server* is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) server that connects AI assistants with data from the Census Data API and other official Census Bureau sources. This project is built using the [MCP Typescript SDK](https://github.com/modelcontextprotocol/typescript-sdk).
+The *U.S. Census Bureau Data API MCP* is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) server that connects AI assistants with data from the Census Data API and other official Census Bureau sources. This project is built using the [MCP Typescript SDK](https://github.com/modelcontextprotocol/typescript-sdk).
 
 ## Contents
 * [Getting Started](#getting-started)
@@ -25,12 +25,12 @@ The *U.S. Census Bureau MCP Server* is a [Model Context Protocol (MCP)](https://
 ## Getting Started
 To get started, you will need:
 
-* A valid Census Bureau [API key](https://api.census.gov/data/key_signup.html)
+* A valid Census Bureau [Data API key](https://api.census.gov/data/key_signup.html)
 * Docker (i.e. Docker Desktop)
 * Node 18+
 
 ## Using the MCP Server
-To use the U.S. Census Bureau MCP Server:
+To use the U.S. Census Bureau Data API MCP server:
 1. Clone or download the project locally.
 2. Configure your AI Assistant to use the MCP Server.
 
@@ -68,9 +68,9 @@ After that, you can relaunch your MCP Client and it should connect to the server
 
 ## How the MCP Server Works
 
-The U.S. Census Bureau MCP Server uses data from the Census Data API and other official sources to construct contextually rich data and statistics for use with AI Assistants. The Census Data API is the primary source of data but some of the API's data is pulled down to a local postgres container to enable more robust and performant search functionality. Below is an illustration of how user prompts are processed by AI Assistants and the MCP Server.
+The U.S. Census Bureau Data API MCP server uses data from the Census Data API and other official sources to construct contextually rich data and statistics for use with AI Assistants. The Census Data API is the primary source of data but some of the API's data is pulled down to a local postgres container to enable more robust and performant search functionality. Below is an illustration of how user prompts are processed by AI Assistants and the MCP Server.
 
-![Illustration of how the MCP Server works, starting with a user prompt, processing by an AI Assistant, tool or resource calls to the U.S. Census Bureau MCP Server, and finally queries to the local postgres database or the Census Data API.](/us-census-burea-mcp-server-flow.jpg)
+![Illustration of how the MCP Server works, starting with a user prompt, processing by an AI Assistant, tool or resource calls to the U.S. Census Bureau Data API MCP server, and finally queries to the local postgres database or the Census Data API.](/us-census-burea-mcp-server-flow.jpg)
 
 
 
