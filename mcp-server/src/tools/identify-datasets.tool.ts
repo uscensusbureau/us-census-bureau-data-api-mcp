@@ -65,15 +65,14 @@ export class IdentifyDatasetsTool extends BaseTool<object> {
         ? dataset.c_dataset.join('/')
         : dataset.c_dataset,
       title: dataset.title,
-      description: dataset.description,
     }
     if ('c_vintage' in dataset) simplified.c_vintage = dataset.c_vintage
     if ('c_isAggregate' in dataset)
       simplified.c_isAggregate = dataset.c_isAggregate
-    if ('c_isTimeseries' in dataset)
-      simplified.c_isTimeseries = dataset.c_isTimeseries
-    if ('c_isMicrodata' in dataset)
-      simplified.c_isMicrodata = dataset.c_isMicrodata
+    // if ('c_isTimeseries' in dataset)
+    //   simplified.c_isTimeseries = dataset.c_isTimeseries
+    // if ('c_isMicrodata' in dataset)
+    //   simplified.c_isMicrodata = dataset.c_isMicrodata
     return simplified
   }
 
@@ -89,36 +88,36 @@ private cleanTitle(title: string, vintage?: number): string {
     return title.replace(regex, '').replace(/\s{2,}/g, ' ').trim();
 }
 
-// Aggregate by c_dataset, create arrays of titles, descriptions, and vintages
+// Aggregate by c_dataset, create arrays vintages and keep only latest title
 private aggregateDatasets(data: SimplifiedAPIDatasetType[]): AggregatedResultType[] {
   const grouped = new Map<string, AggregatedResultType>();
 
   for (const entry of data) {
+    // Filter out datasets that do not have c_isAggregate: true
+    if (entry.c_isAggregate !== true) {
+      continue;
+    }
+
     const key = entry.c_dataset;
     const vintage = entry.c_vintage;
+
     const cleanedTitle = this.cleanTitle(entry.title, vintage);
 
     if (!grouped.has(key)) {
       grouped.set(key, {
         c_dataset: entry.c_dataset,
-        title: [cleanedTitle],
-        description: [entry.description],
-        c_vintages: vintage !== undefined && typeof vintage === 'number' ? [vintage] : [],
-        ...(entry.c_isAggregate !== undefined && { c_isAggregate: entry.c_isAggregate }),
-        ...(entry.c_isTimeseries !== undefined && { c_isTimeseries: entry.c_isTimeseries }),
-        ...(entry.c_isMicrodata !== undefined && { c_isMicrodata: entry.c_isMicrodata })
+        title: cleanedTitle,
+        c_vintages: vintage !== undefined && typeof vintage === 'number' ? [vintage] : []
+        // ...(entry.c_isAggregate !== undefined && { c_isAggregate: entry.c_isAggregate })
+        // ...(entry.c_isTimeseries !== undefined && { c_isTimeseries: entry.c_isTimeseries }),
+        // ...(entry.c_isMicrodata !== undefined && { c_isMicrodata: entry.c_isMicrodata })
       });
     } else {
       const existing = grouped.get(key)!;
       
-      // Add title if not already present
-      if (!existing.title.includes(cleanedTitle)) {
+      // Only keep the first title (skip adding additional titles)
+      if (existing.title.length === 0) {
         existing.title.push(cleanedTitle);
-      }
-      
-      // Add description if not already present
-      if (!existing.description.includes(entry.description)) {
-        existing.description.push(entry.description);
       }
       
       // Add vintage if it's a number and not already present
@@ -126,16 +125,16 @@ private aggregateDatasets(data: SimplifiedAPIDatasetType[]): AggregatedResultTyp
         existing.c_vintages.push(vintage);
       }
       
-      // Keep boolean values if they exist
-      if (entry.c_isAggregate !== undefined) {
-        existing.c_isAggregate = entry.c_isAggregate;
-      }
-      if (entry.c_isTimeseries !== undefined) {
-        existing.c_isTimeseries = entry.c_isTimeseries;
-      }
-      if (entry.c_isMicrodata !== undefined) {
-        existing.c_isMicrodata = entry.c_isMicrodata;
-      }
+      // // Keep boolean values if they exist
+      // if (entry.c_isAggregate !== undefined) {
+      //   existing.c_isAggregate = entry.c_isAggregate;
+      // }
+      // if (entry.c_isTimeseries !== undefined) {
+      //   existing.c_isTimeseries = entry.c_isTimeseries;
+      // }
+      // if (entry.c_isMicrodata !== undefined) {
+      //   existing.c_isMicrodata = entry.c_isMicrodata;
+      // }
     }
   }
 
@@ -171,14 +170,19 @@ private aggregateDatasets(data: SimplifiedAPIDatasetType[]): AggregatedResultTyp
         )
       }
 
-      const simplified = data.dataset.map(this.simplifyDataset)
+      let simplified = data.dataset.map(this.simplifyDataset)
+      // Sort simplified datasets by c_vintage (descending)
+      simplified = simplified.sort((a, b) => (b.c_vintage || 0) - (a.c_vintage || 0))
+
       const aggregated = this.aggregateDatasets(simplified)
 
       return {
         content: [
           {
             type: 'text',
-            text: JSON.stringify(aggregated, null, 2),
+            text: JSON.stringify(aggregated, (key, value) => {
+              return value === null ? undefined : value;
+            }),
           },
         ],
       }
