@@ -15,7 +15,6 @@ describe('IdentifyDatasetsTool - Integration Tests', () => {
     if (parsedResponse.length > 0) {
       expect(parsedResponse[0]).toHaveProperty('c_dataset')
       expect(parsedResponse[0]).toHaveProperty('title')
-      expect(parsedResponse[0]).toHaveProperty('description')
       expect(parsedResponse[0]).toHaveProperty('c_vintages')
     }
   }, 10000) 
