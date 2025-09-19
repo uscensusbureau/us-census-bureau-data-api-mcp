@@ -6,18 +6,18 @@ vi.mock('node-fetch', () => ({
 }))
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { IdentifyDatasetsTool } from '../../../src/tools/identify-datasets.tool'
-import { sampleDatasetMetadata } from '../../../tests/helpers/test-data'
+import { ListDatasetsTool } from '../../../src/tools/list-datasets.tool'
+import { sampleDatasetMetadata } from '../../helpers/test-data.js'
 import {
   SimplifiedAPIDatasetType,
   AggregatedResultType,
-} from '../../../src/schema/identify-datasets.schema.js'
+} from '../../../src/schema/list-datasets.schema.js'
 
-describe('IdentifyDatasetsTool', () => {
-  let tool: IdentifyDatasetsTool
+describe('ListDatasetsTool', () => {
+  let tool: ListDatasetsTool
 
   beforeEach(async () => {
-    tool = new IdentifyDatasetsTool()
+    tool = new ListDatasetsTool()
 
     mockFetch.mockClear()
 
@@ -29,19 +29,19 @@ describe('IdentifyDatasetsTool', () => {
   })
 
   // Extend the class to expose private methods for testing
-  class TestableIdentifyDatasetsTool extends IdentifyDatasetsTool {
+  class TestableListDatasetsTool extends ListDatasetsTool {
     public testCleanTitle(title: string, vintage?: number): string {
-      return (this as IdentifyDatasetsTool).cleanTitle(title, vintage);
+      return (this as ListDatasetsTool).cleanTitle(title, vintage);
     }
 
     public testAggregateDatasets(data: SimplifiedAPIDatasetType[]): AggregatedResultType[] {
-      return (this as IdentifyDatasetsTool).aggregateDatasets(data);
+      return (this as ListDatasetsTool).aggregateDatasets(data);
     }
   }
 
   describe('Tool Configuration', () => {
     it('should have correct name and description', () => {
-      expect(tool.name).toBe('identify-datasets')
+      expect(tool.name).toBe('list-datasets')
       expect(tool.description).toContain(
         'returns a data catalog of available Census datasets',
       )
@@ -345,11 +345,11 @@ describe('IdentifyDatasetsTool', () => {
   })
 
   describe('Cleaning title', () => {
-    let tool: TestableIdentifyDatasetsTool;
+    let tool: TestableListDatasetsTool;
 
     beforeEach(() => {
       process.env.CENSUS_API_KEY = 'test-api-key'
-      tool = new TestableIdentifyDatasetsTool();
+      tool = new TestableListDatasetsTool();
     });
 
     it('should return original title when vintage is undefined', () => {
@@ -396,10 +396,10 @@ describe('IdentifyDatasetsTool', () => {
   });
 
   describe('Aggregating simplified dataset metadata', () => {
-  let tool: TestableIdentifyDatasetsTool;
+  let tool: TestableListDatasetsTool;
 
   beforeEach(() => {
-    tool = new TestableIdentifyDatasetsTool();
+    tool = new TestableListDatasetsTool();
   });
 
   it('should aggregate single dataset', () => {
@@ -628,10 +628,10 @@ describe('IdentifyDatasetsTool', () => {
     it('should properly bind handler method', () => {
       // @ts-expect-error: spying on prototype method's bind isn't type-safe but is valid for testing
       const handlerBindSpy = vi.spyOn(
-        IdentifyDatasetsTool.prototype.handler,
+        ListDatasetsTool.prototype.handler,
         'bind',
       )
-      new IdentifyDatasetsTool()
+      new ListDatasetsTool()
 
       // This test ensures the handler is properly bound and won't lose context
       expect(handlerBindSpy).toHaveBeenCalled()

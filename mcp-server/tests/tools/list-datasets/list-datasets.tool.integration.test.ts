@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest'
-import { IdentifyDatasetsTool } from '../../../src/tools/identify-datasets.tool'
+import { ListDatasetsTool } from '../../../src/tools/list-datasets.tool'
 
-describe('IdentifyDatasetsTool - Integration Tests', () => {
+describe('ListDatasetsTool - Integration Tests', () => {
   it('should fetch and process real Census dataset metadata', async () => {
-    const tool = new IdentifyDatasetsTool()
+    const tool = new ListDatasetsTool()
 
     const response = await tool.handler()
 

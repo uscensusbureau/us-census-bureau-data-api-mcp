@@ -12,7 +12,7 @@ import { MCPServer } from './server.js'
 import { FetchDatasetGeographyTool } from './tools/fetch-dataset-geography.tool.js'
 import { FetchDatasetVariablesTool } from './tools/fetch-dataset-variables.tool.js'
 import { FetchSummaryTableTool } from './tools/fetch-summary-table.tool.js'
-import { IdentifyDatasetsTool } from './tools/identify-datasets.tool.js'
+import { ListDatasetsTool } from './tools/list-datasets.tool.js'
 import { ResolveGeographyFipsTool } from './tools/resolve-geography-fips.tool.js'
 
 import { PopulationPrompt } from './prompts/population.prompt.js'
@@ -28,7 +28,7 @@ async function main() {
   mcpServer.registerTool(new FetchDatasetGeographyTool())
   mcpServer.registerTool(new FetchDatasetVariablesTool())
   mcpServer.registerTool(new FetchSummaryTableTool())
-  mcpServer.registerTool(new IdentifyDatasetsTool())
+  mcpServer.registerTool(new ListDatasetsTool())
   mcpServer.registerTool(new ResolveGeographyFipsTool())
 
   const transport = new StdioServerTransport()

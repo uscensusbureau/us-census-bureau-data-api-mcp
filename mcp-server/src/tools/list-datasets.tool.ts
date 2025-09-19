@@ -8,14 +8,14 @@ import {
   SimplifiedAPIDatasetType,
   AggregatedResultType,
   DatasetType,
-} from '../schema/identify-datasets.schema.js'
+} from '../schema/list-datasets.schema.js'
 
 import { BaseTool } from './base.tool.js'
 
 import { ToolContent } from '../types/base.types.js'
 
-export class IdentifyDatasetsTool extends BaseTool<object> {
-  name = 'identify-datasets'
+export class ListDatasetsTool extends BaseTool<object> {
+  name = 'list-datasets'
   description = `This tool returns a data catalog of available Census datasets from the Census API. 
   The LLM should analyze this catalog against the user's request and identify the best dataset match(es).
   The LLM must return at least one dataset name or indicate low confidence if no dataset is a strong match. 
