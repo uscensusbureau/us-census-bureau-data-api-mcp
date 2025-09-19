@@ -263,9 +263,9 @@ export class SeedRunner {
       .join(', ')
 
     const query = `
-      INSERT INTO ${tableName} (${columns.join(', ')}) 
+      INSERT INTO ${tableName} (${columns.join(', ')})
       VALUES ${placeholders}
-      ON CONFLICT (${conflictColumn}) 
+      ON CONFLICT (${conflictColumn})
       DO UPDATE SET ${conflictColumn} = ${tableName}.${conflictColumn}
       RETURNING id
     `
@@ -340,6 +340,8 @@ export class SeedRunner {
     const isUrl = !!url
 
     console.log(`Seeding table ${config.table} from ${source}.`)
+    const tableExists = await this.tableExists(config.table);
+    console.log(`Table ${config.table} exists: ${tableExists} for url ${url}`);
 
     try {
       await this.client.query('BEGIN')
@@ -391,6 +393,25 @@ export class SeedRunner {
       throw error
     }
   }
+
+  async tableExists(tableName: string): Promise<boolean> {
+        const query = `
+            SELECT EXISTS (
+                SELECT 1
+                FROM pg_catalog.pg_tables
+                WHERE tablename = ${tableName}
+            );
+        `;
+        let res;
+        try {
+          res = await this.client.query(query, [tableName]);
+        } catch (error) {
+          console.error('Error checking table existence:', error);
+          // throw errnor;
+        }
+        return res?.rows[0].exists;
+    }
+
 }
 
 export default SeedRunner
