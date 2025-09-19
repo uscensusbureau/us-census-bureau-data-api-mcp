@@ -17,5 +17,5 @@ describe('ListDatasetsTool - Integration Tests', () => {
       expect(parsedResponse[0]).toHaveProperty('title')
       expect(parsedResponse[0]).toHaveProperty('years')
     }
-  }, 10000) 
+  }, 10000)
 })

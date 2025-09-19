@@ -103,7 +103,7 @@ describe('ListDatasetsTool', () => {
       mockFetch.mockResolvedValue({
         ok: true,
         json: () => Promise.resolve(mockApiResponse),
-      }) 
+      })
 
       const result = await tool.handler()
 
@@ -358,7 +358,7 @@ describe('ListDatasetsTool', () => {
       expect(result).toBe(title);
     });
 
-      it('should return original title when years are hyphenated', () => {
+    it('should return original title when years are hyphenated', () => {
       const title = '2018-2022 American Community Survey: Migration Flows'
       const result = tool.testCleanTitle(title, 2018)
       expect(result).toBe(title)
@@ -396,212 +396,212 @@ describe('ListDatasetsTool', () => {
   });
 
   describe('Aggregating simplified dataset metadata', () => {
-  let tool: TestableListDatasetsTool;
+    let tool: TestableListDatasetsTool;
 
-  beforeEach(() => {
-    tool = new TestableListDatasetsTool();
-  });
-
-  it('should aggregate single dataset', () => {
-    const data: SimplifiedAPIDatasetType[] = [
-      {
-        c_dataset: 'acs/acs1',
-        c_vintage: 2020,
-        title: 'American Community Survey 2020',
-        c_isAggregate: true
-      }
-    ];
-
-    const result = tool.testAggregateDatasets(data);
-    
-    expect(result).toHaveLength(1);
-    expect(result[0]).toEqual({
-      dataset: 'acs/acs1',
-      title: 'American Community Survey',
-      years: [2020]
+    beforeEach(() => {
+      tool = new TestableListDatasetsTool();
     });
-  });
 
-  it('should aggregate multiple datasets with same c_dataset', () => {
-    const data: SimplifiedAPIDatasetType[] = [
-      {
-        c_dataset: 'acs/acs1',
-        c_vintage: 2020,
-        title: 'American Community Survey 2020',
-        c_isAggregate: true
-      },
-      {
-        c_dataset: 'acs/acs1',
-        c_vintage: 2019,
-        title: 'American Community Survey 2019',
-        c_isAggregate: true
-      }
-    ];
+    it('should aggregate single dataset', () => {
+      const data: SimplifiedAPIDatasetType[] = [
+        {
+          c_dataset: 'acs/acs1',
+          c_vintage: 2020,
+          title: 'American Community Survey 2020',
+          c_isAggregate: true
+        }
+      ];
 
-    const result = tool.testAggregateDatasets(data);
+      const result = tool.testAggregateDatasets(data);
 
-    expect(result).toHaveLength(1);
-    expect(result[0]).toEqual({
-      dataset: 'acs/acs1',
-      title: 'American Community Survey',
-      years: [2019, 2020]
-    });
-  });
-
-  it('should handle different titles for same dataset', () => {
-    const data: SimplifiedAPIDatasetType[] = [
-      {
-        c_dataset: 'acs/acs1',
-        c_vintage: 2020,
-        title: 'American Community Survey 2020',
-        c_isAggregate: true
-      },
-      {
-        c_dataset: 'acs/acs1',
-        c_vintage: 2019,
-        title: 'ACS 1-Year 2019',
-        c_isAggregate: true
-      }
-    ];
-
-    const result = tool.testAggregateDatasets(data);
-
-    expect(result[0].title).toEqual('American Community Survey');
-  });
-
-  it('should not duplicate identical titles and descriptions', () => {
-    const data: SimplifiedAPIDatasetType[] = [
-      {
-        c_dataset: 'acs/acs1',
-        c_vintage: 2020,
-        title: 'Survey 2020',
-        c_isAggregate: true
-      },
-      {
-        c_dataset: 'acs/acs1',
-        c_vintage: 2019,
-        title: 'Survey 2019',
-        c_isAggregate: true
-      }
-    ];
-
-    const result = tool.testAggregateDatasets(data);
-
-    expect(result[0].title).toEqual('Survey');
-  });
-
-  it('should handle datasets without vintage', () => {
-    const data: SimplifiedAPIDatasetType[] = [
-      {
-        c_dataset: 'acs/acs1',
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
+        dataset: 'acs/acs1',
         title: 'American Community Survey',
-        c_isAggregate: true
-      }
-    ];
-
-    const result = tool.testAggregateDatasets(data);
-
-    expect(result[0]).toEqual({
-      dataset: 'acs/acs1',
-      title: 'American Community Survey',
-      years: []
+        years: [2020]
+      });
     });
-  });
 
-  it('should sort vintages in ascending order', () => {
-    const data: SimplifiedAPIDatasetType[] = [
-      {
-        c_dataset: 'acs/acs1',
-        c_vintage: 2022,
-        title: 'Survey',
-        c_isAggregate: true
-      },
-      {
-        c_dataset: 'acs/acs1',
-        c_vintage: 2018,
-        title: 'Survey',
-        c_isAggregate: true
-      },
-      {
-        c_dataset: 'acs/acs1',
-        c_vintage: 2020,
-        title: 'Survey',
-        c_isAggregate: true
-      }
-    ];
+    it('should aggregate multiple datasets with same c_dataset', () => {
+      const data: SimplifiedAPIDatasetType[] = [
+        {
+          c_dataset: 'acs/acs1',
+          c_vintage: 2020,
+          title: 'American Community Survey 2020',
+          c_isAggregate: true
+        },
+        {
+          c_dataset: 'acs/acs1',
+          c_vintage: 2019,
+          title: 'American Community Survey 2019',
+          c_isAggregate: true
+        }
+      ];
 
-    const result = tool.testAggregateDatasets(data);
+      const result = tool.testAggregateDatasets(data);
 
-    expect(result[0].years).toEqual([2018, 2020, 2022]);
-  });
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
+        dataset: 'acs/acs1',
+        title: 'American Community Survey',
+        years: [2019, 2020]
+      });
+    });
 
-  it('should handle empty input array', () => {
-    const result = tool.testAggregateDatasets([]);
-    expect(result).toEqual([]);
-  });
+    it('should handle different titles for same dataset', () => {
+      const data: SimplifiedAPIDatasetType[] = [
+        {
+          c_dataset: 'acs/acs1',
+          c_vintage: 2020,
+          title: 'American Community Survey 2020',
+          c_isAggregate: true
+        },
+        {
+          c_dataset: 'acs/acs1',
+          c_vintage: 2019,
+          title: 'ACS 1-Year 2019',
+          c_isAggregate: true
+        }
+      ];
 
-  it('should handle multiple different datasets', () => {
-    const data: SimplifiedAPIDatasetType[] = [
-      {
-        c_dataset: 'acs/acs1',
-        c_vintage: 2020,
-        title: 'ACS 1-Year',
-        c_isAggregate: true
-      },
-      {
-        c_dataset: 'acs/acs5',
-        c_vintage: 2020,
-        title: 'ACS 5-Year',
-        c_isAggregate: true
-  }];
+      const result = tool.testAggregateDatasets(data);
 
-    const result = tool.testAggregateDatasets(data);
+      expect(result[0].title).toEqual('American Community Survey');
+    });
 
-    expect(result).toHaveLength(2);
-    expect(result.map(r => r.dataset)).toEqual(['acs/acs1', 'acs/acs5']);
-  });
+    it('should not duplicate identical titles and descriptions', () => {
+      const data: SimplifiedAPIDatasetType[] = [
+        {
+          c_dataset: 'acs/acs1',
+          c_vintage: 2020,
+          title: 'Survey 2020',
+          c_isAggregate: true
+        },
+        {
+          c_dataset: 'acs/acs1',
+          c_vintage: 2019,
+          title: 'Survey 2019',
+          c_isAggregate: true
+        }
+      ];
 
-  it('should not duplicate vintages', () => {
-    const data: SimplifiedAPIDatasetType[] = [
-      {
-        c_dataset: 'acs/acs1',
-        c_vintage: 2020,
-        title: 'Survey A',
-        c_isAggregate: true
-      },
-      {
-        c_dataset: 'acs/acs1',
-        c_vintage: 2020,
-        title: 'Survey B',
-        c_isAggregate: true
-      }
-    ];
+      const result = tool.testAggregateDatasets(data);
 
-    const result = tool.testAggregateDatasets(data);
+      expect(result[0].title).toEqual('Survey');
+    });
 
-    expect(result[0].years).toEqual([2020]);
-  });
+    it('should handle datasets without vintage', () => {
+      const data: SimplifiedAPIDatasetType[] = [
+        {
+          c_dataset: 'acs/acs1',
+          title: 'American Community Survey',
+          c_isAggregate: true
+        }
+      ];
 
-  it('should handle non-number vintage values gracefully', () => {
-    const data: SimplifiedAPIDatasetType[] = [
-      {
-        c_dataset: 'acs/acs1',
-        c_vintage: 2020,
-        title: 'Survey',
-        c_isAggregate: true
-      },
-      {
-        c_dataset: 'acs/acs1',
-        c_vintage: undefined,
-        title: 'Survey',
-        c_isAggregate: true
-      }
-    ];
+      const result = tool.testAggregateDatasets(data);
 
-    const result = tool.testAggregateDatasets(data);
+      expect(result[0]).toEqual({
+        dataset: 'acs/acs1',
+        title: 'American Community Survey',
+        years: []
+      });
+    });
 
-    expect(result[0].years).toEqual([2020]);
-  });
+    it('should sort vintages in ascending order', () => {
+      const data: SimplifiedAPIDatasetType[] = [
+        {
+          c_dataset: 'acs/acs1',
+          c_vintage: 2022,
+          title: 'Survey',
+          c_isAggregate: true
+        },
+        {
+          c_dataset: 'acs/acs1',
+          c_vintage: 2018,
+          title: 'Survey',
+          c_isAggregate: true
+        },
+        {
+          c_dataset: 'acs/acs1',
+          c_vintage: 2020,
+          title: 'Survey',
+          c_isAggregate: true
+        }
+      ];
+
+      const result = tool.testAggregateDatasets(data);
+
+      expect(result[0].years).toEqual([2018, 2020, 2022]);
+    });
+
+    it('should handle empty input array', () => {
+      const result = tool.testAggregateDatasets([]);
+      expect(result).toEqual([]);
+    });
+
+    it('should handle multiple different datasets', () => {
+      const data: SimplifiedAPIDatasetType[] = [
+        {
+          c_dataset: 'acs/acs1',
+          c_vintage: 2020,
+          title: 'ACS 1-Year',
+          c_isAggregate: true
+        },
+        {
+          c_dataset: 'acs/acs5',
+          c_vintage: 2020,
+          title: 'ACS 5-Year',
+          c_isAggregate: true
+        }];
+
+      const result = tool.testAggregateDatasets(data);
+
+      expect(result).toHaveLength(2);
+      expect(result.map(r => r.dataset)).toEqual(['acs/acs1', 'acs/acs5']);
+    });
+
+    it('should not duplicate vintages', () => {
+      const data: SimplifiedAPIDatasetType[] = [
+        {
+          c_dataset: 'acs/acs1',
+          c_vintage: 2020,
+          title: 'Survey A',
+          c_isAggregate: true
+        },
+        {
+          c_dataset: 'acs/acs1',
+          c_vintage: 2020,
+          title: 'Survey B',
+          c_isAggregate: true
+        }
+      ];
+
+      const result = tool.testAggregateDatasets(data);
+
+      expect(result[0].years).toEqual([2020]);
+    });
+
+    it('should handle non-number vintage values gracefully', () => {
+      const data: SimplifiedAPIDatasetType[] = [
+        {
+          c_dataset: 'acs/acs1',
+          c_vintage: 2020,
+          title: 'Survey',
+          c_isAggregate: true
+        },
+        {
+          c_dataset: 'acs/acs1',
+          c_vintage: undefined,
+          title: 'Survey',
+          c_isAggregate: true
+        }
+      ];
+
+      const result = tool.testAggregateDatasets(data);
+
+      expect(result[0].years).toEqual([2020]);
+    });
   });
 
   describe('JSON Parsing Errors', () => {
