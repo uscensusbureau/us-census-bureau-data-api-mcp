@@ -72,7 +72,7 @@ export class ListDatasetsTool extends BaseTool<object> {
     return simplified
   }
 
-private cleanTitle(title: string, vintage?: number): string {
+  private cleanTitle(title: string, vintage?: number): string {
     if (vintage === undefined) return title;
 
     const vintageStr = vintage.toString();
@@ -82,51 +82,51 @@ private cleanTitle(title: string, vintage?: number): string {
 
     // Replace only the first vintage while preserving spacing
     return title.replace(regex, '').replace(/\s{2,}/g, ' ').trim();
-}
-
-// Aggregate by c_dataset, create arrays vintages and keep only latest title
-private aggregateDatasets(data: SimplifiedAPIDatasetType[]): AggregatedResultType[] {
-  const grouped = new Map<string, AggregatedResultType>();
-
-  for (const entry of data) {
-    // Filter out datasets that do not have c_isAggregate: true
-    if (entry.c_isAggregate !== true) {
-      continue;
-    }
-
-    const key = entry.c_dataset;
-    const vintage = entry.c_vintage;
-
-    const cleanedTitle = this.cleanTitle(entry.title, vintage);
-
-    if (!grouped.has(key)) {
-      grouped.set(key, {
-        dataset: entry.c_dataset,
-        title: cleanedTitle,
-        years: vintage !== undefined && typeof vintage === 'number' ? [vintage] : []
-      });
-    } else {
-      const existing = grouped.get(key)!;
-      
-      // Only keep the first title (skip adding additional titles)
-      if (existing.title.length === 0) {
-        existing.title.push(cleanedTitle);
-      }
-      
-      // Add vintage if it's a number and not already present
-      if (vintage !== undefined && typeof vintage === 'number' && !existing.years.includes(vintage)) {
-        existing.years.push(vintage);
-      }
-    }
   }
 
-  // Sort vintages for each entry
-  for (const entry of grouped.values()) {
-    entry.years.sort((a, b) => a - b);
-  }
+  // Aggregate by c_dataset, create arrays vintages and keep only latest title
+  private aggregateDatasets(data: SimplifiedAPIDatasetType[]): AggregatedResultType[] {
+    const grouped = new Map<string, AggregatedResultType>();
 
-  return Array.from(grouped.values());
-}
+    for (const entry of data) {
+      // Filter out datasets that do not have c_isAggregate: true
+      if (entry.c_isAggregate !== true) {
+        continue;
+      }
+
+      const key = entry.c_dataset;
+      const vintage = entry.c_vintage;
+
+      const cleanedTitle = this.cleanTitle(entry.title, vintage);
+
+      if (!grouped.has(key)) {
+        grouped.set(key, {
+          dataset: entry.c_dataset,
+          title: cleanedTitle,
+          years: vintage !== undefined && typeof vintage === 'number' ? [vintage] : []
+        });
+      } else {
+        const existing = grouped.get(key)!;
+
+        // Only keep the first title (skip adding additional titles)
+        if (existing.title.length === 0) {
+          existing.title.push(cleanedTitle);
+        }
+
+        // Add vintage if it's a number and not already present
+        if (vintage !== undefined && typeof vintage === 'number' && !existing.years.includes(vintage)) {
+          existing.years.push(vintage);
+        }
+      }
+    }
+
+    // Sort vintages for each entry (ascending order)
+    for (const entry of grouped.values()) {
+      entry.years.sort((a, b) => a - b);
+    }
+
+    return Array.from(grouped.values());
+  }
 
   async handler(): Promise<{ content: ToolContent[] }> {
     try {
@@ -153,7 +153,7 @@ private aggregateDatasets(data: SimplifiedAPIDatasetType[]): AggregatedResultTyp
       }
 
       let simplified = data.dataset.map(this.simplifyDataset)
-      // Sort simplified datasets by c_vintage (descending)
+      // Sort simplified datasets by c_vintage (descending, so to get the first/most recent title in aggregateDatasets)
       simplified = simplified.sort((a, b) => (b.c_vintage || 0) - (a.c_vintage || 0))
 
       const aggregated = this.aggregateDatasets(simplified)
