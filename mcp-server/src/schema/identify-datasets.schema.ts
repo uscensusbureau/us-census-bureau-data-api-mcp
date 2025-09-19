@@ -3,8 +3,8 @@ import { z } from 'zod'
 
 // Zod schema for the returned dataset
 export const AggregatedResultSchema = z.object({
-  c_dataset: z.string(),
-  c_vintages: z.array(z.number()).optional(),
+  dataset: z.string(),
+  years: z.array(z.number()).optional(),
   title: z.string()
 })
 

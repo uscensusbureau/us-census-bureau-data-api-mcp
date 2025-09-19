@@ -117,9 +117,9 @@ describe('IdentifyDatasetsTool', () => {
       expect(parsedContent).toHaveLength(1)
 
       expect(parsedContent[0]).toEqual({
-        c_dataset: 'acs/acs1',
+        dataset: 'acs/acs1',
         title: 'American Community Survey: 1-Year Estimates: Detailed Tables',
-        c_vintages: [2022]
+        years: [2022]
       })
     })
 
@@ -207,7 +207,7 @@ describe('IdentifyDatasetsTool', () => {
       const result = await tool.handler()
       const parsedContent = JSON.parse(result.content[0].text)
 
-      expect(parsedContent[0].c_dataset).toBe('acs/acs1')
+      expect(parsedContent[0].dataset).toBe('acs/acs1')
     })
 
     it('should simplify dataset with string c_dataset', async () => {
@@ -279,7 +279,7 @@ describe('IdentifyDatasetsTool', () => {
       const result = await tool.handler()
       const parsedContent = JSON.parse(result.content[0].text)
 
-      expect(parsedContent[0].c_dataset).toBe('dec/sf1')
+      expect(parsedContent[0].dataset).toBe('dec/sf1')
     })
 
     it('should include optional fields when present', async () => {
@@ -301,7 +301,7 @@ describe('IdentifyDatasetsTool', () => {
       const result = await tool.handler()
       const parsedContent = JSON.parse(result.content[0].text)
 
-      expect(parsedContent[0]).toHaveProperty('c_vintages')
+      expect(parsedContent[0]).toHaveProperty('years')
     })
 
     it('should omit optional fields when not present', async () => {
@@ -416,9 +416,9 @@ describe('IdentifyDatasetsTool', () => {
     
     expect(result).toHaveLength(1);
     expect(result[0]).toEqual({
-      c_dataset: 'acs/acs1',
+      dataset: 'acs/acs1',
       title: 'American Community Survey',
-      c_vintages: [2020]
+      years: [2020]
     });
   });
 
@@ -442,9 +442,9 @@ describe('IdentifyDatasetsTool', () => {
 
     expect(result).toHaveLength(1);
     expect(result[0]).toEqual({
-      c_dataset: 'acs/acs1',
+      dataset: 'acs/acs1',
       title: 'American Community Survey',
-      c_vintages: [2019, 2020]
+      years: [2019, 2020]
     });
   });
 
@@ -502,51 +502,11 @@ describe('IdentifyDatasetsTool', () => {
     const result = tool.testAggregateDatasets(data);
 
     expect(result[0]).toEqual({
-      c_dataset: 'acs/acs1',
+      dataset: 'acs/acs1',
       title: 'American Community Survey',
-      c_vintages: []
+      years: []
     });
   });
-
-  // it('should handle datasets with missing boolean fields', () => {
-  //   const data: SimplifiedAPIDatasetType[] = [
-  //     {
-  //       c_dataset: 'acs/acs1',
-  //       c_vintage: 2022,
-  //       title: 'American Community Survey'
-  //       // boolean fields omitted
-  //     }
-  //   ];
-
-  //   const result = tool.testAggregateDatasets(data);
-    
-  //   expect(result[0]).toEqual({
-  //     c_dataset: 'acs/acs1',
-  //     title: 'American Community Survey',
-  //     c_vintages: [2022]
-  //   });
-  // });
- 
-  // it('should overwrite boolean fields with later values', () => {
-  //   const data: SimplifiedAPIDatasetType[] = [
-  //     {
-  //       c_dataset: 'acs/acs1',
-  //       c_vintage: 2020,
-  //       title: 'Survey',
-  //       c_isAggregate: false
-  //     },
-  //     {
-  //       c_dataset: 'acs/acs1',
-  //       c_vintage: 2019,
-  //       title: 'Survey',
-  //       c_isAggregate: true
-  //     }
-  //   ];
-
-  //   const result = tool.testAggregateDatasets(data);
-
-  //   expect(result[0].c_isAggregate).toBe(true);
-  // });
 
   it('should sort vintages in ascending order', () => {
     const data: SimplifiedAPIDatasetType[] = [
@@ -572,7 +532,7 @@ describe('IdentifyDatasetsTool', () => {
 
     const result = tool.testAggregateDatasets(data);
 
-    expect(result[0].c_vintages).toEqual([2018, 2020, 2022]);
+    expect(result[0].years).toEqual([2018, 2020, 2022]);
   });
 
   it('should handle empty input array', () => {
@@ -598,7 +558,7 @@ describe('IdentifyDatasetsTool', () => {
     const result = tool.testAggregateDatasets(data);
 
     expect(result).toHaveLength(2);
-    expect(result.map(r => r.c_dataset)).toEqual(['acs/acs1', 'acs/acs5']);
+    expect(result.map(r => r.dataset)).toEqual(['acs/acs1', 'acs/acs5']);
   });
 
   it('should not duplicate vintages', () => {
@@ -619,7 +579,7 @@ describe('IdentifyDatasetsTool', () => {
 
     const result = tool.testAggregateDatasets(data);
 
-    expect(result[0].c_vintages).toEqual([2020]);
+    expect(result[0].years).toEqual([2020]);
   });
 
   it('should handle non-number vintage values gracefully', () => {
@@ -640,7 +600,7 @@ describe('IdentifyDatasetsTool', () => {
 
     const result = tool.testAggregateDatasets(data);
 
-    expect(result[0].c_vintages).toEqual([2020]);
+    expect(result[0].years).toEqual([2020]);
   });
   });
 

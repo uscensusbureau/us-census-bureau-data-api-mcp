@@ -69,10 +69,6 @@ export class IdentifyDatasetsTool extends BaseTool<object> {
     if ('c_vintage' in dataset) simplified.c_vintage = dataset.c_vintage
     if ('c_isAggregate' in dataset)
       simplified.c_isAggregate = dataset.c_isAggregate
-    // if ('c_isTimeseries' in dataset)
-    //   simplified.c_isTimeseries = dataset.c_isTimeseries
-    // if ('c_isMicrodata' in dataset)
-    //   simplified.c_isMicrodata = dataset.c_isMicrodata
     return simplified
   }
 
@@ -105,12 +101,9 @@ private aggregateDatasets(data: SimplifiedAPIDatasetType[]): AggregatedResultTyp
 
     if (!grouped.has(key)) {
       grouped.set(key, {
-        c_dataset: entry.c_dataset,
+        dataset: entry.c_dataset,
         title: cleanedTitle,
-        c_vintages: vintage !== undefined && typeof vintage === 'number' ? [vintage] : []
-        // ...(entry.c_isAggregate !== undefined && { c_isAggregate: entry.c_isAggregate })
-        // ...(entry.c_isTimeseries !== undefined && { c_isTimeseries: entry.c_isTimeseries }),
-        // ...(entry.c_isMicrodata !== undefined && { c_isMicrodata: entry.c_isMicrodata })
+        years: vintage !== undefined && typeof vintage === 'number' ? [vintage] : []
       });
     } else {
       const existing = grouped.get(key)!;
@@ -121,26 +114,15 @@ private aggregateDatasets(data: SimplifiedAPIDatasetType[]): AggregatedResultTyp
       }
       
       // Add vintage if it's a number and not already present
-      if (vintage !== undefined && typeof vintage === 'number' && !existing.c_vintages.includes(vintage)) {
-        existing.c_vintages.push(vintage);
+      if (vintage !== undefined && typeof vintage === 'number' && !existing.years.includes(vintage)) {
+        existing.years.push(vintage);
       }
-      
-      // // Keep boolean values if they exist
-      // if (entry.c_isAggregate !== undefined) {
-      //   existing.c_isAggregate = entry.c_isAggregate;
-      // }
-      // if (entry.c_isTimeseries !== undefined) {
-      //   existing.c_isTimeseries = entry.c_isTimeseries;
-      // }
-      // if (entry.c_isMicrodata !== undefined) {
-      //   existing.c_isMicrodata = entry.c_isMicrodata;
-      // }
     }
   }
 
   // Sort vintages for each entry
   for (const entry of grouped.values()) {
-    entry.c_vintages.sort((a, b) => a - b);
+    entry.years.sort((a, b) => a - b);
   }
 
   return Array.from(grouped.values());
