@@ -141,18 +141,6 @@ echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"fetch-data
 | docker exec -i mcp-server node dist/index.js
 ```
 
-### Fetch Dataset Variables
-The `fetch-dataset-variables` tool is used for fetching variables for filtering a given dataset. It accepts the following arguments:
-* Dataset (Required) - The identifier of the dataset, e.g. `'acs/acs1'`
-* Group (Optional) - Filter variables by a specific group for this dataset, e.g. `'S0101'`
-* Year (Optional) - The vintage of the dataset, e.g. `1987`
-
-#### How to Run via CLI
-```
-echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"fetch-dataset-variables","arguments":{"dataset":"acs/acs1","year":2022}}}' \
-| docker exec -i mcp-server node dist/index.js
-```
-
 ### Fetch Summary Table
 The `fetch-summary-table` tool is used for fetching a summary table from the Census Bureau’s API. It accepts the following arguments:
 * Dataset (Required) - The identifier of the dataset, e.g. `'acs/acs1'`

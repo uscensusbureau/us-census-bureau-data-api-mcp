@@ -13,11 +13,6 @@ vi.mock('../src/tools/fetch-dataset-geography.tool.js', () => ({
     .mockImplementation(() => ({ name: 'fetch-dataset-geography-tool' })),
 }))
 
-vi.mock('../src/tools/fetch-dataset-variables.tool.js', () => ({
-  FetchDatasetVariablesTool: vi
-    .fn()
-    .mockImplementation(() => ({ name: 'fetch-dataset-variables-tool' })),
-}))
 
 vi.mock('../src/tools/fetch-summary-table.tool.js', () => ({
   FetchSummaryTableTool: vi
@@ -75,9 +70,7 @@ describe('main', () => {
     expect(toolRegistrySpy).toHaveBeenCalledWith({
       name: 'fetch-dataset-geography-tool',
     })
-    expect(toolRegistrySpy).toHaveBeenCalledWith({
-      name: 'fetch-dataset-variables-tool',
-    })
+
     expect(toolRegistrySpy).toHaveBeenCalledWith({
       name: 'fetch-summary-table-tool',
     })
