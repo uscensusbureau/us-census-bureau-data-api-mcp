@@ -448,7 +448,7 @@ describe('ListDatasetsTool', () => {
       });
     });
 
-    it('should handle different titles for same dataset', () => {
+    it('should handle different titles for same dataset, keep only the latest/most recent', () => {
       const data: SimplifiedAPIDatasetType[] = [
         {
           c_dataset: 'acs/acs1',
@@ -469,7 +469,7 @@ describe('ListDatasetsTool', () => {
       expect(result[0].title).toEqual('American Community Survey');
     });
 
-    it('should not duplicate identical titles and descriptions', () => {
+    it('should not duplicate identical titles', () => {
       const data: SimplifiedAPIDatasetType[] = [
         {
           c_dataset: 'acs/acs1',
