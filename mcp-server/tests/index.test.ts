@@ -62,7 +62,7 @@ describe('main', () => {
       name: 'population-prompt',
     })
 
-    expect(toolRegistrySpy).toHaveBeenCalledTimes(5)
+    expect(toolRegistrySpy).toHaveBeenCalledTimes(4)
 
     expect(toolRegistrySpy).toHaveBeenCalledWith({
       name: 'list-datasets-tool',
