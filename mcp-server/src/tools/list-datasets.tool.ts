@@ -153,8 +153,13 @@ export class ListDatasetsTool extends BaseTool<object> {
       }
 
       let simplified = data.dataset.map(this.simplifyDataset)
-      // Sort simplified datasets by c_vintage (descending, so to get the first/most recent title in aggregateDatasets)
-      simplified = simplified.sort((a, b) => (b.c_vintage || 0) - (a.c_vintage || 0))
+      // Deterministically sort: group by c_dataset, newest vintage first
+      simplified = simplified.sort((a, b) => {
+        const datasetCompare = a.c_dataset.localeCompare(b.c_dataset);
+        if (datasetCompare !== 0) return datasetCompare;
+
+        return (b.c_vintage ?? 0) - (a.c_vintage ?? 0); // descending vintage
+      });
 
       const aggregated = this.aggregateDatasets(simplified)
 
