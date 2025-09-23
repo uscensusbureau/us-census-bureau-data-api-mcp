@@ -6,9 +6,9 @@ vi.mock('node-fetch', () => ({
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import {
-  FetchSummaryTableTool,
+  FetchAggregateDataTool,
   toolDescription,
-} from '../../../src/tools/fetch-summary-table.tool'
+} from '../../../src/tools/fetch-aggregate-data.tool'
 import {
   validateToolStructure,
   validateResponseStructure,
@@ -19,11 +19,11 @@ import {
 
 import { sampleTableByGroupData } from '../../helpers/test-data'
 
-describe('FetchSummaryTableTool', () => {
-  let tool: FetchSummaryTableTool
+describe('FetchAggregateDataTool', () => {
+  let tool: FetchAggregateDataTool
 
   beforeEach(() => {
-    tool = new FetchSummaryTableTool()
+    tool = new FetchAggregateDataTool()
     mockFetch.mockClear()
 
     process.env.CENSUS_API_KEY = 'test-api-key-12345'
@@ -37,7 +37,7 @@ describe('FetchSummaryTableTool', () => {
   describe('Tool Configuration', () => {
     it('should have correct tool metadata', () => {
       validateToolStructure(tool)
-      expect(tool.name).toBe('fetch-summary-table')
+      expect(tool.name).toBe('fetch-aggregate-data')
       expect(tool.description).toBe(toolDescription)
     })
 
@@ -200,7 +200,9 @@ describe('FetchSummaryTableTool', () => {
       const result = tool.validateArgs(invalidArgs)
 
       expect(() => tool.argsSchema.parse(invalidArgs)).toThrow()
-      expect(result.error.issues[0].message).toContain('Incompatible dataset')
+      expect(result.error.issues[0].message).toContain(
+        'This data is currently not supported by the U.S. Census Bureau Data API MCP Server.',
+      )
     })
   })
 

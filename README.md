@@ -120,13 +120,13 @@ echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | docker exec -i mcp-serve
 ## Available Tools
 This section covers tools that can be called.
 
-### Identify Datasets
-The `identify-datasets` tool is used for fetching a subset of metadata for all datasets that are available in the Census Bureau's API. \
+### List Datasets
+The `list-datasets` tool is used for fetching a subset of metadata for all datasets that are available in the Census Bureau's API. \
 It requires no arguments.
 
 #### How to Run via CLI
 ```
-echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"identify-datasets","arguments":{}}}' \
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"list-datasets","arguments":{}}}' \
 | docker exec -i mcp-server node dist/index.js
 ```
 
@@ -138,18 +138,6 @@ The `fetch-dataset-geography` tool is used for fetching available geography leve
 #### How to Run via CLI
 ```
 echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"fetch-dataset-geography","arguments":{"dataset":"acs/acs1","year":2022}}}' \
-| docker exec -i mcp-server node dist/index.js
-```
-
-### Fetch Dataset Variables
-The `fetch-dataset-variables` tool is used for fetching variables for filtering a given dataset. It accepts the following arguments:
-* Dataset (Required) - The identifier of the dataset, e.g. `'acs/acs1'`
-* Group (Optional) - Filter variables by a specific group for this dataset, e.g. `'S0101'`
-* Year (Optional) - The vintage of the dataset, e.g. `1987`
-
-#### How to Run via CLI
-```
-echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"fetch-dataset-variables","arguments":{"dataset":"acs/acs1","year":2022}}}' \
 | docker exec -i mcp-server node dist/index.js
 ```
 

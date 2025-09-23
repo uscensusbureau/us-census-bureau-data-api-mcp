@@ -8,14 +8,14 @@ import {
   SimplifiedAPIDatasetType,
   AggregatedResultType,
   DatasetType,
-} from '../schema/identify-datasets.schema.js'
+} from '../schema/list-datasets.schema.js'
 
 import { BaseTool } from './base.tool.js'
 
 import { ToolContent } from '../types/base.types.js'
 
-export class IdentifyDatasetsTool extends BaseTool<object> {
-  name = 'identify-datasets'
+export class ListDatasetsTool extends BaseTool<object> {
+  name = 'list-datasets'
   description = `This tool returns a data catalog of available Census datasets from the Census API. 
   The LLM should analyze this catalog against the user's request and identify the best dataset match(es).
   The LLM must return at least one dataset name or indicate low confidence if no dataset is a strong match. 
@@ -65,87 +65,82 @@ export class IdentifyDatasetsTool extends BaseTool<object> {
         ? dataset.c_dataset.join('/')
         : dataset.c_dataset,
       title: dataset.title,
-      description: dataset.description,
     }
     if ('c_vintage' in dataset) simplified.c_vintage = dataset.c_vintage
     if ('c_isAggregate' in dataset)
       simplified.c_isAggregate = dataset.c_isAggregate
-    if ('c_isTimeseries' in dataset)
-      simplified.c_isTimeseries = dataset.c_isTimeseries
-    if ('c_isMicrodata' in dataset)
-      simplified.c_isMicrodata = dataset.c_isMicrodata
     return simplified
   }
 
-private cleanTitle(title: string, vintage?: number): string {
-    if (vintage === undefined) return title;
+  private cleanTitle(title: string, vintage?: number): string {
+    if (vintage === undefined) return title
 
-    const vintageStr = vintage.toString();
+    const vintageStr = vintage.toString()
 
     // Avoid matching vintage if it's part of a number-number pattern (like 2018-2022)
-    const regex = new RegExp(`(?<!\\d\\s*-\\s*)\\b${vintageStr}\\b(?!\\s*-\\s*\\d)`);
+    const regex = new RegExp(
+      `(?<!\\d\\s*-\\s*)\\b${vintageStr}\\b(?!\\s*-\\s*\\d)`,
+    )
 
     // Replace only the first vintage while preserving spacing
-    return title.replace(regex, '').replace(/\s{2,}/g, ' ').trim();
-}
+    return title
+      .replace(regex, '')
+      .replace(/\s{2,}/g, ' ')
+      .trim()
+  }
 
-// Aggregate by c_dataset, create arrays of titles, descriptions, and vintages
-private aggregateDatasets(data: SimplifiedAPIDatasetType[]): AggregatedResultType[] {
-  const grouped = new Map<string, AggregatedResultType>();
+  // Aggregate by c_dataset, create arrays vintages and keep only latest title
+  private aggregateDatasets(
+    data: SimplifiedAPIDatasetType[],
+  ): AggregatedResultType[] {
+    const grouped = new Map<string, AggregatedResultType>()
 
-  for (const entry of data) {
-    const key = entry.c_dataset;
-    const vintage = entry.c_vintage;
-    const cleanedTitle = this.cleanTitle(entry.title, vintage);
+    for (const entry of data) {
+      // Filter out datasets that do not have c_isAggregate: true
+      if (entry.c_isAggregate !== true) {
+        continue
+      }
 
-    if (!grouped.has(key)) {
-      grouped.set(key, {
-        c_dataset: entry.c_dataset,
-        title: [cleanedTitle],
-        description: [entry.description],
-        c_vintages: vintage !== undefined && typeof vintage === 'number' ? [vintage] : [],
-        ...(entry.c_isAggregate !== undefined && { c_isAggregate: entry.c_isAggregate }),
-        ...(entry.c_isTimeseries !== undefined && { c_isTimeseries: entry.c_isTimeseries }),
-        ...(entry.c_isMicrodata !== undefined && { c_isMicrodata: entry.c_isMicrodata })
-      });
-    } else {
-      const existing = grouped.get(key)!;
-      
-      // Add title if not already present
-      if (!existing.title.includes(cleanedTitle)) {
-        existing.title.push(cleanedTitle);
-      }
-      
-      // Add description if not already present
-      if (!existing.description.includes(entry.description)) {
-        existing.description.push(entry.description);
-      }
-      
-      // Add vintage if it's a number and not already present
-      if (vintage !== undefined && typeof vintage === 'number' && !existing.c_vintages.includes(vintage)) {
-        existing.c_vintages.push(vintage);
-      }
-      
-      // Keep boolean values if they exist
-      if (entry.c_isAggregate !== undefined) {
-        existing.c_isAggregate = entry.c_isAggregate;
-      }
-      if (entry.c_isTimeseries !== undefined) {
-        existing.c_isTimeseries = entry.c_isTimeseries;
-      }
-      if (entry.c_isMicrodata !== undefined) {
-        existing.c_isMicrodata = entry.c_isMicrodata;
+      const key = entry.c_dataset
+      const vintage = entry.c_vintage
+
+      const cleanedTitle = this.cleanTitle(entry.title, vintage)
+
+      if (!grouped.has(key)) {
+        grouped.set(key, {
+          dataset: entry.c_dataset,
+          title: cleanedTitle,
+          years:
+            vintage !== undefined && typeof vintage === 'number'
+              ? [vintage]
+              : [],
+        })
+      } else {
+        const existing = grouped.get(key)!
+
+        // Only keep the first title (skip adding additional titles)
+        if (existing.title.length === 0) {
+          existing.title.push(cleanedTitle)
+        }
+
+        // Add vintage if it's a number and not already present
+        if (
+          vintage !== undefined &&
+          typeof vintage === 'number' &&
+          !existing.years.includes(vintage)
+        ) {
+          existing.years.push(vintage)
+        }
       }
     }
-  }
 
-  // Sort vintages for each entry
-  for (const entry of grouped.values()) {
-    entry.c_vintages.sort((a, b) => a - b);
-  }
+    // Sort vintages for each entry (ascending order)
+    for (const entry of grouped.values()) {
+      entry.years.sort((a, b) => a - b)
+    }
 
-  return Array.from(grouped.values());
-}
+    return Array.from(grouped.values())
+  }
 
   async handler(): Promise<{ content: ToolContent[] }> {
     try {
@@ -171,14 +166,24 @@ private aggregateDatasets(data: SimplifiedAPIDatasetType[]): AggregatedResultTyp
         )
       }
 
-      const simplified = data.dataset.map(this.simplifyDataset)
+      let simplified = data.dataset.map(this.simplifyDataset)
+      // Deterministically sort: group by c_dataset, newest vintage first
+      simplified = simplified.sort((a, b) => {
+        const datasetCompare = a.c_dataset.localeCompare(b.c_dataset)
+        if (datasetCompare !== 0) return datasetCompare
+
+        return (b.c_vintage ?? 0) - (a.c_vintage ?? 0) // descending vintage
+      })
+
       const aggregated = this.aggregateDatasets(simplified)
 
       return {
         content: [
           {
             type: 'text',
-            text: JSON.stringify(aggregated, null, 2),
+            text: JSON.stringify(aggregated, (key, value) => {
+              return value === null ? undefined : value
+            }),
           },
         ],
       }

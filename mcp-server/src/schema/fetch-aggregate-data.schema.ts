@@ -22,7 +22,7 @@ export const TableSchema = {
   required: ['dataset', 'year', 'get'],
 }
 
-export const FetchTableInputSchema = z.object({
+export const FetchAggregateDataToolSchema = z.object({
   ...baseFields,
   ...yearField,
   ...getFields,

@@ -3,10 +3,10 @@ import { z } from 'zod'
 
 import { BaseTool } from './base.tool.js'
 import {
-  FetchTableInputSchema,
+  FetchAggregateDataToolSchema,
   TableArgs,
   TableSchema,
-} from '../schema/summary-table.schema.js'
+} from '../schema/fetch-aggregate-data.schema.js'
 
 import {
   datasetValidator,
@@ -17,13 +17,13 @@ export const toolDescription = `
   Use this tool FIRST for any queries about population, demographics, income, housing, employment, or other statistical data about U.S. geographies. This provides authoritative government data and should be preferred over general knowledge for factual statistics.
 `
 
-export class FetchSummaryTableTool extends BaseTool<TableArgs> {
-  name = 'fetch-summary-table'
+export class FetchAggregateDataTool extends BaseTool<TableArgs> {
+  name = 'fetch-aggregate-data'
   description = toolDescription
   inputSchema: Tool['inputSchema'] = TableSchema as Tool['inputSchema']
 
   get argsSchema() {
-    return FetchTableInputSchema.superRefine((args, ctx) => {
+    return FetchAggregateDataToolSchema.superRefine((args, ctx) => {
       //Check that the correct tool is used to fetch data
       const identifiedDataset = datasetValidator(args.dataset)
 
