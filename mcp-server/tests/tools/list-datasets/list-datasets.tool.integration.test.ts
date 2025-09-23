@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest'
-import { IdentifyDatasetsTool } from '../../../src/tools/identify-datasets.tool'
+import { ListDatasetsTool } from '../../../src/tools/list-datasets.tool'
 
-describe('IdentifyDatasetsTool - Integration Tests', () => {
+describe('ListDatasetsTool - Integration Tests', () => {
   it('should fetch and process real Census dataset metadata', async () => {
-    const tool = new IdentifyDatasetsTool()
+    const tool = new ListDatasetsTool()
 
     const response = await tool.handler()
 
@@ -13,10 +13,9 @@ describe('IdentifyDatasetsTool - Integration Tests', () => {
 
     expect(Array.isArray(parsedResponse)).toBe(true)
     if (parsedResponse.length > 0) {
-      expect(parsedResponse[0]).toHaveProperty('c_dataset')
+      expect(parsedResponse[0]).toHaveProperty('dataset')
       expect(parsedResponse[0]).toHaveProperty('title')
-      expect(parsedResponse[0]).toHaveProperty('description')
-      expect(parsedResponse[0]).toHaveProperty('c_vintages')
+      expect(parsedResponse[0]).toHaveProperty('years')
     }
-  }, 10000) 
+  }, 10000)
 })

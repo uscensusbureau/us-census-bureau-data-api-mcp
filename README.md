@@ -120,13 +120,13 @@ echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | docker exec -i mcp-serve
 ## Available Tools
 This section covers tools that can be called.
 
-### Identify Datasets
-The `identify-datasets` tool is used for fetching a subset of metadata for all datasets that are available in the Census Bureau's API. \
+### List Datasets
+The `list-datasets` tool is used for fetching a subset of metadata for all datasets that are available in the Census Bureau's API. \
 It requires no arguments.
 
 #### How to Run via CLI
 ```
-echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"identify-datasets","arguments":{}}}' \
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"list-datasets","arguments":{}}}' \
 | docker exec -i mcp-server node dist/index.js
 ```
 

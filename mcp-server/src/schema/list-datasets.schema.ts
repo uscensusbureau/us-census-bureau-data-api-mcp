@@ -3,13 +3,9 @@ import { z } from 'zod'
 
 // Zod schema for the returned dataset
 export const AggregatedResultSchema = z.object({
-  c_dataset: z.string(),
-  c_vintages: z.array(z.number()).optional(),
-  title: z.array(z.string()),
-  description: z.array(z.string()),
-  c_isAggregate: z.boolean().optional(),
-  c_isTimeseries: z.boolean().optional(),
-  c_isMicrodata: z.boolean().optional(),
+  dataset: z.string(),
+  years: z.array(z.number()).optional(),
+  title: z.string()
 })
 
 
@@ -18,10 +14,7 @@ export const SimplifiedAPIDatasetSchema = z.object({
   c_dataset: z.string(),
   c_vintage: z.number().optional(),
   title: z.string(),
-  description: z.string(),
-  c_isAggregate: z.boolean().optional(),
-  c_isTimeseries: z.boolean().optional(),
-  c_isMicrodata: z.boolean().optional(),
+  c_isAggregate: z.boolean().optional()
 })
 
 export const DatasetSchema = z.object({
