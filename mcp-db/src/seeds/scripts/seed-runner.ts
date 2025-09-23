@@ -429,7 +429,6 @@ export class SeedRunner {
       throw error
     }
   }
-
 }
 
 export default SeedRunner
