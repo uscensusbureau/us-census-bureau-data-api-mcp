@@ -15,10 +15,9 @@ export const baseProperties = {
   predicates: {
     type: 'object',
     additionalProperties: { type: 'string' },
-    description: 'Used to filter table results with parameters outside of year and geography constraints.',
-    examples: [
-      { 'NAICS2017': '31-33', 'EPSZES': '251'}
-    ]
+    description:
+      'Used to filter table results with parameters outside of year and geography constraints.',
+    examples: [{ NAICS2017: '31-33', EPSZES: '251' }],
   },
 }
 

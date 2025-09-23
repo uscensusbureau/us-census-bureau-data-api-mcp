@@ -16,19 +16,19 @@ type TableArgs = {
 
 const datasets: Dataset[] = [
   {
-    tool: 'fetch-summary-table',
-    message: 'Incompatible dataset. Please use the fetch-summary-table tool.',
+    tool: 'fetch-aggregate-data',
+    message: 'Incompatible dataset. Please use the fetch-aggregate-data tool.',
   },
   {
     tool: 'fetch-timeseries-data',
     message:
-      'Incompatible dataset. Please use the (not yet defined) fetch-timeseries-data tool.',
+      'This data is currently not supported by the U.S. Census Bureau Data API MCP Server.',
     identifiers: ['timeseries'],
   },
   {
     tool: 'fetch-microdata',
     message:
-      'Incompatible dataset. Please use the (not yet defined) fetch-microdata tool.',
+      'This data is currently not supported by the U.S. Census Bureau Data API MCP Server.',
     identifiers: ['cfspum', 'cps', 'pums', 'pumpr', 'sipp'],
   },
 ]

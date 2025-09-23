@@ -21,11 +21,11 @@ describe('datasetValidator', () => {
       'unknown/data',
     ]
 
-    expect(datasetValidator(datasets[0]).tool).toBe('fetch-summary-table')
+    expect(datasetValidator(datasets[0]).tool).toBe('fetch-aggregate-data')
     expect(datasetValidator(datasets[1]).tool).toBe('fetch-timeseries-data')
     expect(datasetValidator(datasets[2]).tool).toBe('fetch-microdata')
-    expect(datasetValidator(datasets[3]).tool).toBe('fetch-summary-table')
-    expect(datasetValidator(datasets[4]).tool).toBe('fetch-summary-table')
+    expect(datasetValidator(datasets[3]).tool).toBe('fetch-aggregate-data')
+    expect(datasetValidator(datasets[4]).tool).toBe('fetch-aggregate-data')
   })
 })
 

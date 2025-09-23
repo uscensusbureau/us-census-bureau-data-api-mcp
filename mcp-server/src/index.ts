@@ -9,8 +9,8 @@ if (!enableDebugLogs) {
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { MCPServer } from './server.js'
 
+import { FetchAggregateDataTool } from './tools/fetch-aggregate-data.tool.js'
 import { FetchDatasetGeographyTool } from './tools/fetch-dataset-geography.tool.js'
-import { FetchSummaryTableTool } from './tools/fetch-summary-table.tool.js'
 import { ListDatasetsTool } from './tools/list-datasets.tool.js'
 import { ResolveGeographyFipsTool } from './tools/resolve-geography-fips.tool.js'
 
@@ -24,8 +24,8 @@ async function main() {
   mcpServer.registerPrompt(new PopulationPrompt())
 
   // Register tools
+  mcpServer.registerTool(new FetchAggregateDataTool())
   mcpServer.registerTool(new FetchDatasetGeographyTool())
-  mcpServer.registerTool(new FetchSummaryTableTool())
   mcpServer.registerTool(new ListDatasetsTool())
   mcpServer.registerTool(new ResolveGeographyFipsTool())
 

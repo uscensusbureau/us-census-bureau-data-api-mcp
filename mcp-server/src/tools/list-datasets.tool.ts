@@ -73,59 +73,73 @@ export class ListDatasetsTool extends BaseTool<object> {
   }
 
   private cleanTitle(title: string, vintage?: number): string {
-    if (vintage === undefined) return title;
+    if (vintage === undefined) return title
 
-    const vintageStr = vintage.toString();
+    const vintageStr = vintage.toString()
 
     // Avoid matching vintage if it's part of a number-number pattern (like 2018-2022)
-    const regex = new RegExp(`(?<!\\d\\s*-\\s*)\\b${vintageStr}\\b(?!\\s*-\\s*\\d)`);
+    const regex = new RegExp(
+      `(?<!\\d\\s*-\\s*)\\b${vintageStr}\\b(?!\\s*-\\s*\\d)`,
+    )
 
     // Replace only the first vintage while preserving spacing
-    return title.replace(regex, '').replace(/\s{2,}/g, ' ').trim();
+    return title
+      .replace(regex, '')
+      .replace(/\s{2,}/g, ' ')
+      .trim()
   }
 
   // Aggregate by c_dataset, create arrays vintages and keep only latest title
-  private aggregateDatasets(data: SimplifiedAPIDatasetType[]): AggregatedResultType[] {
-    const grouped = new Map<string, AggregatedResultType>();
+  private aggregateDatasets(
+    data: SimplifiedAPIDatasetType[],
+  ): AggregatedResultType[] {
+    const grouped = new Map<string, AggregatedResultType>()
 
     for (const entry of data) {
       // Filter out datasets that do not have c_isAggregate: true
       if (entry.c_isAggregate !== true) {
-        continue;
+        continue
       }
 
-      const key = entry.c_dataset;
-      const vintage = entry.c_vintage;
+      const key = entry.c_dataset
+      const vintage = entry.c_vintage
 
-      const cleanedTitle = this.cleanTitle(entry.title, vintage);
+      const cleanedTitle = this.cleanTitle(entry.title, vintage)
 
       if (!grouped.has(key)) {
         grouped.set(key, {
           dataset: entry.c_dataset,
           title: cleanedTitle,
-          years: vintage !== undefined && typeof vintage === 'number' ? [vintage] : []
-        });
+          years:
+            vintage !== undefined && typeof vintage === 'number'
+              ? [vintage]
+              : [],
+        })
       } else {
-        const existing = grouped.get(key)!;
+        const existing = grouped.get(key)!
 
         // Only keep the first title (skip adding additional titles)
         if (existing.title.length === 0) {
-          existing.title.push(cleanedTitle);
+          existing.title.push(cleanedTitle)
         }
 
         // Add vintage if it's a number and not already present
-        if (vintage !== undefined && typeof vintage === 'number' && !existing.years.includes(vintage)) {
-          existing.years.push(vintage);
+        if (
+          vintage !== undefined &&
+          typeof vintage === 'number' &&
+          !existing.years.includes(vintage)
+        ) {
+          existing.years.push(vintage)
         }
       }
     }
 
     // Sort vintages for each entry (ascending order)
     for (const entry of grouped.values()) {
-      entry.years.sort((a, b) => a - b);
+      entry.years.sort((a, b) => a - b)
     }
 
-    return Array.from(grouped.values());
+    return Array.from(grouped.values())
   }
 
   async handler(): Promise<{ content: ToolContent[] }> {
@@ -155,11 +169,11 @@ export class ListDatasetsTool extends BaseTool<object> {
       let simplified = data.dataset.map(this.simplifyDataset)
       // Deterministically sort: group by c_dataset, newest vintage first
       simplified = simplified.sort((a, b) => {
-        const datasetCompare = a.c_dataset.localeCompare(b.c_dataset);
-        if (datasetCompare !== 0) return datasetCompare;
+        const datasetCompare = a.c_dataset.localeCompare(b.c_dataset)
+        if (datasetCompare !== 0) return datasetCompare
 
-        return (b.c_vintage ?? 0) - (a.c_vintage ?? 0); // descending vintage
-      });
+        return (b.c_vintage ?? 0) - (a.c_vintage ?? 0) // descending vintage
+      })
 
       const aggregated = this.aggregateDatasets(simplified)
 
@@ -168,7 +182,7 @@ export class ListDatasetsTool extends BaseTool<object> {
           {
             type: 'text',
             text: JSON.stringify(aggregated, (key, value) => {
-              return value === null ? undefined : value;
+              return value === null ? undefined : value
             }),
           },
         ],

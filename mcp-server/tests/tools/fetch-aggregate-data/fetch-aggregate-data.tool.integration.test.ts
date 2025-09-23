@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest'
-import { FetchSummaryTableTool } from '../../../src/tools/fetch-summary-table.tool'
+import { FetchAggregateDataTool } from '../../../src/tools/fetch-aggregate-data.tool'
 
-describe('FetchSummaryTableTool - Integration Tests', () => {
+describe('FetchAggregateDataTool - Integration Tests', () => {
   it('should fetch real ACS data', async () => {
-    const tool = new FetchSummaryTableTool()
+    const tool = new FetchAggregateDataTool()
     const datasetName = 'acs/acs1'
     const groupName = 'B17015'
 
@@ -23,7 +23,7 @@ describe('FetchSummaryTableTool - Integration Tests', () => {
   }, 10000) // Longer timeout for real API calls
 
   it('should fetch real ACS data with complex geography definitions', async () => {
-    const tool = new FetchSummaryTableTool()
+    const tool = new FetchAggregateDataTool()
     const datasetName = 'acs/acs5'
     const groupName = 'B15003'
 
@@ -44,7 +44,7 @@ describe('FetchSummaryTableTool - Integration Tests', () => {
   }, 10000) // Longer timeout for real API calls
 
   it('should handle real API errors gracefully', async () => {
-    const tool = new FetchSummaryTableTool()
+    const tool = new FetchAggregateDataTool()
 
     const response = await tool.handler({
       dataset: 'nonexistent/dataset',

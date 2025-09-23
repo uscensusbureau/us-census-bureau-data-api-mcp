@@ -31,11 +31,13 @@ describe('ListDatasetsTool', () => {
   // Extend the class to expose private methods for testing
   class TestableListDatasetsTool extends ListDatasetsTool {
     public testCleanTitle(title: string, vintage?: number): string {
-      return (this as ListDatasetsTool).cleanTitle(title, vintage);
+      return (this as ListDatasetsTool).cleanTitle(title, vintage)
     }
 
-    public testAggregateDatasets(data: SimplifiedAPIDatasetType[]): AggregatedResultType[] {
-      return (this as ListDatasetsTool).aggregateDatasets(data);
+    public testAggregateDatasets(
+      data: SimplifiedAPIDatasetType[],
+    ): AggregatedResultType[] {
+      return (this as ListDatasetsTool).aggregateDatasets(data)
     }
   }
 
@@ -119,7 +121,7 @@ describe('ListDatasetsTool', () => {
       expect(parsedContent[0]).toEqual({
         dataset: 'acs/acs1',
         title: 'American Community Survey: 1-Year Estimates: Detailed Tables',
-        years: [2022]
+        years: [2022],
       })
     })
 
@@ -345,18 +347,19 @@ describe('ListDatasetsTool', () => {
   })
 
   describe('Cleaning title', () => {
-    let tool: TestableListDatasetsTool;
+    let tool: TestableListDatasetsTool
 
     beforeEach(() => {
       process.env.CENSUS_API_KEY = 'test-api-key'
-      tool = new TestableListDatasetsTool();
-    });
+      tool = new TestableListDatasetsTool()
+    })
 
     it('should return original title when vintage is undefined', () => {
-      const title = 'Annual Economic Surveys: Annual Survey of Manufactures Benchmark 2017';
-      const result = tool.testCleanTitle(title);
-      expect(result).toBe(title);
-    });
+      const title =
+        'Annual Economic Surveys: Annual Survey of Manufactures Benchmark 2017'
+      const result = tool.testCleanTitle(title)
+      expect(result).toBe(title)
+    })
 
     it('should return original title when years are hyphenated', () => {
       const title = '2018-2022 American Community Survey: Migration Flows'
@@ -365,42 +368,45 @@ describe('ListDatasetsTool', () => {
     })
 
     it('should remove vintage year from title', () => {
-      const title = 'Economic Census: Industry by Products Statistics for the U.S.: 2022';
-      const result = tool.testCleanTitle(title, 2022);
-      expect(result).toBe('Economic Census: Industry by Products Statistics for the U.S.:');
-    });
+      const title =
+        'Economic Census: Industry by Products Statistics for the U.S.: 2022'
+      const result = tool.testCleanTitle(title, 2022)
+      expect(result).toBe(
+        'Economic Census: Industry by Products Statistics for the U.S.:',
+      )
+    })
 
     it('should remove vintage at the beginning of title', () => {
-      const title = '2000 County Business Patterns: Business Patterns';
-      const result = tool.testCleanTitle(title, 2000);
-      expect(result).toBe('County Business Patterns: Business Patterns');
-    });
+      const title = '2000 County Business Patterns: Business Patterns'
+      const result = tool.testCleanTitle(title, 2000)
+      expect(result).toBe('County Business Patterns: Business Patterns')
+    })
 
     it('should remove vintage in the middle of title', () => {
-      const title = 'Aug 2011 Current Population Survey: Basic Monthly';
-      const result = tool.testCleanTitle(title, 2011);
-      expect(result).toBe('Aug Current Population Survey: Basic Monthly');
-    });
+      const title = 'Aug 2011 Current Population Survey: Basic Monthly'
+      const result = tool.testCleanTitle(title, 2011)
+      expect(result).toBe('Aug Current Population Survey: Basic Monthly')
+    })
 
     it('should not remove partial matches', () => {
-      const title = 'Survey 20201 Data';
-      const result = tool.testCleanTitle(title, 2020);
-      expect(result).toBe('Survey 20201 Data');
-    });
+      const title = 'Survey 20201 Data'
+      const result = tool.testCleanTitle(title, 2020)
+      expect(result).toBe('Survey 20201 Data')
+    })
 
     it('should only remove first occurrences of vintage', () => {
-      const title = '2020 Survey 2020 Data';
-      const result = tool.testCleanTitle(title, 2020);
-      expect(result).toBe('Survey 2020 Data');
-    });
-  });
+      const title = '2020 Survey 2020 Data'
+      const result = tool.testCleanTitle(title, 2020)
+      expect(result).toBe('Survey 2020 Data')
+    })
+  })
 
   describe('Aggregating simplified dataset metadata', () => {
-    let tool: TestableListDatasetsTool;
+    let tool: TestableListDatasetsTool
 
     beforeEach(() => {
-      tool = new TestableListDatasetsTool();
-    });
+      tool = new TestableListDatasetsTool()
+    })
 
     it('should aggregate single dataset', () => {
       const data: SimplifiedAPIDatasetType[] = [
@@ -408,19 +414,19 @@ describe('ListDatasetsTool', () => {
           c_dataset: 'acs/acs1',
           c_vintage: 2020,
           title: 'American Community Survey 2020',
-          c_isAggregate: true
-        }
-      ];
+          c_isAggregate: true,
+        },
+      ]
 
-      const result = tool.testAggregateDatasets(data);
+      const result = tool.testAggregateDatasets(data)
 
-      expect(result).toHaveLength(1);
+      expect(result).toHaveLength(1)
       expect(result[0]).toEqual({
         dataset: 'acs/acs1',
         title: 'American Community Survey',
-        years: [2020]
-      });
-    });
+        years: [2020],
+      })
+    })
 
     it('should aggregate multiple datasets with same c_dataset', () => {
       const data: SimplifiedAPIDatasetType[] = [
@@ -428,25 +434,25 @@ describe('ListDatasetsTool', () => {
           c_dataset: 'acs/acs1',
           c_vintage: 2020,
           title: 'American Community Survey 2020',
-          c_isAggregate: true
+          c_isAggregate: true,
         },
         {
           c_dataset: 'acs/acs1',
           c_vintage: 2019,
           title: 'American Community Survey 2019',
-          c_isAggregate: true
-        }
-      ];
+          c_isAggregate: true,
+        },
+      ]
 
-      const result = tool.testAggregateDatasets(data);
+      const result = tool.testAggregateDatasets(data)
 
-      expect(result).toHaveLength(1);
+      expect(result).toHaveLength(1)
       expect(result[0]).toEqual({
         dataset: 'acs/acs1',
         title: 'American Community Survey',
-        years: [2019, 2020]
-      });
-    });
+        years: [2019, 2020],
+      })
+    })
 
     it('should handle different titles for same dataset, keep only the latest/most recent', () => {
       const data: SimplifiedAPIDatasetType[] = [
@@ -454,20 +460,20 @@ describe('ListDatasetsTool', () => {
           c_dataset: 'acs/acs1',
           c_vintage: 2020,
           title: 'American Community Survey 2020',
-          c_isAggregate: true
+          c_isAggregate: true,
         },
         {
           c_dataset: 'acs/acs1',
           c_vintage: 2019,
           title: 'ACS 1-Year 2019',
-          c_isAggregate: true
-        }
-      ];
+          c_isAggregate: true,
+        },
+      ]
 
-      const result = tool.testAggregateDatasets(data);
+      const result = tool.testAggregateDatasets(data)
 
-      expect(result[0].title).toEqual('American Community Survey');
-    });
+      expect(result[0].title).toEqual('American Community Survey')
+    })
 
     it('should not duplicate identical titles', () => {
       const data: SimplifiedAPIDatasetType[] = [
@@ -475,38 +481,38 @@ describe('ListDatasetsTool', () => {
           c_dataset: 'acs/acs1',
           c_vintage: 2020,
           title: 'Survey 2020',
-          c_isAggregate: true
+          c_isAggregate: true,
         },
         {
           c_dataset: 'acs/acs1',
           c_vintage: 2019,
           title: 'Survey 2019',
-          c_isAggregate: true
-        }
-      ];
+          c_isAggregate: true,
+        },
+      ]
 
-      const result = tool.testAggregateDatasets(data);
+      const result = tool.testAggregateDatasets(data)
 
-      expect(result[0].title).toEqual('Survey');
-    });
+      expect(result[0].title).toEqual('Survey')
+    })
 
     it('should handle datasets without vintage', () => {
       const data: SimplifiedAPIDatasetType[] = [
         {
           c_dataset: 'acs/acs1',
           title: 'American Community Survey',
-          c_isAggregate: true
-        }
-      ];
+          c_isAggregate: true,
+        },
+      ]
 
-      const result = tool.testAggregateDatasets(data);
+      const result = tool.testAggregateDatasets(data)
 
       expect(result[0]).toEqual({
         dataset: 'acs/acs1',
         title: 'American Community Survey',
-        years: []
-      });
-    });
+        years: [],
+      })
+    })
 
     it('should sort vintages in ascending order', () => {
       const data: SimplifiedAPIDatasetType[] = [
@@ -514,31 +520,31 @@ describe('ListDatasetsTool', () => {
           c_dataset: 'acs/acs1',
           c_vintage: 2022,
           title: 'Survey',
-          c_isAggregate: true
+          c_isAggregate: true,
         },
         {
           c_dataset: 'acs/acs1',
           c_vintage: 2018,
           title: 'Survey',
-          c_isAggregate: true
+          c_isAggregate: true,
         },
         {
           c_dataset: 'acs/acs1',
           c_vintage: 2020,
           title: 'Survey',
-          c_isAggregate: true
-        }
-      ];
+          c_isAggregate: true,
+        },
+      ]
 
-      const result = tool.testAggregateDatasets(data);
+      const result = tool.testAggregateDatasets(data)
 
-      expect(result[0].years).toEqual([2018, 2020, 2022]);
-    });
+      expect(result[0].years).toEqual([2018, 2020, 2022])
+    })
 
     it('should handle empty input array', () => {
-      const result = tool.testAggregateDatasets([]);
-      expect(result).toEqual([]);
-    });
+      const result = tool.testAggregateDatasets([])
+      expect(result).toEqual([])
+    })
 
     it('should handle multiple different datasets', () => {
       const data: SimplifiedAPIDatasetType[] = [
@@ -546,20 +552,21 @@ describe('ListDatasetsTool', () => {
           c_dataset: 'acs/acs1',
           c_vintage: 2020,
           title: 'ACS 1-Year',
-          c_isAggregate: true
+          c_isAggregate: true,
         },
         {
           c_dataset: 'acs/acs5',
           c_vintage: 2020,
           title: 'ACS 5-Year',
-          c_isAggregate: true
-        }];
+          c_isAggregate: true,
+        },
+      ]
 
-      const result = tool.testAggregateDatasets(data);
+      const result = tool.testAggregateDatasets(data)
 
-      expect(result).toHaveLength(2);
-      expect(result.map(r => r.dataset)).toEqual(['acs/acs1', 'acs/acs5']);
-    });
+      expect(result).toHaveLength(2)
+      expect(result.map((r) => r.dataset)).toEqual(['acs/acs1', 'acs/acs5'])
+    })
 
     it('should not duplicate vintages', () => {
       const data: SimplifiedAPIDatasetType[] = [
@@ -567,20 +574,20 @@ describe('ListDatasetsTool', () => {
           c_dataset: 'acs/acs1',
           c_vintage: 2020,
           title: 'Survey A',
-          c_isAggregate: true
+          c_isAggregate: true,
         },
         {
           c_dataset: 'acs/acs1',
           c_vintage: 2020,
           title: 'Survey B',
-          c_isAggregate: true
-        }
-      ];
+          c_isAggregate: true,
+        },
+      ]
 
-      const result = tool.testAggregateDatasets(data);
+      const result = tool.testAggregateDatasets(data)
 
-      expect(result[0].years).toEqual([2020]);
-    });
+      expect(result[0].years).toEqual([2020])
+    })
 
     it('should handle non-number vintage values gracefully', () => {
       const data: SimplifiedAPIDatasetType[] = [
@@ -588,21 +595,21 @@ describe('ListDatasetsTool', () => {
           c_dataset: 'acs/acs1',
           c_vintage: 2020,
           title: 'Survey',
-          c_isAggregate: true
+          c_isAggregate: true,
         },
         {
           c_dataset: 'acs/acs1',
           c_vintage: undefined,
           title: 'Survey',
-          c_isAggregate: true
-        }
-      ];
+          c_isAggregate: true,
+        },
+      ]
 
-      const result = tool.testAggregateDatasets(data);
+      const result = tool.testAggregateDatasets(data)
 
-      expect(result[0].years).toEqual([2020]);
-    });
-  });
+      expect(result[0].years).toEqual([2020])
+    })
+  })
 
   describe('JSON Parsing Errors', () => {
     beforeEach(() => {
