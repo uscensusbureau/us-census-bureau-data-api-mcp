@@ -3,7 +3,6 @@ import { z } from 'zod'
 
 import { ToolContent } from '../types/base.types.js'
 
-// Tool interface for consistent tool structure
 export interface MCPTool<Args extends object = object> {
   name: string
   description: string
@@ -12,7 +11,6 @@ export interface MCPTool<Args extends object = object> {
   handler: (args: Args) => Promise<{ content: ToolContent[] }>
 }
 
-// Type-erased version for storage in registry
 interface StoredMCPTool {
   name: string
   description: string
@@ -21,15 +19,34 @@ interface StoredMCPTool {
   handler: (args: object) => Promise<{ content: ToolContent[] }>
 }
 
-// Abstract base class for tools
 export abstract class BaseTool<Args extends object> implements MCPTool<Args> {
   abstract name: string
   abstract description: string
   abstract inputSchema: Tool['inputSchema']
   abstract get argsSchema(): z.ZodType<Args, z.ZodTypeDef, Args>
-  abstract handler(args: Args): Promise<{ content: ToolContent[] }>
+  protected abstract toolHandler(args: Args, apiKey?: string): Promise<{ content: ToolContent[] }>
+  abstract readonly requiresApiKey: boolean
 
-  // Helper method for error responses
+  async handler(args: Args): Promise<{ content: ToolContent[] }> {
+    try {
+      let apiKey: string | undefined
+
+      // Only check for API key if the tool requires it
+      if (this.requiresApiKey) {
+        apiKey = process.env.CENSUS_API_KEY
+        
+        if (!apiKey) {
+          return this.createErrorResponse('Error: CENSUS_API_KEY is not set.')
+        }
+      }
+
+      return await this.toolHandler(args, apiKey)
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err)
+      return this.createErrorResponse(`Unexpected error: ${errorMessage}`)
+    }
+  }
+
   protected createErrorResponse(message: string): { content: ToolContent[] } {
     return {
       content: [
@@ -41,7 +58,6 @@ export abstract class BaseTool<Args extends object> implements MCPTool<Args> {
     }
   }
 
-  // Helper method for success responses
   protected createSuccessResponse(text: string): { content: ToolContent[] } {
     return {
       content: [
@@ -54,7 +70,6 @@ export abstract class BaseTool<Args extends object> implements MCPTool<Args> {
   }
 }
 
-// Tool registry to manage all tools
 export class ToolRegistry {
   private tools = new Map<string, StoredMCPTool>()
 

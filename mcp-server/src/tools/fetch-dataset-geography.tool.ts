@@ -8,7 +8,6 @@ import {
   FetchDatasetGeographyInputSchema,
   GeographyJsonSchema,
 } from '../schema/dataset-geography.schema.js'
-
 import { ToolContent } from '../types/base.types.js'
 import {
   SummaryLevelRow,
@@ -19,6 +18,7 @@ import {
 export class FetchDatasetGeographyTool extends BaseTool<FetchDatasetGeographyArgs> {
   name = 'fetch-dataset-geography'
   description = 'Fetch available geographies for filtering a dataset.'
+  readonly requiresApiKey = true
 
   private dbService: DatabaseService
 
@@ -172,15 +172,8 @@ export class FetchDatasetGeographyTool extends BaseTool<FetchDatasetGeographyArg
       .join(' ')
   }
 
-  async handler(
-    args: FetchDatasetGeographyArgs,
-  ): Promise<{ content: ToolContent[] }> {
+  async toolHandler(args: FetchDatasetGeographyArgs, apiKey: string): Promise<{ content: ToolContent[] }> {
     try {
-      const apiKey = process.env.CENSUS_API_KEY
-      if (!apiKey) {
-        return this.createErrorResponse('Error: CENSUS_API_KEY is not set.')
-      }
-
       // Check database health first
       const isDbHealthy = await this.dbService.healthCheck()
       if (!isDbHealthy) {

@@ -7,6 +7,7 @@ import {
   TableArgs,
   TableSchema,
 } from '../schema/fetch-aggregate-data.schema.js'
+import { ToolContent } from '../types/base.types.js'
 
 import {
   datasetValidator,
@@ -21,6 +22,7 @@ export class FetchAggregateDataTool extends BaseTool<TableArgs> {
   name = 'fetch-aggregate-data'
   description = toolDescription
   inputSchema: Tool['inputSchema'] = TableSchema as Tool['inputSchema']
+  readonly requiresApiKey = true
 
   get argsSchema() {
     return FetchAggregateDataToolSchema.superRefine((args, ctx) => {
@@ -48,12 +50,7 @@ export class FetchAggregateDataTool extends BaseTool<TableArgs> {
     return this.argsSchema.safeParse(input)
   }
 
-  async handler(args: TableArgs) {
-    const apiKey = process.env.CENSUS_API_KEY
-    if (!apiKey) {
-      return this.createErrorResponse('Error: CENSUS_API_KEY is not set.')
-    }
-
+  async toolHandler(args: TableArgs, apiKey: string): Promise<{ content: ToolContent[] }> {
     const baseUrl = `https://api.census.gov/data/${args.year}/${args.dataset}`
 
     let getParams = ''

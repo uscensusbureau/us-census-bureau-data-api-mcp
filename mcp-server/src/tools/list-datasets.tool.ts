@@ -32,6 +32,7 @@ export class ListDatasetsTool extends BaseTool<object> {
     - If the user request is ambiguous, state your assumptions
     - Flag when no dataset is a strong match (confidence: 'low')
     `
+  readonly requiresApiKey = true
 
   inputSchema: Tool['inputSchema'] = {
     type: 'object',
@@ -142,13 +143,8 @@ export class ListDatasetsTool extends BaseTool<object> {
     return Array.from(grouped.values())
   }
 
-  async handler(): Promise<{ content: ToolContent[] }> {
+  async toolHandler(apiKey: string): Promise<{ content: ToolContent[] }> {
     try {
-      const apiKey = process.env.CENSUS_API_KEY
-      if (!apiKey) {
-        return this.createErrorResponse('CENSUS_API_KEY is not set')
-      }
-
       const fetch = (await import('node-fetch')).default
       const catalogUrl = `https://api.census.gov/data.json?key=${apiKey}`
 

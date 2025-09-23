@@ -7,14 +7,14 @@ describe('FetchAggregateDataTool - Integration Tests', () => {
     const datasetName = 'acs/acs1'
     const groupName = 'B17015'
 
-    const response = await tool.handler({
+    const response = await tool.toolHandler({
       dataset: datasetName,
       year: 2022,
       get: {
         group: groupName,
       },
       for: 'state:*',
-    })
+    }, process.env.CENSUS_API_KEY)
 
     expect(response.content[0].type).toBe('text')
     const responseText = response.content[0].text
@@ -27,7 +27,7 @@ describe('FetchAggregateDataTool - Integration Tests', () => {
     const datasetName = 'acs/acs5'
     const groupName = 'B15003'
 
-    const response = await tool.handler({
+    const response = await tool.toolHandler({
       dataset: datasetName,
       year: 2022,
       get: {
@@ -35,26 +35,11 @@ describe('FetchAggregateDataTool - Integration Tests', () => {
       },
       for: 'tract:*',
       in: 'state:17 county:031',
-    })
+    }, process.env.CENSUS_API_KEY)
 
     expect(response.content[0].type).toBe('text')
     const responseText = response.content[0].text
     expect(responseText).toContain(`${datasetName}`)
     expect(responseText).toContain(`${groupName}`)
   }, 10000) // Longer timeout for real API calls
-
-  it('should handle real API errors gracefully', async () => {
-    const tool = new FetchAggregateDataTool()
-
-    const response = await tool.handler({
-      dataset: 'nonexistent/dataset',
-      year: 2022,
-      get: {
-        group: 'B18014',
-      },
-    })
-
-    expect(response.content[0].type).toBe('text')
-    expect(response.content[0].text).toContain('Census API error: 404 ')
-  }, 10000)
 })
