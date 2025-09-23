@@ -2,7 +2,6 @@ import { promises as fs } from 'fs'
 import path from 'path'
 import { Client } from 'pg'
 import { fileURLToPath } from 'url'
-import { z } from 'zod'
 
 import { GeographyRecord } from '../../schema/geography.schema'
 
@@ -195,6 +194,33 @@ export class SeedRunner {
     }
   }
 
+  // Check if an API endpoint has been called before
+  async hasApiBeenCalled(url: string): Promise<boolean> {
+    await this.ensureApiCallLogTable();
+    const query = `SELECT 1 FROM api_call_log WHERE url = '${url}' LIMIT 1`;
+    const res = await this.client.query(query);
+  return (res.rowCount ?? 0) > 0;
+  }
+
+  // Record an API call in the log
+  async recordApiCall(url: string): Promise<void> {
+    await this.ensureApiCallLogTable();
+    const query = `INSERT INTO api_call_log (url, last_called) VALUES ('${url}', NOW())
+      ON CONFLICT (url) DO UPDATE SET last_called = NOW();`;
+
+    await this.client.query(query);
+  }
+
+  // Ensure the api_call_log table exists
+  private async ensureApiCallLogTable(): Promise<void> {
+    const createTableQuery = `CREATE TABLE IF NOT EXISTS api_call_log (
+      url TEXT PRIMARY KEY,
+      last_called TIMESTAMP
+    )`;
+
+    await this.client.query(createTableQuery);
+  }
+
   // Load JSON file and extract data
   async loadData(
     source: string,
@@ -204,8 +230,16 @@ export class SeedRunner {
     let data: unknown
 
     if (isUrl) {
+      // Check if this API endpoint has been called before
+      const alreadyCalled = await this.hasApiBeenCalled(source);
+      if (alreadyCalled) {
+        console.log(`API endpoint ${source} has already been called. Skipping fetch.`);
+        return []; // Return empty array to skip processing
+      }
       // Fetch Data from the API with rate limiting
-      data = await this.fetchFromApi(source)
+      data = await this.fetchFromApi(source);
+      // Record the API call
+      await this.recordApiCall(source);
     } else {
       // Use the filepath
       const filePath = path.join(this.dataPath, source)
@@ -340,15 +374,17 @@ export class SeedRunner {
     const isUrl = !!url
 
     console.log(`Seeding table ${config.table} from ${source}.`)
-    const tableExists = await this.tableExists(config.table);
-    console.log(`Table ${config.table} exists: ${tableExists} for url ${url}`);
 
     try {
       await this.client.query('BEGIN')
 
       // Load raw data with rate limiting if from API
       const rawData = await this.loadData(source, config.dataPath, isUrl)
+      if (rawData.length === 0) {
+        console.log(`No new data to process for ${config.table}. Skipping seeding.`)
 
+        return;
+      }
       if (config.beforeSeed) {
         if (context) {
           // Pass context to beforeSeed
@@ -393,24 +429,6 @@ export class SeedRunner {
       throw error
     }
   }
-
-  async tableExists(tableName: string): Promise<boolean> {
-        const query = `
-            SELECT EXISTS (
-                SELECT 1
-                FROM pg_catalog.pg_tables
-                WHERE tablename = ${tableName}
-            );
-        `;
-        let res;
-        try {
-          res = await this.client.query(query, [tableName]);
-        } catch (error) {
-          console.error('Error checking table existence:', error);
-          // throw errnor;
-        }
-        return res?.rows[0].exists;
-    }
 
 }
 
