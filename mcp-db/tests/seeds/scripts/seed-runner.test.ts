@@ -241,7 +241,7 @@ describe('SeedRunner - Additional Coverage Tests', () => {
       await client.query('DELETE FROM years WHERE year IN (2020, 2021, 2023)')
 
       await client.query(`
-        INSERT INTO years (year) VALUES 
+        INSERT INTO years (year) VALUES
         (2020),
         (2021),
         (2023)
@@ -869,6 +869,63 @@ describe('SeedRunner - Additional Coverage Tests', () => {
         'SELECT COUNT(*) as count FROM seed_comprehensive_test',
       )
       expect(parseInt(result.rows[0].count)).toBe(0)
+    })
+  })
+
+  // --- API Call Log and loadData API endpoint tests ---
+  const TEST_URL = 'https://api.example.com/test-endpoint'
+  const TEST_URL_2 = 'https://api.example.com/other-endpoint'
+
+  // Helper to clean up the api_call_log table
+  async function cleanupApiLog(client: Client) {
+    await client.query('DELETE FROM api_call_log')
+  }
+
+  describe('SeedRunner API call log', () => {
+    afterEach(async () => {
+      await cleanupApiLog(client)
+    })
+
+    it('hasApiBeenCalled returns false for new URL, true after recordApiCall', async () => {
+      expect(await runner.hasApiBeenCalled(TEST_URL)).toBe(false)
+      await runner.recordApiCall(TEST_URL)
+      expect(await runner.hasApiBeenCalled(TEST_URL)).toBe(true)
+    })
+
+    it('recordApiCall is idempotent and updates last_called', async () => {
+      await runner.recordApiCall(TEST_URL)
+      const first = await client.query(`SELECT last_called FROM api_call_log WHERE url = '${TEST_URL}'`)
+      await new Promise((r) => setTimeout(r, 10))
+      await runner.recordApiCall(TEST_URL)
+      const second = await client.query(`SELECT last_called FROM api_call_log WHERE url = '${TEST_URL}'`)
+      expect(second.rows[0].last_called.getTime()).toBeGreaterThanOrEqual(first.rows[0].last_called.getTime())
+    })
+
+    it('hasApiBeenCalled is independent for different URLs', async () => {
+      await runner.recordApiCall(TEST_URL)
+      expect(await runner.hasApiBeenCalled(TEST_URL)).toBe(true)
+      expect(await runner.hasApiBeenCalled(TEST_URL_2)).toBe(false)
+    })
+
+    it('loadData skips fetch if API endpoint already called', async () => {
+      // Write a dummy file for fallback
+      const dummyFile = path.join(__dirname, 'fixtures', 'dummy.json')
+      await fs.writeFile(dummyFile, JSON.stringify([{ id: 1 }]))
+      // Record the API call first
+      await runner.recordApiCall(TEST_URL)
+      // Should skip fetch and return []
+      const result = await runner.loadData(TEST_URL, undefined, true)
+      expect(result).toEqual([])
+    })
+
+    it('loadData fetches and records if not already called', async () => {
+      // Mock fetch
+      global.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => [{ id: 42 }] })
+      const result = await runner.loadData(TEST_URL, undefined, true)
+      expect(Array.isArray(result)).toBe(true)
+      expect(result[0].id).toBe(42)
+      // Now should be marked as called
+      expect(await runner.hasApiBeenCalled(TEST_URL)).toBe(true)
     })
   })
 })
