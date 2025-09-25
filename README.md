@@ -191,7 +191,7 @@ echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"resolve-ge
 ```
 
 ## Available Prompts
-This section covers tools that can be called.
+This section covers prompts that can be called.
 
 ### Population
 This `get_population_data` prompt retrieves population statistics for US states, counties, cities, and other geographic areas. It resolves geographic names to their corresponding FIPS codes before fetching data. This prompt accepts the following argument:
