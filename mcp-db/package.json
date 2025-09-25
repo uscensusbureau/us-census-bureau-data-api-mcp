@@ -10,7 +10,7 @@
     "migrate:create": "npx tsx node_modules/.bin/node-pg-migrate create --migration-file-language ts",
     "migrate:down": "npx tsx node_modules/.bin/node-pg-migrate down --verbose",
     "migrate:up": "npx tsx node_modules/.bin/node-pg-migrate up --verbose",
-    "prod:build": "docker compose --profile prod up --build -d",
+    "prod:build": "docker compose --profile prod up --build -d && npm run seed:prod",
     "prod:down": "docker compose --profile prod down",
     "schema:dump": "docker compose --profile dev exec census-mcp-db-dev pg_dump --schema-only --no-owner --no-privileges --username=mcp_user_dev mcp_db_dev > schema.sql",
     "seed": "npm run build && node dist/seeds/scripts/seed-database.js",

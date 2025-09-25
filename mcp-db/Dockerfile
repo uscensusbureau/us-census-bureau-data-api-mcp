@@ -12,4 +12,4 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci --omit=dev --silent
 COPY . .
-CMD ["sh", "-c", "npm run migrate:up && npm run seed:prod"]
+CMD ["sh", "-c", "npm run migrate:up"]
