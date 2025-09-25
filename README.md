@@ -198,6 +198,5 @@ This section covers prompts that can be called.
 This `get_population_data` prompt retrieves population statistics for US states, counties, cities, and other geographic areas. It resolves geographic names to their corresponding FIPS codes before fetching data. This prompt accepts the following argument:
 - `geography_name` (required): Name of the geographic area (state, county, city, etc.)
 
-
 ## Additional Information
 For more information about the parameters above and all available predicates, review the Census Bureau’s [API documentation](https://www.census.gov/data/developers/guidance/api-user-guide.Core_Concepts.html#list-tab-559651575).
