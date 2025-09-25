@@ -107,6 +107,7 @@ describe('ResolveGeographyFipsTool', () => {
     validateToolStructure(tool)
     expect(tool.name).toBe('resolve-geography-fips')
     expect(tool.description).toBe(toolDescription)
+    expect(tool.requiresApiKey).toBe(false)
   })
 
   it('should have valid input schema', () => {

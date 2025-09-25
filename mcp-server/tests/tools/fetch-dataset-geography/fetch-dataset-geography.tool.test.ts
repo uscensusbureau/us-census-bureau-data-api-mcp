@@ -140,6 +140,7 @@ describe('FetchDatasetGeographyTool', () => {
       expect(tool.description).toBe(
         'Fetch available geographies for filtering a dataset.',
       )
+      expect(tool.requiresApiKey).toBe(true)
     })
 
     it('should have valid input schema', () => {
@@ -183,41 +184,6 @@ describe('FetchDatasetGeographyTool', () => {
     })
   })
 
-  describe('API Key Handling', () => {
-    it('should return error when API key is missing', async () => {
-      const originalApiKey = process.env.CENSUS_API_KEY
-      delete process.env.CENSUS_API_KEY
-
-      const args = {
-        dataset: 'acs/acs1',
-        year: 2022,
-      }
-
-      const response = await tool.handler(args)
-      validateResponseStructure(response)
-      expect(response.content[0].text).toContain('CENSUS_API_KEY is not set')
-
-      // Restore API key for other tests
-      process.env.CENSUS_API_KEY = originalApiKey
-    })
-
-    it('should use API key when available', async () => {
-      mockFetch.mockResolvedValue(createMockResponse(mockCensusApiResponse))
-      const apiKey = process.env.CENSUS_API_KEY
-
-      const args = {
-        dataset: 'acs/acs1',
-        year: 2022,
-      }
-
-      await tool.handler(args)
-
-      expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining(`key=${apiKey}`),
-      )
-    })
-  })
-
   describe('Database Integration', () => {
     it('should return error when database is unhealthy', async () => {
       mockDbService.healthCheck.mockResolvedValue(false)
@@ -227,7 +193,7 @@ describe('FetchDatasetGeographyTool', () => {
         year: 2022,
       }
 
-      const response = await tool.handler(args)
+      const response = await tool.toolHandler(args, process.env.CENSUS_API_KEY)
       validateResponseStructure(response)
       expect(response.content[0].text).toContain(
         'Database connection failed - cannot retrieve geography metadata',
@@ -242,7 +208,7 @@ describe('FetchDatasetGeographyTool', () => {
         year: 2022,
       }
 
-      await tool.handler(args)
+      await tool.toolHandler(args, process.env.CENSUS_API_KEY)
 
       expect(mockDbService.healthCheck).toHaveBeenCalled()
 
@@ -262,7 +228,7 @@ describe('FetchDatasetGeographyTool', () => {
         year: 2022,
       }
 
-      const response = await tool.handler(args)
+      const response = await tool.toolHandler(args, process.env.CENSUS_API_KEY)
       validateResponseStructure(response)
       expect(response.content[0].text).toContain('Database connection failed')
     })
@@ -277,7 +243,7 @@ describe('FetchDatasetGeographyTool', () => {
         year: 2022,
       }
 
-      await tool.handler(args)
+      await tool.toolHandler(args, process.env.CENSUS_API_KEY)
       const calls = mockFetch.mock.calls
       expect(calls[0][0]).toContain(
         'https://api.census.gov/data/2022/acs/acs1/geography.json?key=',
@@ -291,7 +257,7 @@ describe('FetchDatasetGeographyTool', () => {
         dataset: 'timeseries/asm/area2012',
       }
 
-      await tool.handler(args)
+      await tool.toolHandler(args, process.env.CENSUS_API_KEY)
 
       expect(mockFetch).toHaveBeenCalledWith(
         expect.stringContaining(
@@ -310,7 +276,7 @@ describe('FetchDatasetGeographyTool', () => {
         year: 2022,
       }
 
-      const response = await tool.handler(args)
+      const response = await tool.toolHandler(args, process.env.CENSUS_API_KEY)
       validateResponseStructure(response)
 
       expect(response.content[0].type).toBe('text')
@@ -367,7 +333,7 @@ describe('FetchDatasetGeographyTool', () => {
         year: 2022,
       }
 
-      const response = await tool.handler(args)
+      const response = await tool.toolHandler(args, process.env.CENSUS_API_KEY)
       validateResponseStructure(response)
 
       const responseText = response.content[0].text
@@ -393,7 +359,7 @@ describe('FetchDatasetGeographyTool', () => {
         year: 2022,
       }
 
-      const response = await tool.handler(args)
+      const response = await tool.toolHandler(args, process.env.CENSUS_API_KEY)
       validateResponseStructure(response)
       expect(response.content[0].text).toContain(
         'Geography endpoint returned: 400 Bad Request',
@@ -408,7 +374,7 @@ describe('FetchDatasetGeographyTool', () => {
         year: 2022,
       }
 
-      const response = await tool.handler(args)
+      const response = await tool.toolHandler(args, process.env.CENSUS_API_KEY)
       validateResponseStructure(response)
       expect(response.content[0].text).toContain(
         'Failed to fetch dataset geography levels: Network error',
@@ -426,7 +392,7 @@ describe('FetchDatasetGeographyTool', () => {
         year: 2022,
       }
 
-      const response = await tool.handler(args)
+      const response = await tool.toolHandler(args, process.env.CENSUS_API_KEY)
       validateResponseStructure(response)
       expect(response.content[0].text).toContain(
         'Failed to fetch dataset geography levels: Invalid JSON',
@@ -442,7 +408,7 @@ describe('FetchDatasetGeographyTool', () => {
         year: 2022,
       }
 
-      const response = await tool.handler(args)
+      const response = await tool.toolHandler(args, process.env.CENSUS_API_KEY)
       validateResponseStructure(response)
       expect(response.content[0].text).toContain('Response validation failed')
     })
@@ -457,7 +423,7 @@ describe('FetchDatasetGeographyTool', () => {
         year: 2022,
       }
 
-      const response = await tool.handler(args)
+      const response = await tool.toolHandler(args, process.env.CENSUS_API_KEY)
       const responseText = response.content[0].text
       const jsonStart = responseText.indexOf('[')
       const parsedData = JSON.parse(responseText.substring(jsonStart))
@@ -480,7 +446,7 @@ describe('FetchDatasetGeographyTool', () => {
         year: 2022,
       }
 
-      const response = await tool.handler(args)
+      const response = await tool.toolHandler(args, process.env.CENSUS_API_KEY)
       const responseText = response.content[0].text
       const jsonStart = responseText.indexOf('[')
       const parsedData = JSON.parse(responseText.substring(jsonStart))

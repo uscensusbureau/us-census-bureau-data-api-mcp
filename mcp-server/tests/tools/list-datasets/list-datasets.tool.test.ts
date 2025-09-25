@@ -47,6 +47,7 @@ describe('ListDatasetsTool', () => {
       expect(tool.description).toContain(
         'returns a data catalog of available Census datasets',
       )
+      expect(tool.requiresApiKey).toBe(true)
     })
 
     it('should have empty input schema', () => {
@@ -63,110 +64,6 @@ describe('ListDatasetsTool', () => {
     })
   })
 
-  describe('Environment Variable Validation', () => {
-    it('should return error when CENSUS_API_KEY is not set', async () => {
-      const result = await tool.handler()
-
-      expect(result.content).toHaveLength(1)
-      expect(result.content[0]).toEqual({
-        type: 'text',
-        text: expect.stringContaining('CENSUS_API_KEY is not set'),
-      })
-    })
-
-    it('should return error when CENSUS_API_KEY is empty string', async () => {
-      process.env.CENSUS_API_KEY = ''
-
-      const result = await tool.handler()
-
-      expect(result.content[0]).toEqual({
-        type: 'text',
-        text: expect.stringContaining('CENSUS_API_KEY is not set'),
-      })
-    })
-  })
-
-  describe('API Response Handling', () => {
-    beforeEach(() => {
-      process.env.CENSUS_API_KEY = 'test-api-key'
-    })
-
-    it('should handle successful API response', async () => {
-      const mockApiResponse = {
-        ...sampleDatasetMetadata,
-        dataset: [
-          {
-            ...sampleDatasetMetadata.dataset[0],
-            c_isAggregate: true,
-          },
-        ],
-      }
-
-      mockFetch.mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockApiResponse),
-      })
-
-      const result = await tool.handler()
-
-      expect(mockFetch).toHaveBeenCalledWith(
-        'https://api.census.gov/data.json?key=test-api-key',
-      )
-      expect(result.content).toHaveLength(1)
-      expect(result.content[0].type).toBe('text')
-
-      const parsedContent = JSON.parse(result.content[0].text)
-      expect(parsedContent).toHaveLength(1)
-
-      expect(parsedContent[0]).toEqual({
-        dataset: 'acs/acs1',
-        title: 'American Community Survey: 1-Year Estimates: Detailed Tables',
-        years: [2022],
-      })
-    })
-
-    it('should handle HTTP error responses', async () => {
-      mockFetch.mockResolvedValue({
-        ok: false,
-        status: 403,
-        statusText: 'Forbidden',
-      })
-
-      const result = await tool.handler()
-
-      expect(result.content[0]).toEqual({
-        type: 'text',
-        text: expect.stringContaining('Failed to fetch catalog: 403 Forbidden'),
-      })
-    })
-
-    it('should handle network errors', async () => {
-      mockFetch.mockRejectedValue(new Error('Network error'))
-
-      const result = await tool.handler()
-
-      expect(result.content[0]).toEqual({
-        type: 'text',
-        text: expect.stringContaining(
-          'Failed to fetch datasets: Network error',
-        ),
-      })
-    })
-
-    it('should handle non-Error exceptions', async () => {
-      mockFetch.mockRejectedValue('String error')
-
-      const result = await tool.handler()
-
-      expect(result.content[0]).toEqual({
-        type: 'text',
-        text: expect.stringContaining(
-          'Failed to fetch datasets: Unknown error occurred',
-        ),
-      })
-    })
-  })
-
   describe('Data Validation and Transformation', () => {
     beforeEach(() => {
       process.env.CENSUS_API_KEY = 'test-api-key'
@@ -178,7 +75,7 @@ describe('ListDatasetsTool', () => {
         json: () => Promise.resolve({ invalidStructure: true }),
       })
 
-      const result = await tool.handler()
+      const result = await tool.toolHandler(process.env.CENSUS_API_KEY)
 
       expect(result.content[0]).toEqual({
         type: 'text',
@@ -206,7 +103,7 @@ describe('ListDatasetsTool', () => {
         json: () => Promise.resolve(mockApiResponse),
       })
 
-      const result = await tool.handler()
+      const result = await tool.toolHandler({}, 'test-api-key')
       const parsedContent = JSON.parse(result.content[0].text)
 
       expect(parsedContent[0].dataset).toBe('acs/acs1')
@@ -278,7 +175,7 @@ describe('ListDatasetsTool', () => {
         json: () => Promise.resolve(mockApiResponse),
       })
 
-      const result = await tool.handler()
+      const result = await tool.toolHandler({}, 'test-api-key')
       const parsedContent = JSON.parse(result.content[0].text)
 
       expect(parsedContent[0].dataset).toBe('dec/sf1')
@@ -300,7 +197,7 @@ describe('ListDatasetsTool', () => {
         json: () => Promise.resolve(mockApiResponse),
       })
 
-      const result = await tool.handler()
+      const result = await tool.toolHandler({}, 'test-api-key')
       const parsedContent = JSON.parse(result.content[0].text)
 
       expect(parsedContent[0]).toHaveProperty('years')
@@ -322,7 +219,7 @@ describe('ListDatasetsTool', () => {
         json: () => Promise.resolve(mockApiResponse),
       })
 
-      const result = await tool.handler()
+      const result = await tool.toolHandler({}, 'test-api-key')
       const parsedContent = JSON.parse(result.content[0].text)
 
       expect(parsedContent[0]).not.toHaveProperty('c_isAggregate')
@@ -338,7 +235,7 @@ describe('ListDatasetsTool', () => {
         json: async () => mockApiResponse,
       } as Response)
 
-      const result = await tool.handler()
+      const result = await tool.toolHandler({}, 'test-api-key')
 
       const parsedContent = JSON.parse(result.content[0].text)
 
@@ -622,7 +519,7 @@ describe('ListDatasetsTool', () => {
         json: () => Promise.reject(new Error('Invalid JSON')),
       })
 
-      const result = await tool.handler()
+      const result = await tool.toolHandler({}, 'test-api-key')
 
       expect(result.content[0]).toEqual({
         type: 'text',

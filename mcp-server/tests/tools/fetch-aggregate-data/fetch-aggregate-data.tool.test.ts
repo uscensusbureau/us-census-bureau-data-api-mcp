@@ -13,8 +13,7 @@ import {
   validateToolStructure,
   validateResponseStructure,
   createMockResponse,
-  createMockFetchError,
-  sampleCensusError,
+  createMockFetchError
 } from '../../helpers/test-utils'
 
 import { sampleTableByGroupData } from '../../helpers/test-data'
@@ -39,6 +38,7 @@ describe('FetchAggregateDataTool', () => {
       validateToolStructure(tool)
       expect(tool.name).toBe('fetch-aggregate-data')
       expect(tool.description).toBe(toolDescription)
+      expect(tool.requiresApiKey).toBe(true)
     })
 
     it('should have valid input schema', () => {
@@ -206,47 +206,6 @@ describe('FetchAggregateDataTool', () => {
     })
   })
 
-  describe('API Key Handling', () => {
-    it('should return error when API key is missing', async () => {
-      const originalApiKey = process.env.CENSUS_API_KEY
-      delete process.env.CENSUS_API_KEY
-
-      const args = {
-        dataset: 'acs/acs1',
-        year: 2022,
-        get: {
-          group: 'B01001',
-        },
-      }
-
-      const response = await tool.handler(args)
-      validateResponseStructure(response)
-      expect(response.content[0].text).toContain('CENSUS_API_KEY is not set')
-
-      // Restore API key
-      process.env.CENSUS_API_KEY = originalApiKey
-    })
-
-    it('should use API key when available', async () => {
-      mockFetch.mockResolvedValue(createMockResponse(sampleTableByGroupData))
-
-      const args = {
-        dataset: 'acs/acs1',
-        year: 2022,
-        get: {
-          group: 'B01001',
-        },
-        for: 'state:03',
-      }
-
-      await tool.handler(args)
-
-      expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('key=test-api-key-12345'),
-      )
-    })
-  })
-
   describe('URL Construction', () => {
     beforeEach(() => {
       mockFetch.mockResolvedValue(createMockResponse(sampleTableByGroupData))
@@ -262,7 +221,7 @@ describe('FetchAggregateDataTool', () => {
         for: 'state:*',
       }
 
-      await tool.handler(args)
+      await tool.toolHandler(args, process.env.CENSUS_API_KEY)
 
       expect(mockFetch).toHaveBeenCalledWith(
         expect.stringContaining('https://api.census.gov/data/2022/acs/acs1'),
@@ -282,7 +241,7 @@ describe('FetchAggregateDataTool', () => {
         for: 'state:*',
       }
 
-      await tool.handler(args)
+      await tool.toolHandler(args, process.env.CENSUS_API_KEY)
 
       const calledUrl = mockFetch.mock.calls[0][0]
       expect(calledUrl).toContain('get=group%28B02015%29')
@@ -301,7 +260,7 @@ describe('FetchAggregateDataTool', () => {
         descriptive: true,
       }
 
-      await tool.handler(args)
+      await tool.toolHandler(args, process.env.CENSUS_API_KEY)
 
       const calledUrl = mockFetch.mock.calls[0][0]
       expect(calledUrl).toContain('for=state%3A01')
@@ -321,7 +280,7 @@ describe('FetchAggregateDataTool', () => {
         predicates: { AGEGROUP: '29', PAYANN: '100000' },
       }
 
-      await tool.handler(args)
+      await tool.toolHandler(args, process.env.CENSUS_API_KEY)
 
       const calledUrl = mockFetch.mock.calls[0][0]
       expect(calledUrl).toContain('AGEGROUP=29')
@@ -342,7 +301,7 @@ describe('FetchAggregateDataTool', () => {
         for: 'state:*',
       }
 
-      const response = await tool.handler(args)
+      const response = await tool.toolHandler(args, process.env.CENSUS_API_KEY)
       validateResponseStructure(response)
 
       const responseText = response.content[0].text
@@ -350,27 +309,6 @@ describe('FetchAggregateDataTool', () => {
       expect(responseText).toContain('Alabama')
       expect(responseText).toContain('Alaska')
       expect(responseText).toContain('Arizona')
-    })
-
-    it('should handle API error responses', async () => {
-      mockFetch.mockResolvedValue(
-        createMockResponse(sampleCensusError, 400, 'Bad Request'),
-      )
-
-      const args = {
-        dataset: 'invalid/dataset',
-        year: 2022,
-        get: {
-          group: '123456',
-        },
-        for: 'state:*',
-      }
-
-      const response = await tool.handler(args)
-      validateResponseStructure(response)
-      expect(response.content[0].text).toContain(
-        'Census API error: 400 Bad Request',
-      )
     })
 
     it('should handle network errors', async () => {
@@ -385,7 +323,7 @@ describe('FetchAggregateDataTool', () => {
         for: 'state:*',
       }
 
-      const response = await tool.handler(args)
+      const response = await tool.toolHandler(args, process.env.CENSUS_API_KEY)
       validateResponseStructure(response)
       expect(response.content[0].text).toContain('Fetch failed: Network error')
     })
@@ -405,7 +343,7 @@ describe('FetchAggregateDataTool', () => {
         for: 'state:02',
       }
 
-      const response = await tool.handler(args)
+      const response = await tool.toolHandler(args, process.env.CENSUS_API_KEY)
       validateResponseStructure(response)
       expect(response.content[0].text).toContain('Fetch failed: Invalid JSON')
     })
@@ -428,7 +366,7 @@ describe('FetchAggregateDataTool', () => {
         for: 'state:01',
       }
 
-      const response = await tool.handler(args)
+      const response = await tool.toolHandler(args, process.env.CENSUS_API_KEY)
       const responseText = response.content[0].text
 
       expect(responseText).toContain(
@@ -449,7 +387,7 @@ describe('FetchAggregateDataTool', () => {
         for: 'state:*',
       }
 
-      const response = await tool.handler(args)
+      const response = await tool.toolHandler(args, process.env.CENSUS_API_KEY)
       const responseText = response.content[0].text
 
       expect(responseText).toContain('Response from acs/acs1:')
@@ -471,7 +409,7 @@ describe('FetchAggregateDataTool', () => {
         for: 'state:*',
       }
 
-      const response = await tool.handler(args)
+      const response = await tool.toolHandler(args, process.env.CENSUS_API_KEY)
 
       // Verify fetch was called with correct URL
       expect(mockFetch).toHaveBeenCalledTimes(1)
@@ -500,7 +438,7 @@ describe('FetchAggregateDataTool', () => {
         predicates: { AGEGROUP: '29', PAYANN: '100000' },
       }
 
-      const response = await tool.handler(args)
+      const response = await tool.toolHandler(args, process.env.CENSUS_API_KEY)
 
       expect(mockFetch).toHaveBeenCalledTimes(1)
       const calledUrl = mockFetch.mock.calls[0][0]

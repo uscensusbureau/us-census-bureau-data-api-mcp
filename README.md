@@ -78,7 +78,7 @@ The U.S. Census Bureau Data API MCP server uses data from the Census Data API an
 
 Run `docker compose --profile dev up` from the root of the project to build the containers. This starts the MCP Database containers that runs migrations and seeds a local `postgres` database to supplement information from the Census Bureau API. It also starts the MCP Server itself.
 
-By default, all logging functions are disabled in the `mcp-server` to prevent `json` validation errors when interacting with the MCP server through MCP clients. To enable logging for development purposes, set `DEBUG_LOGS=true` when interacting with the server directly using the examples below, e.g. `echo '{CALL_ARGUMENTS}' docker exec -e DEBUG_LOGS=true -i mcp-server node dist/index.js`. 
+By default, all logging functions are disabled in the `mcp-server` to prevent `json` validation errors when interacting with the MCP server through MCP clients. To enable logging for development purposes, set `DEBUG_LOGS=true` when interacting with the server directly using the examples below, e.g. `echo '{CALL_ARGUMENTS}' docker exec -e DEBUG_LOGS=true -i -e CENSUS_API_KEY=YOUR_CENSUS_API_KEY mcp-server node dist/index.js`. 
 
 ### Testing
 
@@ -114,7 +114,8 @@ To list available tools, use the `tools/list` method with no arguments. `tools/l
 
 #### How to Run via CLI
 ```
-echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | docker exec -i mcp-server node dist/index.js
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | docker exec -i \
+-e CENSUS_API_KEY=YOUR_CENSUS_API_KEY mcp-server node dist/index.js
 ```
 
 ## Available Tools
@@ -126,8 +127,10 @@ It requires no arguments.
 
 #### How to Run via CLI
 ```
-echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"list-datasets","arguments":{}}}' \
-| docker exec -i mcp-server node dist/index.js
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/call", \
+"params":{"name":"list-datasets","arguments":{}}}' \
+| docker exec -i -e CENSUS_API_KEY=YOUR_CENSUS_API_KEY \
+mcp-server node dist/index.js
 ```
 
 ### Fetch Dataset Geography
@@ -137,18 +140,21 @@ The `fetch-dataset-geography` tool is used for fetching available geography leve
 
 #### How to Run via CLI
 ```
-echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"fetch-dataset-geography","arguments":{"dataset":"acs/acs1","year":2022}}}' \
-| docker exec -i mcp-server node dist/index.js
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/call", \
+"params":{"name":"fetch-dataset-geography", \
+"arguments":{"dataset":"acs/acs1","year":2022}}}' \
+| docker exec -i -e CENSUS_API_KEY=YOUR_CENSUS_API_KEY \
+mcp-server node dist/index.js
 ```
 
-### Fetch Summary Table
-The `fetch-summary-table` tool is used for fetching a summary table from the Census Bureau’s API. It accepts the following arguments:
+### Fetch Aggregate Data
+The `fetch-aggregate-data` tool is used for fetching  aggregate data from the Census Bureau’s API. It accepts the following arguments:
 * Dataset (Required) - The identifier of the dataset, e.g. `'acs/acs1'`
 * Year (Required) - The vintage of the dataset, e.g. `1987`
 * Get (Required) - An object that is required that accepts 2 optional arguments:
 	* Variables (optional) - An array of variables for filtering responses by attributes and rows, e.g. `'NAME'`, `'B01001_001E'`
-	* Group (Optional) - A string that returns a larger collecton of variables, e.g. `S0101`
-* For (Optional) - A string that testricts geography to various levels and is required in most datasets
+	* Group (Optional) - A string that returns a larger collection of variables, e.g. `S0101`
+* For (Optional) - A string that restricts geography to various levels and is required in most datasets
 * In (Optional) - A string that restricts geography to smaller areas than state level
 * UCGID (Optional) - A string that restricts geography by Uniform Census Geography Identifier (UCGID), e.g. `0400000US41`
 * Predicates (Optional) - Filter options for the dataset, e.g. `'for': 'state*'`
@@ -156,8 +162,9 @@ The `fetch-summary-table` tool is used for fetching a summary table from the Cen
 
 #### How to Run via CLI
 ```
-echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"fetch-summary-table","arguments":{"dataset":"acs/acs1","year":2022, "get": { "variables":["NAME","B01001_001E"] },"for":"state:01,13"}}}' \
-| docker exec -i mcp-server node dist/index.js
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/call", "params":{"name":"fetch-aggregate-data", \
+"arguments":{"dataset":"acs/acs1","year":2022, "get": { "variables":["NAME","B01001_001E"] }, \
+"for":"state:01,13"}}}' | docker exec -i -e CENSUS_API_KEY=YOUR_CENSUS_API_KEY mcp-server node dist/index.js
 ```
 
 ### Resolve Geography FIPS Tool
@@ -167,8 +174,9 @@ The `resolve-geography-fips` tool is used to search across all Census Bureau geo
 
 #### How to Run via CLI
 ```
-echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"resolve-geography-fips","arguments":{"geography_name":"Philadelphia, Pennsylvania",}}}' \
-| docker exec -i mcp-server node dist/index.js
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"resolve-geography-fips", \
+"arguments":{"geography_name":"Philadelphia, Pennsylvania"}}}' \
+| docker exec -i -e CENSUS_API_KEY=YOUR_CENSUS_API_KEY mcp-server node dist/index.js
 ```
 
 ## Resources
