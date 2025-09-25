@@ -29,4 +29,4 @@ export const FetchAggregateDataToolSchema = z.object({
   ...geoFields,
 })
 
-export type TableArgs = z.infer<typeof FetchTableInputSchema>
+export type TableArgs = z.infer<typeof FetchAggregateDataToolSchema>

@@ -21,19 +21,24 @@ class MockToolWithApiKey extends BaseTool<{ testArg: string }> {
   inputSchema = {
     type: 'object',
     properties: {
-      testArg: { type: 'string' }
+      testArg: { type: 'string' },
     },
-    required: ['testArg']
+    required: ['testArg'],
   }
 
   get argsSchema() {
     return z.object({
-      testArg: z.string()
+      testArg: z.string(),
     })
   }
 
-  protected async toolHandler(args: { testArg: string }, apiKey?: string): Promise<{ content: ToolContent[] }> {
-    return this.createSuccessResponse(`Executed with ${args.testArg} and key ${apiKey}`)
+  protected async toolHandler(
+    args: { testArg: string },
+    apiKey?: string,
+  ): Promise<{ content: ToolContent[] }> {
+    return this.createSuccessResponse(
+      `Executed with ${args.testArg} and key ${apiKey}`,
+    )
   }
 }
 
@@ -44,19 +49,23 @@ class MockToolWithoutApiKey extends BaseTool<{ testArg: string }> {
   inputSchema = {
     type: 'object',
     properties: {
-      testArg: { type: 'string' }
+      testArg: { type: 'string' },
     },
-    required: ['testArg']
+    required: ['testArg'],
   }
 
   get argsSchema() {
     return z.object({
-      testArg: z.string()
+      testArg: z.string(),
     })
   }
 
-  protected async toolHandler(args: { testArg: string }): Promise<{ content: ToolContent[] }> {
-    return this.createSuccessResponse(`Executed with ${args.testArg} without API key`)
+  protected async toolHandler(args: {
+    testArg: string
+  }): Promise<{ content: ToolContent[] }> {
+    return this.createSuccessResponse(
+      `Executed with ${args.testArg} without API key`,
+    )
   }
 }
 
@@ -67,18 +76,21 @@ class ErrorThrowingToolWithApiKey extends BaseTool<{ testArg: string }> {
   inputSchema = {
     type: 'object',
     properties: {
-      testArg: { type: 'string' }
+      testArg: { type: 'string' },
     },
-    required: ['testArg']
+    required: ['testArg'],
   }
 
   get argsSchema() {
     return z.object({
-      testArg: z.string()
+      testArg: z.string(),
     })
   }
 
-  protected async toolHandler(args: { testArg: string }, apiKey?: string): Promise<{ content: ToolContent[] }> {
+  protected async toolHandler(
+    args: { testArg: string },
+    apiKey?: string,
+  ): Promise<{ content: ToolContent[] }> {
     console.log(args, apiKey)
     throw new Error('Test error from toolHandler method')
   }
@@ -91,18 +103,21 @@ class ErrorThrowingToolWithoutApiKey extends BaseTool<{ testArg: string }> {
   inputSchema = {
     type: 'object',
     properties: {
-      testArg: { type: 'string' }
+      testArg: { type: 'string' },
     },
-    required: ['testArg']
+    required: ['testArg'],
   }
 
   get argsSchema() {
     return z.object({
-      testArg: z.string()
+      testArg: z.string(),
     })
   }
 
-  protected async toolHandler(args: { testArg: string }, apiKey?: string): Promise<{ content: ToolContent[] }> {
+  protected async toolHandler(
+    args: { testArg: string },
+    apiKey?: string,
+  ): Promise<{ content: ToolContent[] }> {
     console.log(args, apiKey)
     throw new Error('Test error from toolHandler method')
   }
@@ -131,10 +146,12 @@ describe('BaseTool', () => {
         const result = await mockToolWithApiKey.handler({ testArg: 'test' })
 
         expect(result).toEqual({
-          content: [{
-            type: 'text',
-            text: 'Error: CENSUS_API_KEY is not set.'
-          }]
+          content: [
+            {
+              type: 'text',
+              text: 'Error: CENSUS_API_KEY is not set.',
+            },
+          ],
         })
       })
 
@@ -145,24 +162,30 @@ describe('BaseTool', () => {
         const result = await mockToolWithApiKey.handler({ testArg: 'test' })
 
         expect(result).toEqual({
-          content: [{
-            type: 'text',
-            text: 'Error: CENSUS_API_KEY is not set.'
-          }]
+          content: [
+            {
+              type: 'text',
+              text: 'Error: CENSUS_API_KEY is not set.',
+            },
+          ],
         })
       })
 
       it('should call toolHandler method when CENSUS_API_KEY is set', async () => {
         // Mock process.env with a valid key
         process.env = { ...originalEnv, CENSUS_API_KEY: 'test-api-key' }
-        
-        const result = await mockToolWithApiKey.handler({ testArg: 'test-value' })
+
+        const result = await mockToolWithApiKey.handler({
+          testArg: 'test-value',
+        })
 
         expect(result).toEqual({
-          content: [{
-            type: 'text',
-            text: 'Executed with test-value and key test-api-key'
-          }]
+          content: [
+            {
+              type: 'text',
+              text: 'Executed with test-value and key test-api-key',
+            },
+          ],
         })
       })
     })
@@ -176,24 +199,30 @@ describe('BaseTool', () => {
         const result = await mockToolWithoutApiKey.handler({ testArg: 'test' })
 
         expect(result).toEqual({
-          content: [{
-            type: 'text',
-            text: 'Executed with test without API key'
-          }]
+          content: [
+            {
+              type: 'text',
+              text: 'Executed with test without API key',
+            },
+          ],
         })
       })
 
       it('should work even when API key is present but not required', async () => {
         // Mock process.env with a valid key (should be ignored)
         process.env = { ...originalEnv, CENSUS_API_KEY: 'ignored-api-key' }
-        
-        const result = await mockToolWithoutApiKey.handler({ testArg: 'test-value' })
+
+        const result = await mockToolWithoutApiKey.handler({
+          testArg: 'test-value',
+        })
 
         expect(result).toEqual({
-          content: [{
-            type: 'text',
-            text: 'Executed with test-value without API key'
-          }]
+          content: [
+            {
+              type: 'text',
+              text: 'Executed with test-value without API key',
+            },
+          ],
         })
       })
     })
@@ -205,10 +234,12 @@ describe('BaseTool', () => {
         const result = await errorToolWithApiKey.handler({ testArg: 'test' })
 
         expect(result).toEqual({
-          content: [{
-            type: 'text',
-            text: 'Unexpected error: Test error from toolHandler method'
-          }]
+          content: [
+            {
+              type: 'text',
+              text: 'Unexpected error: Test error from toolHandler method',
+            },
+          ],
         })
       })
     })
@@ -222,10 +253,12 @@ describe('BaseTool', () => {
         const result = await errorToolWithoutApiKey.handler({ testArg: 'test' })
 
         expect(result).toEqual({
-          content: [{
-            type: 'text',
-            text: 'Unexpected error: Test error from toolHandler method'
-          }]
+          content: [
+            {
+              type: 'text',
+              text: 'Unexpected error: Test error from toolHandler method',
+            },
+          ],
         })
       })
     })
@@ -239,18 +272,21 @@ describe('BaseTool', () => {
           inputSchema = {
             type: 'object',
             properties: {
-              testArg: { type: 'string' }
+              testArg: { type: 'string' },
             },
-            required: ['testArg']
+            required: ['testArg'],
           }
 
           get argsSchema() {
             return z.object({
-              testArg: z.string()
+              testArg: z.string(),
             })
           }
 
-          protected async toolHandler(args: { testArg: string }, apiKey?: string): Promise<{ content: ToolContent[] }> {
+          protected async toolHandler(
+            args: { testArg: string },
+            apiKey?: string,
+          ): Promise<{ content: ToolContent[] }> {
             console.log(args, apiKey)
             throw 'String error'
           }
@@ -260,10 +296,12 @@ describe('BaseTool', () => {
         const result = await nonErrorTool.handler({ testArg: 'test' })
 
         expect(result).toEqual({
-          content: [{
-            type: 'text',
-            text: 'Unexpected error: String error'
-          }]
+          content: [
+            {
+              type: 'text',
+              text: 'Unexpected error: String error',
+            },
+          ],
         })
       })
 
@@ -275,20 +313,23 @@ describe('BaseTool', () => {
           inputSchema = {
             type: 'object',
             properties: {
-              testArg: { type: 'string' }
+              testArg: { type: 'string' },
             },
-            required: ['testArg']
+            required: ['testArg'],
           }
 
           get argsSchema() {
             return z.object({
-              testArg: z.string()
+              testArg: z.string(),
             })
           }
 
-          protected async toolHandler(args: { testArg: string }, apiKey?: string): Promise<{ content: ToolContent[] }> {
+          protected async toolHandler(
+            args: { testArg: string },
+            apiKey?: string,
+          ): Promise<{ content: ToolContent[] }> {
             console.log(args, apiKey)
-            await new Promise(resolve => setTimeout(resolve, 10))
+            await new Promise((resolve) => setTimeout(resolve, 10))
             throw new Error('Async error')
           }
         }
@@ -299,10 +340,12 @@ describe('BaseTool', () => {
         const result = await asyncErrorTool.handler({ testArg: 'test' })
 
         expect(result).toEqual({
-          content: [{
-            type: 'text',
-            text: 'Unexpected error: Async error'
-          }]
+          content: [
+            {
+              type: 'text',
+              text: 'Unexpected error: Async error',
+            },
+          ],
         })
       })
     })
@@ -311,13 +354,17 @@ describe('BaseTool', () => {
       it('should return success response from toolHandler method with API key', async () => {
         process.env = { ...originalEnv, CENSUS_API_KEY: 'valid-key' }
 
-        const result = await mockToolWithApiKey.handler({ testArg: 'success-test' })
+        const result = await mockToolWithApiKey.handler({
+          testArg: 'success-test',
+        })
 
         expect(result).toEqual({
-          content: [{
-            type: 'text',
-            text: 'Executed with success-test and key valid-key'
-          }]
+          content: [
+            {
+              type: 'text',
+              text: 'Executed with success-test and key valid-key',
+            },
+          ],
         })
       })
 
@@ -326,27 +373,33 @@ describe('BaseTool', () => {
         process.env = { ...originalEnv }
         delete process.env.CENSUS_API_KEY
 
-        const result = await mockToolWithoutApiKey.handler({ testArg: 'success-test' })
+        const result = await mockToolWithoutApiKey.handler({
+          testArg: 'success-test',
+        })
 
         expect(result).toEqual({
-          content: [{
-            type: 'text',
-            text: 'Executed with success-test without API key'
-          }]
+          content: [
+            {
+              type: 'text',
+              text: 'Executed with success-test without API key',
+            },
+          ],
         })
       })
 
       it('should pass correct arguments to toolHandler method', async () => {
         process.env = { ...originalEnv, CENSUS_API_KEY: 'test-key-123' }
-        
+
         const testArgs = { testArg: 'complex-test-value' }
         const result = await mockToolWithApiKey.handler(testArgs)
 
         expect(result).toEqual({
-          content: [{
-            type: 'text',
-            text: 'Executed with complex-test-value and key test-key-123'
-          }]
+          content: [
+            {
+              type: 'text',
+              text: 'Executed with complex-test-value and key test-key-123',
+            },
+          ],
         })
       })
     })

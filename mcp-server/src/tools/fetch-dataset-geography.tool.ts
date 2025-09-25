@@ -140,8 +140,10 @@ export class FetchDatasetGeographyTool extends BaseTool<FetchDatasetGeographyArg
         onSpine: metadata?.onSpine ?? false,
         queryExample: queryExample,
         requires: entry.requires,
-        allowsWildcard: entry.wildcard,
-        wildcardFor: entry.optionalWithWCFor,
+        allowsWildcard: Boolean(entry.wildcard && entry.wildcard.length > 0),
+        wildcardFor: entry.optionalWithWCFor
+          ? [entry.optionalWithWCFor]
+          : undefined,
       }
     })
 
@@ -172,7 +174,10 @@ export class FetchDatasetGeographyTool extends BaseTool<FetchDatasetGeographyArg
       .join(' ')
   }
 
-  async toolHandler(args: FetchDatasetGeographyArgs, apiKey: string): Promise<{ content: ToolContent[] }> {
+  async toolHandler(
+    args: FetchDatasetGeographyArgs,
+    apiKey: string,
+  ): Promise<{ content: ToolContent[] }> {
     try {
       // Check database health first
       const isDbHealthy = await this.dbService.healthCheck()

@@ -13,7 +13,7 @@ import {
   validateToolStructure,
   validateResponseStructure,
   createMockResponse,
-  createMockFetchError
+  createMockFetchError,
 } from '../../helpers/test-utils'
 
 import { sampleTableByGroupData } from '../../helpers/test-data'

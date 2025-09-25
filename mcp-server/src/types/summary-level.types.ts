@@ -2,7 +2,6 @@ interface SummaryLevelMetadata {
   querySyntax: string
   code: string
   queryExample: string
-  requiresFIPS: boolean
   onSpine: boolean
 }
 
@@ -34,7 +33,6 @@ export interface ParsedGeographyEntry {
   hierarchy: string[]
   fullName: string
   description?: string
-  requiresFIPS: boolean
   onSpine: boolean
   queryExample: string
   requires?: string[]

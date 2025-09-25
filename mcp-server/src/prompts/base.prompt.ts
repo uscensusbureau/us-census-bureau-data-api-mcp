@@ -84,13 +84,10 @@ export class PromptRegistry {
         z.ZodTypeDef,
         object
       >,
-      handler: prompt.handler as (args: object) => Promise<{
-        description: string
-        messages: Array<{
-          role: string
-          content: { type: string; text: string }
-        }>
-      }>,
+      handler: async (args: object) => {
+        // Always call the handler with the original prompt instance as 'this'
+        return await prompt.handler.call(prompt, args as T)
+      },
     }
     this.prompts.set(prompt.name, storedPrompt)
   }

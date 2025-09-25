@@ -61,7 +61,7 @@ export class MCPServer {
   }
 
   async handleToolCall(request: {
-    params: { name: string; arguments: unknown }
+    params: { name: string; arguments?: unknown }
   }) {
     const toolName = request.params.name
     const tool = this.toolRegistry.get(toolName)
@@ -114,11 +114,9 @@ export class MCPServer {
     }
 
     try {
-      // Validate arguments using the prompt's schema if arguments are provided
       const args = request.params.arguments || {}
       const validatedArgs = prompt.argsSchema.parse(args)
 
-      // Call the prompt handler
       const result = await prompt.handler(validatedArgs)
 
       return {

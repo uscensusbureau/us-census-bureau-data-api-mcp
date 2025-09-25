@@ -8,6 +8,7 @@ export default defineConfig([
     files: ['**/*.{js,mjs,cjs,ts,mts,cts}'],
     plugins: { js },
     extends: ['js/recommended'],
+    ignores: ['dist/**/*', 'build/**/*', 'node_modules/**/*']
   },
   {
     files: ['**/*.{js,mjs,cjs,ts,mts,cts}'],

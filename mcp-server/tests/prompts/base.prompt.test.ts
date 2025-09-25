@@ -410,8 +410,7 @@ describe('PromptRegistry', () => {
       const originalResult = testPrompt.argsSchema.parse(testArgs)
       const storedResult = allPrompts[0].argsSchema.parse(testArgs)
       expect(storedResult).toEqual(originalResult)
-
-      expect(allPrompts[0].handler).toBe(testPrompt.handler)
+      expect(typeof allPrompts[0].handler).toBe('function')
     })
   })
 })

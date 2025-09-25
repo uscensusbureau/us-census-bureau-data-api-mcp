@@ -1,5 +1,4 @@
 import { z } from 'zod'
-
 import { BasePrompt } from './base.prompt.js'
 import { PopulationArgsSchema } from '../schema/population.prompt.schema.js'
 
@@ -18,6 +17,11 @@ export class PopulationPrompt extends BasePrompt<
     },
   ]
 
+  constructor() {
+    super()
+    this.handler = this.handler.bind(this)
+  }
+
   get argsSchema() {
     return PopulationArgsSchema
   }
@@ -26,10 +30,10 @@ export class PopulationPrompt extends BasePrompt<
     const { geography_name } = args
 
     let promptText = `Get the most recent population data for ${geography_name}`
-
     promptText +=
       ' using the Census MCP Server. Start by using the resolve-geography-fips tool to identify the correct geography.'
 
+    // This should work now that we have proper inheritance
     return this.createPromptResponse(
       `What’s the population of ${geography_name}?`,
       promptText,

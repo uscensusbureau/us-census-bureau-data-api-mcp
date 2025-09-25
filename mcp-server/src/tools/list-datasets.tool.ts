@@ -119,9 +119,8 @@ export class ListDatasetsTool extends BaseTool<object> {
       } else {
         const existing = grouped.get(key)!
 
-        // Only keep the first title (skip adding additional titles)
-        if (existing.title.length === 0) {
-          existing.title.push(cleanedTitle)
+        if (!existing.years) {
+          existing.years = []
         }
 
         // Add vintage if it's a number and not already present
@@ -137,13 +136,16 @@ export class ListDatasetsTool extends BaseTool<object> {
 
     // Sort vintages for each entry (ascending order)
     for (const entry of grouped.values()) {
-      entry.years.sort((a, b) => a - b)
+      entry.years?.sort((a, b) => a - b)
     }
 
     return Array.from(grouped.values())
   }
 
-  async toolHandler(apiKey: string): Promise<{ content: ToolContent[] }> {
+  async toolHandler(
+    args: object,
+    apiKey: string,
+  ): Promise<{ content: ToolContent[] }> {
     try {
       const fetch = (await import('node-fetch')).default
       const catalogUrl = `https://api.census.gov/data.json?key=${apiKey}`

@@ -133,7 +133,10 @@ describe('FetchDatasetGeographyTool - Integration Tests', () => {
 
       const brokenTool = new FetchDatasetGeographyTool()
 
-      const response = await brokenTool.toolHandler({ dataset: 'acs/acs1' }, process.env.CENSUS_API_KEY)
+      const response = await brokenTool.toolHandler(
+        { dataset: 'acs/acs1' },
+        process.env.CENSUS_API_KEY,
+      )
 
       expect(response.content[0].text).toContain('Database connection failed')
 
@@ -154,7 +157,10 @@ describe('FetchDatasetGeographyTool - Integration Tests', () => {
 
       global.fetch = mockFetch
 
-      const response = await tool.toolHandler({ dataset: 'acs/acs1' }, process.env.CENSUS_API_KEY)
+      const response = await tool.toolHandler(
+        { dataset: 'acs/acs1' },
+        process.env.CENSUS_API_KEY,
+      )
 
       expect(response.content[0].type).toBe('text')
       const responseText = response.content[0].text
@@ -167,10 +173,13 @@ describe('FetchDatasetGeographyTool - Integration Tests', () => {
     it('should fetch real ACS geography metadata with database enhancement', async () => {
       const datasetName = 'acs/acs1'
 
-      const response = await tool.toolHandler({
-        dataset: datasetName,
-        year: 2022,
-      }, process.env.CENSUS_API_KEY)
+      const response = await tool.toolHandler(
+        {
+          dataset: datasetName,
+          year: 2022,
+        },
+        process.env.CENSUS_API_KEY,
+      )
 
       expect(response.content[0].type).toBe('text')
       const responseText = response.content[0].text
@@ -214,9 +223,12 @@ describe('FetchDatasetGeographyTool - Integration Tests', () => {
     it('should work with timeseries datasets', async () => {
       const datasetName = 'timeseries/healthins/sahie'
 
-      const response = await tool.toolHandler({
-        dataset: datasetName,
-      }, process.env.CENSUS_API_KEY)
+      const response = await tool.toolHandler(
+        {
+          dataset: datasetName,
+        },
+        process.env.CENSUS_API_KEY,
+      )
 
       expect(response.content[0].type).toBe('text')
       const responseText = response.content[0].text
@@ -256,7 +268,10 @@ describe('FetchDatasetGeographyTool - Integration Tests', () => {
 
       global.fetch = mockFetch
 
-      const response = await tool.toolHandler({ dataset: 'acs/acs1', year: '2022' }, process.env.CENSUS_API_KEY)
+      const response = await tool.toolHandler(
+        { dataset: 'acs/acs1', year: '2022' },
+        process.env.CENSUS_API_KEY,
+      )
 
       const responseText = response.content[0].text
       const jsonStart = responseText.indexOf('[')
@@ -312,7 +327,10 @@ describe('FetchDatasetGeographyTool - Integration Tests', () => {
 
       global.fetch = mockFetch
 
-      const response = await tool.toolHandler({ dataset: 'acs/acs1', year: '2022' }, process.env.CENSUS_API_KEY)
+      const response = await tool.toolHandler(
+        { dataset: 'acs/acs1', year: '2022' },
+        process.env.CENSUS_API_KEY,
+      )
 
       const responseText = response.content[0].text
       const jsonStart = responseText.indexOf('[')
@@ -351,7 +369,10 @@ describe('FetchDatasetGeographyTool - Integration Tests', () => {
 
       global.fetch = mockFetch
 
-      const response = await tool.toolHandler({ dataset: 'acs/acs1', year: '2022' }, process.env.CENSUS_API_KEY)
+      const response = await tool.toolHandler(
+        { dataset: 'acs/acs1', year: '2022' },
+        process.env.CENSUS_API_KEY,
+      )
 
       const responseText = response.content[0].text
       const jsonStart = responseText.indexOf('[')

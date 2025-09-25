@@ -70,7 +70,9 @@ export class ResolveGeographyFipsTool extends BaseTool<ResolveGeographyFipsArgs>
     return result.rows
   }
 
-  async toolHandler(args: ResolveGeographyFipsArgs): Promise<{ content: ToolContent[] }> {
+  async toolHandler(
+    args: ResolveGeographyFipsArgs,
+  ): Promise<{ content: ToolContent[] }> {
     try {
       // Check database health first
       const isDbHealthy = await this.dbService.healthCheck()

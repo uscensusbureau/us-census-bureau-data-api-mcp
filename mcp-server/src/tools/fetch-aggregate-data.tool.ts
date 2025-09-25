@@ -50,7 +50,10 @@ export class FetchAggregateDataTool extends BaseTool<TableArgs> {
     return this.argsSchema.safeParse(input)
   }
 
-  async toolHandler(args: TableArgs, apiKey: string): Promise<{ content: ToolContent[] }> {
+  async toolHandler(
+    args: TableArgs,
+    apiKey: string,
+  ): Promise<{ content: ToolContent[] }> {
     const baseUrl = `https://api.census.gov/data/${args.year}/${args.dataset}`
 
     let getParams = ''

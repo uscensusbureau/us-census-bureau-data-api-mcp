@@ -7,14 +7,17 @@ describe('FetchAggregateDataTool - Integration Tests', () => {
     const datasetName = 'acs/acs1'
     const groupName = 'B17015'
 
-    const response = await tool.toolHandler({
-      dataset: datasetName,
-      year: 2022,
-      get: {
-        group: groupName,
+    const response = await tool.toolHandler(
+      {
+        dataset: datasetName,
+        year: 2022,
+        get: {
+          group: groupName,
+        },
+        for: 'state:*',
       },
-      for: 'state:*',
-    }, process.env.CENSUS_API_KEY)
+      process.env.CENSUS_API_KEY,
+    )
 
     expect(response.content[0].type).toBe('text')
     const responseText = response.content[0].text
@@ -27,15 +30,18 @@ describe('FetchAggregateDataTool - Integration Tests', () => {
     const datasetName = 'acs/acs5'
     const groupName = 'B15003'
 
-    const response = await tool.toolHandler({
-      dataset: datasetName,
-      year: 2022,
-      get: {
-        group: groupName,
+    const response = await tool.toolHandler(
+      {
+        dataset: datasetName,
+        year: 2022,
+        get: {
+          group: groupName,
+        },
+        for: 'tract:*',
+        in: 'state:17 county:031',
       },
-      for: 'tract:*',
-      in: 'state:17 county:031',
-    }, process.env.CENSUS_API_KEY)
+      process.env.CENSUS_API_KEY,
+    )
 
     expect(response.content[0].type).toBe('text')
     const responseText = response.content[0].text

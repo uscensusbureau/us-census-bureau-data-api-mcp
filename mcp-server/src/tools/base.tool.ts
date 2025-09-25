@@ -24,7 +24,10 @@ export abstract class BaseTool<Args extends object> implements MCPTool<Args> {
   abstract description: string
   abstract inputSchema: Tool['inputSchema']
   abstract get argsSchema(): z.ZodType<Args, z.ZodTypeDef, Args>
-  protected abstract toolHandler(args: Args, apiKey?: string): Promise<{ content: ToolContent[] }>
+  protected abstract toolHandler(
+    args: Args,
+    apiKey?: string,
+  ): Promise<{ content: ToolContent[] }>
   abstract readonly requiresApiKey: boolean
 
   async handler(args: Args): Promise<{ content: ToolContent[] }> {
@@ -34,7 +37,7 @@ export abstract class BaseTool<Args extends object> implements MCPTool<Args> {
       // Only check for API key if the tool requires it
       if (this.requiresApiKey) {
         apiKey = process.env.CENSUS_API_KEY
-        
+
         if (!apiKey) {
           return this.createErrorResponse('Error: CENSUS_API_KEY is not set.')
         }
