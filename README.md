@@ -19,7 +19,8 @@ The *U.S. Census Bureau Data API MCP* is a [Model Context Protocol (MCP)](https:
 * [MCP Server Architecture](#mcp-server-architecture)
 * [Available Methods](#available-methods)
 * [Available Tools](#available-tools)
-* [Resources](#resources)
+* [Available Prompts](#available-prompts)
+* [Additional Information](#additional-information)
 
 
 ## Getting Started
