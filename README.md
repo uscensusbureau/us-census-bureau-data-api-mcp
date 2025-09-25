@@ -109,7 +109,7 @@ To run tests, navigate to the `mcp-db/` directoruy and run `npm run test:db`.
 
 ## Available Methods
 
-The MCP server exposes several methods: `tools/list`, `tools/call`, `prompts/list`, and `prompts/gets`.
+The MCP server exposes several methods: `tools/list`, `tools/call`, `prompts/list`, and `prompts/get`.
 
 ## Listing Tools
 
