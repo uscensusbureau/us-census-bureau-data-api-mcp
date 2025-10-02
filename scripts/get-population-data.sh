@@ -69,7 +69,7 @@ GEOGRAPHY_NAME="$1"
 JSON_PAYLOAD="{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"prompts/get\",\"params\":{\"name\":\"get_population_data\",\"arguments\":{\"geography_name\":\"$GEOGRAPHY_NAME\"}}}"
 
 # Change to project directory
-cd "$PROJECT_DIR"
+cd "$PROJECT_DIR" || exit
 
 # Ensure services are running
 docker compose --profile prod up -d >/dev/null 2>&1
