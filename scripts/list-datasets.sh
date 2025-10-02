@@ -41,7 +41,7 @@ if [ -z "$CENSUS_API_KEY" ]; then
 fi
 
 # Change to project directory
-cd "$PROJECT_DIR"
+cd "$PROJECT_DIR" || exit
 
 # Ensure services are running
 docker compose --profile prod up -d >/dev/null 2>&1
