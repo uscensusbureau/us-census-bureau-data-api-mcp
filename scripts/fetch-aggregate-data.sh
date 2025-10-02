@@ -67,10 +67,6 @@ while [[ $# -gt 0 ]]; do
                 exit 1
             fi
             ;;
-        --json)
-            JSON_ONLY=true
-            shift
-            ;;
         -*)
             echo "Unknown option: $1" >&2
             exit 1
