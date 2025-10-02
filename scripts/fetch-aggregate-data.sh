@@ -6,14 +6,6 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 
-#!/bin/bash
-
-# Fetch Aggregate Data Helper Script
-# This script wraps the fetch-aggregate-data tool with a simplified interface
-
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-
 # Parse arguments
 JSON_ONLY=false
 DESCRIPTIVE=false
