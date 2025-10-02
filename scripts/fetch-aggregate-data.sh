@@ -98,7 +98,7 @@ UCGID_PARAM="$6"
 IFS=',' read -ra VAR_ARRAY <<< "$VARIABLES"
 VARS_JSON="["
 for i in "${!VAR_ARRAY[@]}"; do
-    if [ $i -gt 0 ]; then
+    if [ "$i" -gt 0 ]; then
         VARS_JSON+=","
     fi
     VARS_JSON+="\"${VAR_ARRAY[i]}\""
