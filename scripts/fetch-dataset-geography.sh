@@ -6,14 +6,6 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 
-#!/bin/bash
-
-# Fetch Dataset Geography Helper Script
-# This script wraps the fetch-dataset-geography tool
-
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-
 # Parse arguments
 JSON_ONLY=false
 POSITIONAL_ARGS=()
