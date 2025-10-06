@@ -47,15 +47,31 @@ export CENSUS_API_KEY='your_api_key_here'
 The `census-mcp.sh` script provides a unified interface to all Census MCP tools:
 
 ```bash
-# Use the main helper script
-./census-mcp.sh <command> [arguments...]
+# Usage
+./census-mcp.sh <command> [arguments...] [--json]
 
-# Examples:
+# Available commands:
+#   list-tools              List available MCP tools
+#   list-prompts            List available MCP prompts
+#   list-datasets           List available Census datasets
+#   fetch-dataset-geography <dataset> [year]
+#                           Fetch geography levels for a dataset
+#   fetch-aggregate-data    <dataset> <year> <variables> [for] [in] [ucgid] [--descriptive] [--predicates key:value]
+#                           Fetch aggregate Census data
+#   resolve-geography-fips  <geography> [summary_level]
+#                           Resolve geography name to FIPS codes
+#   get-population-data     <geography>
+#                           Get population data for a geography
+```
+
+#### Examples:
+```bash
+# Basic commands
 ./census-mcp.sh list-tools
 ./census-mcp.sh list-datasets
 ./census-mcp.sh fetch-dataset-geography acs/acs1 2022
-./census-mcp.sh fetch-data acs/acs1 2022 'NAME,B01001_001E' 'state:01,13'
-./census-mcp.sh resolve-fips 'Philadelphia, Pennsylvania'
+./census-mcp.sh fetch-aggregate-data acs/acs1 2022 'NAME,B01001_001E' 'state:01,13' --descriptive
+./census-mcp.sh resolve-geography-fips 'Philadelphia, Pennsylvania'
 ./census-mcp.sh get-population-data 'San Francisco, CA'
 
 # JSON output (suitable for piping to tools like jq)
@@ -182,14 +198,14 @@ export CENSUS_API_KEY='your_api_key'
 
 ### Fetch Dataset Geography
 The `fetch-dataset-geography` tool is used for fetching available geography levels for filtering a given dataset. It accepts the following arguments:
-* Dataset (Required) - The identifier of the dataset, e.g. `'acs/acs1'`
-* Year (Optional) - The vintage of the dataset, e.g. `1987`
+* Dataset (Required) - The identifier of the dataset, e.g. `'cbp'`
+* Year (Optional) - The vintage of the dataset, e.g. `2022`
 
 #### How to Run via CLI (Raw)
 ```
 echo '{"jsonrpc":"2.0","id":1,"method":"tools/call", \
 "params":{"name":"fetch-dataset-geography", \
-"arguments":{"dataset":"acs/acs1","year":2022}}}' \
+"arguments":{"dataset":"cbp","year":2022}}}' \
 | docker exec -i -e CENSUS_API_KEY=YOUR_CENSUS_API_KEY \
 mcp-server node dist/index.js
 ```
@@ -198,23 +214,23 @@ mcp-server node dist/index.js
 ```bash
 export CENSUS_API_KEY='your_api_key'
 
-# Get geography levels for ACS 5-Year data
-./scripts/fetch-dataset-geography.sh acs/acs5 2023
+# Get geography levels for CBP data
+./scripts/fetch-dataset-geography.sh cbp 2022
 
 # Using unified wrapper
-./scripts/census-mcp.sh fetch-dataset-geography acs/acs5 2023
+./scripts/census-mcp.sh fetch-dataset-geography cbp 2022
 
 # JSON output for processing (count geography levels)
-./scripts/fetch-dataset-geography.sh acs/acs5 2023 --json | jq '.result.content[0].text | fromjson | length'
+./scripts/fetch-dataset-geography.sh cbp 2022 --json | jq '.result.content[0].text | fromjson | length'
 ```
 
 ### Fetch Aggregate Data
 The `fetch-aggregate-data` tool is used for fetching  aggregate data from the Census Bureau’s API. It accepts the following arguments:
 * Dataset (Required) - The identifier of the dataset, e.g. `'acs/acs1'`
-* Year (Required) - The vintage of the dataset, e.g. `1987`
-* Get (Required) - An object that is required that accepts 2 optional arguments:
-	* Variables (optional) - An array of variables for filtering responses by attributes and rows, e.g. `'NAME'`, `'B01001_001E'`
-	* Group (Optional) - A string that returns a larger collection of variables, e.g. `S0101`
+* Year (Required) - The vintage of the dataset, e.g. `2022`
+* Get (Required) - Data to retrieve - specify either:
+	* Variables (optional) - Comma-separated variables, e.g. `'NAME,B01001_001E'`
+	* Group (Optional) - Variable group identifier, e.g. `'S0101'`
 * For (Optional) - A string that restricts geography to various levels and is required in most datasets
 * In (Optional) - A string that restricts geography to smaller areas than state level
 * UCGID (Optional) - A string that restricts geography by Uniform Census Geography Identifier (UCGID), e.g. `0400000US41`
@@ -232,24 +248,32 @@ echo '{"jsonrpc":"2.0","id":1,"method":"tools/call", "params":{"name":"fetch-agg
 ```bash
 export CENSUS_API_KEY='your_api_key'
 
-# Basic data fetch - Alabama population
-./scripts/fetch-aggregate-data.sh acs/acs5 2023 'NAME,B01001_001E' 'state:01'
+# Using variables (comma-separated)
+./scripts/fetch-aggregate-data.sh acs/acs1 2022 'NAME,B01001_001E'
+./scripts/fetch-aggregate-data.sh acs/acs1 2022 'NAME,B01001_001E' 'state:01,13'
+
+# Using a group (single identifier)
+./scripts/fetch-aggregate-data.sh acs/acs1 2022 'S0101'
+./scripts/fetch-aggregate-data.sh acs/acs1 2022 'S0101' 'state:*'
 
 # With descriptive labels enabled
-./scripts/fetch-aggregate-data.sh acs/acs5 2023 'NAME,B01001_001E' 'state:01' --descriptive
+./scripts/fetch-aggregate-data.sh acs/acs1 2022 'NAME,B01001_001E' 'state:01' --descriptive
+
+# With predicates
+./scripts/fetch-aggregate-data.sh acs/acs1 2022 'NAME,B01001_001E' --predicates 'NAICS2017:31-33'
 
 # Using unified wrapper
-./scripts/census-mcp.sh fetch-data acs/acs5 2023 'NAME,B01001_001E' 'state:01'
+./scripts/census-mcp.sh fetch-data acs/acs1 2022 'NAME,B01001_001E' 'state:01'
 
 # JSON output for processing
-./scripts/fetch-aggregate-data.sh acs/acs5 2023 'NAME,B01001_001E' 'state:01' --json | jq '.result.content[0].text'
+./scripts/fetch-aggregate-data.sh acs/acs1 2022 'NAME,B01001_001E' 'state:01' --json | jq '.result.content[0].text'
 ```
 
 ### Resolve Geography FIPS Tool
 The `resolve-geography-fips` tool provides potential matches for Census Bureau geographies. For each result, it returns geography information, correct FIPS codes for the `for` and `in` parameters, and available years (vintages).
 
-* Geography Name (Required) - The name of the geography to search, e.g. Philadelphia
-* Summary Level (Optional) - The summary level to search. Accepts name or summary level code, e.g. Place, 160
+* Geography Name (Required) - Name of the geography to search, e.g., 'Philadelphia'
+* Summary Level (Optional) - Summary level to search, e.g., 'Place' or '160'
 
 #### How to Run via CLI (Raw)
 ```
@@ -261,9 +285,19 @@ echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"resolve-ge
 #### How to Run via Helper Script
 ```bash
 export CENSUS_API_KEY='your_api_key'
+
+# Basic geography search
 ./scripts/resolve-geography-fips.sh 'Philadelphia, Pennsylvania'
-# or
+
+# With summary level filter
+./scripts/resolve-geography-fips.sh 'Philadelphia' 'Place'
+./scripts/resolve-geography-fips.sh 'Cook County' '050'
+
+# Using unified wrapper
 ./scripts/census-mcp.sh resolve-fips 'Philadelphia, Pennsylvania'
+
+# JSON output for processing
+./scripts/resolve-geography-fips.sh 'Cook County' '050' --json | jq '.result'
 ```
 
 ## Available Prompts
@@ -281,9 +315,16 @@ echo '{"jsonrpc":"2.0","id":1,"method":"prompts/get", "params":{"name":"get_popu
 #### How to Run via Helper Script
 ```bash
 export CENSUS_API_KEY='your_api_key'
+
+# Basic usage
 ./scripts/get-population-data.sh 'San Francisco, CA'
-# or
+./scripts/get-population-data.sh 'California'
+
+# Using unified wrapper
 ./scripts/census-mcp.sh get-population-data 'San Francisco, CA'
+
+# JSON output for processing
+./scripts/get-population-data.sh 'Cook County, Illinois' --json | jq '.result'
 ```
 
 ## Additional Information
