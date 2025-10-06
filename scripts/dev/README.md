@@ -6,7 +6,21 @@ The Model Context Protocol (MCP) is designed for client-server interactions thro
 
 ## Contents
 * [Available Scripts](#available-scripts)
-
+* [Helper Scripts Usage](#helper-scripts-usage)
+  * [Main Helper Script](#main-helper-script)
+  * [Individual Helper Scripts](#individual-helper-scripts)
+  * [Script Features](#script-features)
+* [CLI Examples](#cli-examples)
+* [Listing Tools](#listing-tools)
+* [Listing Prompts](#listing-prompts)
+* [Available Tools](#available-tools)
+  * [List Datasets](#list-datasets)
+  * [Fetch Dataset Geography](#fetch-dataset-geography)
+  * [Fetch Aggregate Data](#fetch-aggregate-data)
+  * [Resolve Geography FIPS Tool](#resolve-geography-fips-tool)
+* [Available Prompts](#available-prompts)
+  * [Population](#population)
+* [Additional Information](#additional-information)
 
 ## Available Scripts
 

@@ -18,9 +18,7 @@ The *U.S. Census Bureau Data API MCP* is a [Model Context Protocol (MCP)](https:
 * [Development](#development)
 * [MCP Server Architecture](#mcp-server-architecture)
 * [Available Methods](#available-methods)
-* [Available Tools](#available-tools)
-* [Available Prompts](#available-prompts)
-* [Additional Information](#additional-information)
+* [Helper Scripts](#helper-scripts)
 
 ## Getting Started
 To get started, you will need:
@@ -108,6 +106,6 @@ To run tests, navigate to the `mcp-db/` directoruy and run `npm run test:db`.
 
 The MCP server exposes several methods: `tools/list`, `tools/call`, `prompts/list`, and `prompts/get`.
 
-### Helper Scripts
+## Helper Scripts
 
 For easier command-line usage, this project includes bash helper scripts in the `scripts/dev` directory that wrap the complex Docker commands and handle the `CENSUS_API_KEY` parameter automatically.
