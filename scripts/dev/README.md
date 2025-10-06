@@ -220,8 +220,14 @@ export CENSUS_API_KEY='your_api_key'
 # Using unified wrapper
 ./scripts/census-mcp.sh fetch-dataset-geography cbp 2022
 
+# Using unified wrapper with JSON output
+./scripts/census-mcp.sh fetch-dataset-geography cbp 2022 --json | jq -r '.result.content[0].text' | tail -n +3 | jq 'length'
+
 # JSON output for processing (count geography levels)
-./scripts/fetch-dataset-geography.sh cbp 2022 --json | jq '.result.content[0].text | fromjson | length'
+./scripts/fetch-dataset-geography.sh cbp 2022 --json | jq -r '.result.content[0].text' | tail -n +3 | jq 'length'
+
+# Extract specific geography query example
+./scripts/fetch-dataset-geography.sh cbp 2022 --json | jq -r '.result.content[0].text' | tail -n +3 | jq '.[] | select(.name == "state") | .queryExample'
 ```
 
 ### Fetch Aggregate Data
@@ -248,13 +254,13 @@ echo '{"jsonrpc":"2.0","id":1,"method":"tools/call", "params":{"name":"fetch-agg
 ```bash
 export CENSUS_API_KEY='your_api_key'
 
-# Using variables (comma-separated)
-./scripts/fetch-aggregate-data.sh acs/acs1 2022 'NAME,B01001_001E'
+# Using variables (comma-separated) - requires geography for ACS
+./scripts/fetch-aggregate-data.sh acs/acs1 2022 'NAME,B01001_001E' 'state:01'
 ./scripts/fetch-aggregate-data.sh acs/acs1 2022 'NAME,B01001_001E' 'state:01,13'
 
-# Using a group (single identifier)
-./scripts/fetch-aggregate-data.sh acs/acs1 2022 'S0101'
-./scripts/fetch-aggregate-data.sh acs/acs1 2022 'S0101' 'state:*'
+# Using a group (single identifier) - example with CBP dataset  
+./scripts/fetch-aggregate-data.sh cbp 2022 'NAME,EMP' 'state:01'
+./scripts/fetch-aggregate-data.sh cbp 2022 'NAME,EMP' 'state:*'
 
 # With descriptive labels enabled
 ./scripts/fetch-aggregate-data.sh acs/acs1 2022 'NAME,B01001_001E' 'state:01' --descriptive
@@ -263,7 +269,7 @@ export CENSUS_API_KEY='your_api_key'
 ./scripts/fetch-aggregate-data.sh acs/acs1 2022 'NAME,B01001_001E' --predicates 'NAICS2017:31-33'
 
 # Using unified wrapper
-./scripts/census-mcp.sh fetch-data acs/acs1 2022 'NAME,B01001_001E' 'state:01'
+./scripts/census-mcp.sh fetch-aggregate-data acs/acs1 2022 'NAME,B01001_001E' 'state:01'
 
 # JSON output for processing
 ./scripts/fetch-aggregate-data.sh acs/acs1 2022 'NAME,B01001_001E' 'state:01' --json | jq '.result.content[0].text'
@@ -294,10 +300,10 @@ export CENSUS_API_KEY='your_api_key'
 ./scripts/resolve-geography-fips.sh 'Cook County' '050'
 
 # Using unified wrapper
-./scripts/census-mcp.sh resolve-fips 'Philadelphia, Pennsylvania'
+./scripts/census-mcp.sh resolve-geography-fips 'Philadelphia, Pennsylvania'
 
-# JSON output for processing
-./scripts/resolve-geography-fips.sh 'Cook County' '050' --json | jq '.result'
+# JSON output for processing  
+./scripts/resolve-geography-fips.sh 'Cook County' '050' --json | jq -r '.result.content[0].text' | tail -n +3 | jq '.[0].for_param'
 ```
 
 ## Available Prompts
@@ -324,7 +330,7 @@ export CENSUS_API_KEY='your_api_key'
 ./scripts/census-mcp.sh get-population-data 'San Francisco, CA'
 
 # JSON output for processing
-./scripts/get-population-data.sh 'Cook County, Illinois' --json | jq '.result'
+./scripts/get-population-data.sh 'Cook County, Illinois' --json | jq '.result.description'
 ```
 
 ## Additional Information
