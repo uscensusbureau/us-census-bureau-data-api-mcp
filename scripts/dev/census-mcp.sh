@@ -15,13 +15,13 @@ show_usage() {
     echo "  list-tools              List available MCP tools"
     echo "  list-prompts            List available MCP prompts" 
     echo "  list-datasets           List available Census datasets"
-    echo "  fetch-geography <dataset> [year]"
+    echo "  fetch-dataset-geography <dataset> [year]"
     echo "                          Fetch geography levels for a dataset"
     echo "  fetch-data <dataset> <year> <variables> [for] [in] [ucgid] [--descriptive] [--predicates key:value]"
     echo "                          Fetch aggregate Census data"
     echo "  resolve-fips <geography> [summary_level]"
     echo "                          Resolve geography name to FIPS codes"
-    echo "  get-population <geography>"
+    echo "  get-population-data <geography>"
     echo "                          Get population data for a geography"
     echo ""
     echo "Global Options:"
@@ -39,10 +39,10 @@ show_usage() {
     echo "Examples:"
     echo "  $0 list-tools"
     echo "  $0 list-datasets --json | jq '.result'"
-    echo "  $0 fetch-geography acs/acs1 2022"
-    echo "  echo "  ./scripts/census-mcp.sh fetch-data acs/acs1 2022 'NAME,B01001_001E' 'state:01,13' --descriptive --json""
-    echo "  $0 resolve-fips 'Philadelphia, Pennsylvania'"
-    echo "  $0 get-population 'San Francisco, CA'"
+    echo "  $0 fetch-dataset-geography acs/acs1 2022"
+    echo "  echo "  ./scripts/census-mcp.sh fetch-aggregate-data acs/acs1 2022 'NAME,B01001_001E' 'state:01,13' --descriptive --json""
+    echo "  $0 resolve-geography-fips 'Philadelphia, Pennsylvania'"
+    echo "  $0 get-population-data 'San Francisco, CA'"
 }
 
 # Check if CENSUS_API_KEY is provided
@@ -98,16 +98,16 @@ case "$COMMAND" in
     "list-datasets")
         exec "$SCRIPT_DIR/list-datasets.sh" "${COMMAND_ARGS[@]}" $JSON_FLAG
         ;;
-    "fetch-geography")
+    "fetch-dataset-geography")
         exec "$SCRIPT_DIR/fetch-dataset-geography.sh" "${COMMAND_ARGS[@]}" $JSON_FLAG
         ;;
-    "fetch-data")
+    "fetch-aggregate-data")
         exec "$SCRIPT_DIR/fetch-aggregate-data.sh" "${COMMAND_ARGS[@]}" $JSON_FLAG
         ;;
-    "resolve-fips")
+    "resolve-geography-fips")
         exec "$SCRIPT_DIR/resolve-geography-fips.sh" "${COMMAND_ARGS[@]}" $JSON_FLAG
         ;;
-    "get-population")
+    "get-population-data")
         exec "$SCRIPT_DIR/get-population-data.sh" "${COMMAND_ARGS[@]}" $JSON_FLAG
         ;;
     *)
