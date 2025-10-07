@@ -17,7 +17,9 @@ This guide walks you through deploying the US Census Bureau Data API MCP Server 
 
 Click the button above and fill in:
 - **App name**: Choose a unique name (e.g., `your-census-mcp`)
-- **CENSUS_API_KEY**: Your Census Bureau API key
+- **CENSUS_API_KEY**: Your Census Bureau API key (get one free at [api.census.gov/data/key_signup.html](https://api.census.gov/data/key_signup.html))
+
+> **Important**: You must provide your own Census API key during deployment. The app will not function without it.
 
 ### Method 2: Manual Deployment
 
@@ -43,8 +45,10 @@ heroku addons:create heroku-postgresql:essential-0
 
 #### Step 3: Configure Environment Variables
 
+**Important**: You must set your own Census API key as an environment variable.
+
 ```bash
-# Set your Census API key
+# Set your Census API key (REQUIRED)
 heroku config:set CENSUS_API_KEY=your_census_api_key_here
 
 # Set Node environment
@@ -56,6 +60,8 @@ heroku config:set SEED_MODE=lite
 # Optional: Enable debug logs
 heroku config:set DEBUG_LOGS=false
 ```
+
+> **Note**: Replace `your_census_api_key_here` with your actual Census Bureau API key. Get one free at [api.census.gov/data/key_signup.html](https://api.census.gov/data/key_signup.html)
 
 #### Step 4: Deploy to Heroku
 
