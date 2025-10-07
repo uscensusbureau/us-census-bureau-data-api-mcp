@@ -42,10 +42,10 @@ To run locally, you will need:
 
 ## Using the MCP Server
 
-### For Claude.ai (Remote Server)
+### For MCP compatible clients such as Claude.ai (Remote Client)
 1. Deploy to Heroku using the button above (provide your Census API key during deployment)
-2. In Claude.ai settings, add a custom connector using your MCP endpoint: `https://your-app-name.herokuapp.com/mcp`
-3. Start using Census data in your conversations!
+2. In MCP compatible clients such as Claude.AI, add a custom connector using your MCP endpoint: `https://your-app-name.herokuapp.com/mcp`
+3. Start using Census data in your conversations and workflows!
 
 ### For Local Development
 To use the U.S. Census Bureau Data API MCP server:
