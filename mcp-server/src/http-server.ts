@@ -87,7 +87,13 @@ app.get('/', (_req, res) => {
 // MCP endpoint - simplified HTTP handler
 app.post('/mcp', async (req, res) => {
   try {
+    console.error('MCP request received:', JSON.stringify(req.body))
     const { method, params } = req.body
+
+    if (!method) {
+      console.error('No method in request body')
+      return res.status(400).json({ error: 'Method is required' })
+    }
 
     let result
     switch (method) {

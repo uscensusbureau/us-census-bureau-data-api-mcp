@@ -1,2 +1,2 @@
-web: cd mcp-server && node dist/http-server.js
+web: cd mcp-server && node dist/streamable-server.js
 release: bash scripts/heroku-release.sh
