@@ -16,9 +16,9 @@ if [ ! -d "node_modules" ]; then
   npm install
 fi
 
-# Run database migrations
+# Run database migrations with SSL
 echo "Running database migrations..."
-npm run migrate:up
+DATABASE_URL="${DATABASE_URL}?sslmode=require" npx tsx node_modules/.bin/node-pg-migrate up --verbose
 
 # Run seeding based on SEED_MODE environment variable
 if [ "$SEED_MODE" = "full" ]; then
