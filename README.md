@@ -26,7 +26,7 @@ The *U.S. Census Bureau Data API MCP* is a [Model Context Protocol (MCP)](https:
 ## Getting Started
 
 ### Option 1: Deploy to Heroku (Recommended for platforms like Claude.ai)
-[![Deploy to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/uscensusbureau/us-census-bureau-data-api-mcp)
+[![Deploy to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/noahmott/us-census-bureau-data-api-mcp)
 
 Deploy directly to Heroku for use with Claude.ai's custom connectors. See [Heroku Deployment Guide](docs/HEROKU_DEPLOYMENT.md) for detailed instructions.
 
