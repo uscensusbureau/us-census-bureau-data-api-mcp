@@ -16,9 +16,9 @@ if [ ! -d "node_modules" ]; then
   npm install
 fi
 
-# Run database migrations with SSL
+# Run database migrations with SSL (Heroku requires rejectUnauthorized=false)
 echo "Running database migrations..."
-DATABASE_URL="${DATABASE_URL}?sslmode=require" npx tsx node_modules/.bin/node-pg-migrate up --verbose
+NODE_TLS_REJECT_UNAUTHORIZED=0 DATABASE_URL="${DATABASE_URL}?sslmode=require" npx tsx node_modules/.bin/node-pg-migrate up --verbose
 
 # Run seeding based on SEED_MODE environment variable
 if [ "$SEED_MODE" = "full" ]; then
