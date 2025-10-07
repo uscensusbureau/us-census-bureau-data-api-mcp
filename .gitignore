@@ -23,3 +23,6 @@ tmp/
 
 # System files
 .DS_Store
+# Claude Code instructions
+CLAUDE.md
+.claude/

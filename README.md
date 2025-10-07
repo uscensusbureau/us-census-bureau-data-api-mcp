@@ -24,13 +24,27 @@ The *U.S. Census Bureau Data API MCP* is a [Model Context Protocol (MCP)](https:
 
 
 ## Getting Started
-To get started, you will need:
+
+### Option 1: Deploy to Heroku (Recommended for Claude.ai)
+[![Deploy to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/uscensusbureau/us-census-bureau-data-api-mcp)
+
+Deploy directly to Heroku for use with Claude.ai's custom connectors. See [Heroku Deployment Guide](docs/HEROKU_DEPLOYMENT.md) for detailed instructions.
+
+### Option 2: Local Installation
+To run locally, you will need:
 
 * A valid Census Bureau [Data API key](https://api.census.gov/data/key_signup.html)
 * Docker (i.e. Docker Desktop)
 * Node 18+
 
 ## Using the MCP Server
+
+### For Claude.ai (Remote Server)
+1. Deploy to Heroku using the button above or follow the [deployment guide](docs/HEROKU_DEPLOYMENT.md)
+2. Add as a custom connector in Claude.ai settings
+3. Use the MCP endpoint: `https://your-app.herokuapp.com/mcp`
+
+### For Local Development
 To use the U.S. Census Bureau Data API MCP server:
 1. Clone or download the project locally.
 2. In a terminal window, navigate to the project’s root directory and run `docker compose --profile prod run --rm census-mcp-db-init sh -c "npm run migrate:up && npm run seed"` to pull data from the Census Data API into the local database. *This is only required on first-time setup.*
