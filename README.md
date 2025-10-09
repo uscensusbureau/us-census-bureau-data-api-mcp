@@ -26,12 +26,16 @@ The *U.S. Census Bureau Data API MCP* is a [Model Context Protocol (MCP)](https:
 ## Getting Started
 
 ### Option 1: Deploy to Heroku (Recommended for platforms like Claude.ai)
-[![Deploy to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/uscensusbureau/us-census-bureau-data-api-mcp)
+[![Deploy to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/noahmott/us-census-bureau-data-api-mcp/tree/feature/heroku-deploy-test)
 
 Click the button above to deploy. You'll be prompted to provide:
 - **CENSUS_API_KEY** (required): Your Census Bureau API key - get a valid Census Bureau [Data API key](https://api.census.gov/data/key_signup.html) here.
 
-After deployment, your MCP server will be available at `https://your-app-name.herokuapp.com/mcp`
+After deployment, find your MCP endpoint URL:
+1. Go to your app's dashboard on Heroku
+2. Click the **Settings** tab
+3. Look for the **Domains** section to find your full domain (e.g., `your-app-name-abc123def456.herokuapp.com`)
+4. Your MCP endpoint will be: `https://your-app-name-abc123def456.herokuapp.com/mcp`
 
 ### Option 2: Local Installation
 To run locally, you will need:

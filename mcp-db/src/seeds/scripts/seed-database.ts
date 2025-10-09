@@ -44,8 +44,8 @@ let baseGeographySeeds: EnhancedGeographySeedConfig[] = [
 ]
 
 export function geographySeeds(): EnhancedGeographySeedConfig[] {
-  if (process.env.SEED_MODE === 'slim') {
-    // Remove Configs That Take Forever to Run if SEED_MODE Set to Slim (For Testing Builds)
+  if (process.env.SEED_MODE === 'lite' || process.env.SEED_MODE === 'slim') {
+    // Remove Configs That Take Forever to Run if SEED_MODE Set to Lite/Slim (For Testing Builds)
     baseGeographySeeds = baseGeographySeeds
       .filter((config) => config !== CountySubdivisionConfig)
       .filter((config) => config !== PlaceConfig)

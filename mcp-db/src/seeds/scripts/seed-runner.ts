@@ -40,7 +40,14 @@ export class SeedRunner {
     dataPath?: string,
     rateLimitConfig?: Partial<RateLimitConfig>,
   ) {
-    this.client = new Client({ connectionString: dbUrl })
+    // Configure SSL for Heroku PostgreSQL
+    const isHeroku = process.env.DATABASE_URL && process.env.NODE_ENV === 'production'
+    const sslConfig = isHeroku ? { rejectUnauthorized: false } : false
+
+    this.client = new Client({
+      connectionString: dbUrl,
+      ssl: sslConfig
+    })
     // Only use __dirname as fallback if no dataPath provided
     const defaultPath = path.join(__dirname, '../../../data')
     this.dataPath = dataPath || defaultPath
