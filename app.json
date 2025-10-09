@@ -1,7 +1,7 @@
 {
   "name": "census-mcp-server",
   "description": "US Census Bureau Data API MCP Server - Provides AI assistants with access to US Census data",
-  "repository": "https://github.com/uscensusbureau/us-census-bureau-data-api-mcp",
+  "repository": "https://github.com/noahmott/us-census-bureau-data-api-mcp",
   "logo": "https://www.census.gov/etc/designs/census/images/logos/census-logo-blue.svg",
   "keywords": ["mcp", "census", "api", "data", "fastmcp", "ai"],
   "addons": [
