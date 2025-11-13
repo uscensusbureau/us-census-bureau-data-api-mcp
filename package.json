@@ -1,0 +1,30 @@
+{
+  "name": "census-mcp-server-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "US Census Bureau Data API MCP Server",
+  "engines": {
+    "node": "22.x",
+    "npm": "10.x"
+  },
+  "scripts": {
+    "postinstall": "npm run install:all",
+    "install:all": "cd mcp-server && npm install && cd ../mcp-db && npm install",
+    "build": "npm run build:all",
+    "build:all": "cd mcp-server && npm run build && cd ../mcp-db && npm run build",
+    "start": "cd mcp-server && npm start",
+    "heroku-postbuild": "npm run build:all"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/uscensusbureau/us-census-bureau-data-api-mcp.git"
+  },
+  "keywords": [
+    "mcp",
+    "census",
+    "api",
+    "model-context-protocol"
+  ],
+  "author": "US Census Bureau",
+  "license": "MIT"
+}

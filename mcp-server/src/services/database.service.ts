@@ -18,10 +18,15 @@ export class DatabaseService {
       DATABASE_URL.replace(/:[^:@]*@/, ':***@'),
     )
 
+    // Configure SSL for Heroku PostgreSQL
+    const isHeroku = process.env.DATABASE_URL && process.env.NODE_ENV === 'production'
+    const sslConfig = isHeroku ? { rejectUnauthorized: false } : false
+
     // Use connection pooling for better performance
     this.pool = new Pool({
       connectionString: DATABASE_URL,
-      max: 10, // Maximum number of clients in the pool
+      ssl: sslConfig,
+      max: 20, // Increased for production
       idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
       connectionTimeoutMillis: 2000, // Return error after 2 seconds if connection could not be established
     })
@@ -60,7 +65,15 @@ export class DatabaseService {
       const databaseUrl =
         process.env.DATABASE_URL ||
         'postgresql://mcp_user:mcp_pass@localhost:5432/mcp_db'
-      this.client = new Client({ connectionString: databaseUrl })
+
+      // Configure SSL for Heroku PostgreSQL
+      const isHeroku = process.env.DATABASE_URL && process.env.NODE_ENV === 'production'
+      const sslConfig = isHeroku ? { rejectUnauthorized: false } : false
+
+      this.client = new Client({
+        connectionString: databaseUrl,
+        ssl: sslConfig
+      })
       await this.client.connect()
     }
     return this.client

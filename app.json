@@ -1,0 +1,48 @@
+{
+  "name": "census-mcp-server",
+  "description": "US Census Bureau Data API MCP Server - Provides AI assistants with access to US Census data",
+  "repository": "https://github.com/noahmott/us-census-bureau-data-api-mcp",
+  "logo": "https://www.census.gov/etc/designs/census/images/logos/census-logo-blue.svg",
+  "keywords": ["mcp", "census", "api", "data", "fastmcp", "ai"],
+  "addons": [
+    {
+      "plan": "heroku-postgresql:essential-0",
+      "as": "DATABASE"
+    }
+  ],
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
+  "env": {
+    "CENSUS_API_KEY": {
+      "description": "Your Census Bureau API key (get one at https://api.census.gov/data/key_signup.html)",
+      "required": true
+    },
+    "NODE_ENV": {
+      "description": "Node environment",
+      "value": "production",
+      "required": true
+    },
+    "SEED_MODE": {
+      "description": "Database seeding mode (lite for faster init, full for complete data)",
+      "value": "lite",
+      "required": false
+    },
+    "DEBUG_LOGS": {
+      "description": "Enable debug logging",
+      "value": "false",
+      "required": false
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "basic"
+    }
+  },
+  "scripts": {
+    "postdeploy": "cd mcp-db && npm run seed"
+  }
+}
