@@ -28,6 +28,7 @@ import {
   StateConfig,
   SummaryLevelsConfig,
   YearsConfig,
+  ZipCodeTabulationAreaConfig,
 } from '../configs/index.js'
 
 // Seed configurations
@@ -41,14 +42,18 @@ let baseGeographySeeds: EnhancedGeographySeedConfig[] = [
   CountyConfig,
   CountySubdivisionConfig,
   PlaceConfig,
+  ZipCodeTabulationAreaConfig,
 ]
 
 export function geographySeeds(): EnhancedGeographySeedConfig[] {
   if (process.env.SEED_MODE === 'slim') {
     // Remove Configs That Take Forever to Run if SEED_MODE Set to Slim (For Testing Builds)
-    baseGeographySeeds = baseGeographySeeds
-      .filter((config) => config !== CountySubdivisionConfig)
-      .filter((config) => config !== PlaceConfig)
+    baseGeographySeeds = baseGeographySeeds.filter(
+      (config) =>
+        config !== CountySubdivisionConfig &&
+        config !== PlaceConfig &&
+        config !== ZipCodeTabulationAreaConfig,
+    )
   }
 
   return baseGeographySeeds

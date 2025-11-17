@@ -296,178 +296,332 @@ describe('SeedRunner - Additional Coverage Tests', () => {
   })
 
   describe('getStateCodesForYear', () => {
-    it('returns an array of state codes from the context', () => {
-      const context: GeographyContext = {
-        year: 2023,
-        year_id: 1,
-        parentGeographies: {
-          2023: {
-            states: [
-              {
-                name: 'California',
-                state_code: '06',
-                ucgid_code: '0400000US06',
-                geo_id: '0400000US06',
-                summary_level_code: '040',
-                for_param: 'state:06',
-                in_param: null,
-                year: 2023,
-                intptlat: 36.7783,
-                intptlon: -119.4179,
-              },
-              {
-                name: 'Texas',
-                state_code: '48',
-                ucgid_code: '0400000US48',
-                geo_id: '0400000US48',
-                summary_level_code: '040',
-                for_param: 'state:48',
-                in_param: null,
-                year: 2023,
-                intptlat: 31.9686,
-                intptlon: -99.9018,
-              },
-              {
-                name: 'New York',
-                state_code: '36',
-                ucgid_code: '0400000US36',
-                geo_id: '0400000US36',
-                summary_level_code: '040',
-                for_param: 'state:36',
-                in_param: null,
-                year: 2023,
-                intptlat: 42.9538,
-                intptlon: -75.5268,
-              },
-              {
-                name: 'Alaska',
-                state_code: '2', // Test single digit padding
-                ucgid_code: '0400000US02',
-                geo_id: '0400000US02',
-                summary_level_code: '040',
-                for_param: 'state:02',
-                in_param: null,
-                year: 2023,
-                intptlat: 64.0685,
-                intptlon: -152.2782,
-              },
-            ],
+    describe('when states are present in context', () => {
+      it('returns an array of state codes from the context', async () => {
+        const context: GeographyContext = {
+          year: 2023,
+          year_id: 1,
+          parentGeographies: {
+            2023: {
+              states: [
+                {
+                  name: 'California',
+                  state_code: '06',
+                  ucgid_code: '0400000US06',
+                  summary_level_code: '040',
+                  for_param: 'state:06',
+                  in_param: null,
+                  year: 2023,
+                  latitude: 36.7783,
+                  longitude: -119.4179,
+                },
+                {
+                  name: 'Texas',
+                  state_code: '48',
+                  ucgid_code: '0400000US48',
+                  summary_level_code: '040',
+                  for_param: 'state:48',
+                  in_param: null,
+                  year: 2023,
+                  latitude: 31.9686,
+                  longitude: -99.9018,
+                },
+                {
+                  name: 'New York',
+                  state_code: '36',
+                  ucgid_code: '0400000US36',
+                  summary_level_code: '040',
+                  for_param: 'state:36',
+                  in_param: null,
+                  year: 2023,
+                  latitude: 42.9538,
+                  longitude: -75.5268,
+                },
+                {
+                  name: 'Alaska',
+                  state_code: '2', // Test single digit padding
+                  ucgid_code: '0400000US02',
+                  summary_level_code: '040',
+                  for_param: 'state:02',
+                  in_param: null,
+                  year: 2023,
+                  latitude: 64.0685,
+                  longitude: -152.2782,
+                },
+              ],
+            },
           },
-        },
-      }
+        }
 
-      const result = runner.getStateCodesForYear(context, 2023)
+        const result = await runner.getStateCodesForYear(context, 2023)
 
-      expect(result).toEqual(['02', '06', '36', '48']) // Should be sorted and zero-padded
-      expect(result).toHaveLength(4)
+        expect(result).toEqual(['02', '06', '36', '48']) // Should be sorted and zero-padded
+        expect(result).toHaveLength(4)
 
-      // Verify all codes are 2-digit strings
-      result.forEach((code) => {
-        expect(typeof code).toBe('string')
-        expect(code).toHaveLength(2)
-        expect(code).toMatch(/^\d{2}$/)
+        // Verify all codes are 2-digit strings
+        result.forEach((code) => {
+          expect(typeof code).toBe('string')
+          expect(code).toHaveLength(2)
+          expect(code).toMatch(/^\d{2}$/)
+        })
       })
     })
 
-    it('throws an error when no states are found', () => {
-      // Test with empty context
-      const emptyContext: GeographyContext = {
-        year: 2023,
-        year_id: 1,
-        parentGeographies: {},
-      }
+    describe('when states are not present in the context', () => {
+      beforeAll(async () => {
+        // Create tables if they don't exist
+        await client.query(`
+          CREATE TABLE IF NOT EXISTS geographies (
+            id SERIAL PRIMARY KEY,
+            name VARCHAR(255),
+            state_code VARCHAR(3),
+            ucgid_code VARCHAR(20),
+            summary_level_code VARCHAR(10),
+            for_param VARCHAR(50),
+            in_param VARCHAR(50),
+            latitude DECIMAL(10, 6),
+            longitude DECIMAL(10, 6)
+          )
+        `)
 
-      expect(() => runner.getStateCodesForYear(emptyContext, 2023)).toThrow(
-        'No states found in context of year 2023',
-      )
+        await client.query(`
+          CREATE TABLE IF NOT EXISTS geography_years (
+            id SERIAL PRIMARY KEY,
+            year_id INTEGER REFERENCES years(id) ON DELETE CASCADE,
+            geography_id INTEGER REFERENCES geographies(id) ON DELETE CASCADE,
+            UNIQUE(year_id, geography_id)
+          )
+        `)
+      })
 
-      // Test with context missing the specific year
-      const contextMissingYear: GeographyContext = {
-        year: 2023,
-        year_id: 1,
-        parentGeographies: {
-          2022: {
-            states: [
-              {
-                name: 'California',
-                state_code: '06',
-                ucgid_code: '0400000US06',
-                geo_id: '0400000US06',
-                summary_level_code: '040',
-                for_param: 'state:06',
-                in_param: null,
-                year: 2022,
-                intptlat: 36.7783,
-                intptlon: -119.4179,
-              },
-            ],
+      beforeEach(async () => {
+        // Insert test year
+        await client.query(`
+          INSERT INTO years (year) 
+          VALUES (2023)
+          ON CONFLICT (year) DO NOTHING
+        `)
+
+        // Get the year_id for 2023
+        const yearResult = await client.query(
+          `SELECT id FROM years WHERE year = 2023`,
+        )
+        const yearId = yearResult.rows[0].id
+
+        // Insert test state geographies (removed geo_id column)
+        await client.query(`
+          INSERT INTO geographies (
+            name, state_code, ucgid_code,
+            summary_level_code, for_param, in_param,
+            latitude, longitude
+          ) VALUES
+          ('California', '06', '0400000US06', '040', 'state:06', NULL, 36.7783, -119.4179),
+          ('Texas', '48', '0400000US48', '040', 'state:48', NULL, 31.9686, -99.9018),
+          ('Alaska', '02', '0400000US02', '040', 'state:02', NULL, 64.0685, -152.2782)
+        `)
+
+        // Link geographies to year
+        await client.query(
+          `
+          INSERT INTO geography_years (year_id, geography_id)
+          SELECT $1, id FROM geographies WHERE summary_level_code = '040'
+        `,
+          [yearId],
+        )
+      })
+
+      afterEach(async () => {
+        // Clean up test data in correct order (respecting foreign key constraints)
+        await client.query(`
+          DELETE FROM geography_years 
+          WHERE year_id IN (SELECT id FROM years WHERE year IN (2023, 2024))
+        `)
+        await client.query(
+          `DELETE FROM geographies WHERE summary_level_code = '040'`,
+        )
+        await client.query(`DELETE FROM years WHERE year IN (2023, 2024)`)
+      })
+
+      it('should fetch state codes from the database', async () => {
+        // Get the year_id for context
+        const yearResult = await client.query(
+          `SELECT id FROM years WHERE year = 2023`,
+        )
+        const yearId = yearResult.rows[0].id
+
+        // Create context without states in parentGeographies
+        const context: GeographyContext = {
+          year: 2023,
+          year_id: yearId,
+          parentGeographies: {}, // No states in context
+        }
+
+        const result = await runner.getStateCodesForYear(context, 2023)
+
+        expect(result).toEqual(['02', '06', '48']) // Should be sorted and zero-padded
+        expect(result).toHaveLength(3)
+
+        // Verify all codes are 2-digit strings
+        result.forEach((code) => {
+          expect(typeof code).toBe('string')
+          expect(code).toHaveLength(2)
+          expect(code).toMatch(/^\d{2}$/)
+        })
+      })
+
+      it('should handle empty database results', async () => {
+        // Insert a year with no associated states
+        await client.query(
+          `INSERT INTO years (year) VALUES (2024) ON CONFLICT (year) DO NOTHING`,
+        )
+        const yearResult = await client.query(
+          `SELECT id FROM years WHERE year = 2024`,
+        )
+        const yearId = yearResult.rows[0].id
+
+        const context: GeographyContext = {
+          year: 2024,
+          year_id: yearId,
+          parentGeographies: {},
+        }
+
+        await expect(
+          runner.getStateCodesForYear(context, 2024),
+        ).rejects.toThrow('No states found in context of year 2024')
+      })
+
+      it('should handle numeric state codes from database', async () => {
+        const yearResult = await client.query(
+          `SELECT id FROM years WHERE year = 2023`,
+        )
+        const yearId = yearResult.rows[0].id
+
+        // Insert an additional state (removed geo_id column)
+        await client.query(`
+          INSERT INTO geographies (
+            name, state_code, ucgid_code,
+            summary_level_code, for_param, in_param,
+            latitude, longitude
+          ) VALUES
+          ('New York', '36', '0400000US36', '040', 'state:36', NULL, 42.9538, -75.5268)
+        `)
+
+        await client.query(
+          `
+          INSERT INTO geography_years (year_id, geography_id)
+          SELECT $1, id FROM geographies WHERE state_code = '36' AND summary_level_code = '040'
+        `,
+          [yearId],
+        )
+
+        const context: GeographyContext = {
+          year: 2023,
+          year_id: yearId,
+          parentGeographies: {},
+        }
+
+        const result = await runner.getStateCodesForYear(context, 2023)
+
+        expect(result).toContain('36')
+        expect(result).toContain('02')
+        expect(result).toContain('06')
+        expect(result).toContain('48')
+      })
+    })
+
+    describe('when states are neither in context or in the database', () => {
+      it('throws an error', async () => {
+        // Test with empty context
+        const emptyContext: GeographyContext = {
+          year: 2023,
+          year_id: 1,
+          parentGeographies: {},
+        }
+
+        await expect(
+          runner.getStateCodesForYear(emptyContext, 2023),
+        ).rejects.toThrow('No states found in context of year 2023')
+
+        // Test with context missing the specific year
+        const contextMissingYear: GeographyContext = {
+          year: 2023,
+          year_id: 1,
+          parentGeographies: {
+            2022: {
+              states: [
+                {
+                  name: 'California',
+                  state_code: '06',
+                  ucgid_code: '0400000US06',
+                  summary_level_code: '040',
+                  for_param: 'state:06',
+                  in_param: null,
+                  year: 2022,
+                  latitude: 36.7783,
+                  longitude: -119.4179,
+                },
+              ],
+            },
           },
-        },
-      }
+        }
 
-      expect(() =>
-        runner.getStateCodesForYear(contextMissingYear, 2023),
-      ).toThrow('No states found in context of year 2023')
+        await expect(
+          runner.getStateCodesForYear(contextMissingYear, 2023),
+        ).rejects.toThrow('No states found in context of year 2023')
 
-      // Test with context having the year but empty states array
-      const contextEmptyStates: GeographyContext = {
-        year: 2023,
-        year_id: 1,
-        parentGeographies: {
-          2023: {
-            states: [],
+        // Test with context having the year but empty states array
+        const contextEmptyStates: GeographyContext = {
+          year: 2023,
+          year_id: 1,
+          parentGeographies: {
+            2023: {
+              states: [],
+            },
           },
-        },
-      }
+        }
 
-      expect(() =>
-        runner.getStateCodesForYear(contextEmptyStates, 2023),
-      ).toThrow('No states found in context of year 2023')
+        await expect(
+          runner.getStateCodesForYear(contextEmptyStates, 2023),
+        ).rejects.toThrow('No states found in context of year 2023')
 
-      // Test with context having states with null/undefined state_code values
-      const contextNullStateCodes: GeographyContext = {
-        year: 2023,
-        year_id: 1,
-        parentGeographies: {
-          2023: {
-            states: [
-              {
-                name: 'Invalid State 1',
-                state_code: null,
-                ucgid_code: '0400000US00',
-                geo_id: '0400000US00',
-                summary_level_code: '040',
-                for_param: 'state:00',
-                in_param: null,
-                year: 2023,
-                intptlat: 0,
-                intptlon: 0,
-              },
-              {
-                name: 'Invalid State 2',
-                state_code: undefined,
-                ucgid_code: '0400000US01',
-                geo_id: '0400000US01',
-                summary_level_code: '040',
-                for_param: 'state:01',
-                in_param: null,
-                year: 2023,
-                intptlat: 0,
-                intptlon: 0,
-              },
-            ],
+        // Test with context having states with null/undefined state_code values
+        const contextNullStateCodes: GeographyContext = {
+          year: 2023,
+          year_id: 1,
+          parentGeographies: {
+            2023: {
+              states: [
+                {
+                  name: 'Invalid State 1',
+                  state_code: null,
+                  ucgid_code: '0400000US00',
+                  summary_level_code: '040',
+                  for_param: 'state:00',
+                  in_param: null,
+                  year: 2023,
+                  latitude: 0,
+                  longitude: 0,
+                },
+                {
+                  name: 'Invalid State 2',
+                  state_code: undefined,
+                  ucgid_code: '0400000US01',
+                  summary_level_code: '040',
+                  for_param: 'state:01',
+                  in_param: null,
+                  year: 2023,
+                  latitude: 0,
+                  longitude: 0,
+                },
+              ],
+            },
           },
-        },
-      }
+        }
 
-      expect(() =>
-        runner.getStateCodesForYear(contextNullStateCodes, 2023),
-      ).toThrow('No states found in context of year 2023')
-
-      // Test with undefined context
-      expect(() => runner.getStateCodesForYear(undefined, 2023)).toThrow(
-        'No states found in context of year 2023',
-      )
+        await expect(
+          runner.getStateCodesForYear(contextNullStateCodes, 2023),
+        ).rejects.toThrow('No states found in context of year 2023')
+      })
     })
   })
 
@@ -811,13 +965,12 @@ describe('SeedRunner - Additional Coverage Tests', () => {
             {
               name: 'California',
               ucgid_code: '0400000US06',
-              geo_id: '0400000US06',
               summary_level_code: '040',
               for_param: 'state:06',
               in_param: null,
               year: 2023,
-              intptlat: 36.7783,
-              intptlon: -119.4179,
+              latitude: 36.7783,
+              longitude: -119.4179,
             },
           ],
         },
@@ -894,11 +1047,17 @@ describe('SeedRunner - Additional Coverage Tests', () => {
 
     it('recordApiCall is idempotent and updates last_called', async () => {
       await runner.recordApiCall(TEST_URL)
-      const first = await client.query(`SELECT last_called FROM api_call_log WHERE url = '${TEST_URL}'`)
+      const first = await client.query(
+        `SELECT last_called FROM api_call_log WHERE url = '${TEST_URL}'`,
+      )
       await new Promise((r) => setTimeout(r, 10))
       await runner.recordApiCall(TEST_URL)
-      const second = await client.query(`SELECT last_called FROM api_call_log WHERE url = '${TEST_URL}'`)
-      expect(second.rows[0].last_called.getTime()).toBeGreaterThanOrEqual(first.rows[0].last_called.getTime())
+      const second = await client.query(
+        `SELECT last_called FROM api_call_log WHERE url = '${TEST_URL}'`,
+      )
+      expect(second.rows[0].last_called.getTime()).toBeGreaterThanOrEqual(
+        first.rows[0].last_called.getTime(),
+      )
     })
 
     it('hasApiBeenCalled is independent for different URLs', async () => {
@@ -920,7 +1079,11 @@ describe('SeedRunner - Additional Coverage Tests', () => {
 
     it('loadData fetches and records if not already called', async () => {
       // Mock fetch
-      global.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => [{ id: 42 }] })
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => [{ id: 42 }],
+      })
       const result = await runner.loadData(TEST_URL, undefined, true)
       expect(Array.isArray(result)).toBe(true)
       expect(result[0].id).toBe(42)
