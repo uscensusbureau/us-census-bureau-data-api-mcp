@@ -12,6 +12,9 @@ Please provide a brief description of the changes introduced by this pull reques
 
 - Link to the related issue (if applicable).
 
+## Generative AI
+- Was generative AI used to create any part of the code submitted in this PR? [Yes/No]
+
 ## Additional Notes
 
 Provide any additional information or context that might be helpful for reviewers.
