@@ -32,7 +32,7 @@ When reporting issues and feature requests, please use our Github issue template
 All new code contributions must include appropriate tests and require code review. The code review process is simple: open a Pull Request on GitHub and ensure all CI checks pass. One of the code owners will review your contribution. 
 
 ### Generative AI
-We neither encourage nor prohibit AI code generation tools when contributing to this codebase. Please indicate  in the Pull Request (PR)whether you used generative AI to create any part of the code. Generated code requires extra diligence. The time saved in generation is often offset by verification and review effort. Don't shift the burden of catching errors and understanding implementation details to maintainers; do this work before submitting.
+We neither encourage nor prohibit AI code generation tools when contributing to this codebase. Please indicate in the Pull Request (PR) whether you used generative AI to create any part of the code. Generated code requires extra diligence. The time saved in generation is often offset by verification and review effort. Don't shift the burden of catching errors and understanding implementation details to maintainers; do this work before submitting.
 
 ## Public domain
 This project is in the public domain within the United States, and copyright and related rights in the work worldwide are waived through the [CC0 1.0 Universal public domain dedication](https://github.com/uscensusbureau/us-census-bureau-data-api-mcp/?tab=CC0-1.0-1-ov-file/).
