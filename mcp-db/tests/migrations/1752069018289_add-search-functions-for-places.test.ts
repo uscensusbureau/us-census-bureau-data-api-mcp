@@ -17,7 +17,7 @@ describe('Migration 1752069018289 - Add Search Functions for Places', () => {
   beforeEach(() => {
     sqlSpy = vi.fn().mockResolvedValue(undefined)
 
-    mockPgm = { sql: sqlSpy } as MigrationBuilder
+    mockPgm = { sql: sqlSpy } as Partial<MigrationBuilder> as MigrationBuilder
   })
 
   afterEach(() => {

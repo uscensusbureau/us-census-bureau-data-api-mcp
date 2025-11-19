@@ -14,7 +14,7 @@ describe('Migration 1752068942286 - Add Triggers for Updates to Places and Cache
   beforeEach(() => {
     sqlSpy = vi.fn().mockResolvedValue(undefined)
 
-    mockPgm = { sql: sqlSpy } as MigrationBuilder
+    mockPgm = { sql: sqlSpy } as Partial<MigrationBuilder> as MigrationBuilder
   })
 
   afterEach(() => {

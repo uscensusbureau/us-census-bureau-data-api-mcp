@@ -24,7 +24,7 @@ describe('Migration 1752067938877 - Create Cache Table', () => {
       dropTable: dropTableSpy,
       func: funcSpy,
       addConstraint: addConstraintSpy,
-    } as MigrationBuilder
+    } as Partial<MigrationBuilder> as MigrationBuilder
   })
 
   afterEach(() => {

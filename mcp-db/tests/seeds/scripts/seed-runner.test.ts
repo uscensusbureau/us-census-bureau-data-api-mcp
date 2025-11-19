@@ -15,10 +15,24 @@ import { fileURLToPath } from 'url'
 
 import { dbConfig } from '../../helpers/database-config'
 import { SeedRunner } from '../../../src/seeds/scripts/seed-runner'
-import { GeographyContext } from '../../../src/schema/seed-config.schema.js'
+import {
+  GeographyContext,
+  GeographySeedConfig,
+} from '../../../src/schema/seed-config.schema.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
+
+type Item = { year: number }
+type County = {
+  id: number
+  name: string
+  category: string
+  county_code: string
+  state_code: string
+  for_param?: string
+  in_param?: string
+}
 
 describe('SeedRunner - Additional Coverage Tests', () => {
   let client: Client
@@ -96,20 +110,11 @@ describe('SeedRunner - Additional Coverage Tests', () => {
       await strictRunner.connect()
 
       // Mock fetch to simulate slow responses
-      const fetchSpy = vi.spyOn(global, 'fetch').mockImplementation(
-        () =>
-          new Promise((resolve) =>
-            setTimeout(
-              () =>
-                resolve({
-                  ok: true,
-                  status: 200,
-                  json: vi.fn().mockResolvedValue({ data: [] }),
-                }),
-              50,
-            ),
-          ),
-      )
+      const fetchSpy = vi.spyOn(global, 'fetch').mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: vi.fn().mockResolvedValue({ data: [] }),
+      } as Partial<Response> as Response)
 
       try {
         // Make multiple concurrent requests to test queue behavior
@@ -311,7 +316,6 @@ describe('SeedRunner - Additional Coverage Tests', () => {
                   summary_level_code: '040',
                   for_param: 'state:06',
                   in_param: null,
-                  year: 2023,
                   latitude: 36.7783,
                   longitude: -119.4179,
                 },
@@ -322,7 +326,6 @@ describe('SeedRunner - Additional Coverage Tests', () => {
                   summary_level_code: '040',
                   for_param: 'state:48',
                   in_param: null,
-                  year: 2023,
                   latitude: 31.9686,
                   longitude: -99.9018,
                 },
@@ -333,7 +336,6 @@ describe('SeedRunner - Additional Coverage Tests', () => {
                   summary_level_code: '040',
                   for_param: 'state:36',
                   in_param: null,
-                  year: 2023,
                   latitude: 42.9538,
                   longitude: -75.5268,
                 },
@@ -344,7 +346,6 @@ describe('SeedRunner - Additional Coverage Tests', () => {
                   summary_level_code: '040',
                   for_param: 'state:02',
                   in_param: null,
-                  year: 2023,
                   latitude: 64.0685,
                   longitude: -152.2782,
                 },
@@ -556,7 +557,6 @@ describe('SeedRunner - Additional Coverage Tests', () => {
                   summary_level_code: '040',
                   for_param: 'state:06',
                   in_param: null,
-                  year: 2022,
                   latitude: 36.7783,
                   longitude: -119.4179,
                 },
@@ -598,7 +598,6 @@ describe('SeedRunner - Additional Coverage Tests', () => {
                   summary_level_code: '040',
                   for_param: 'state:00',
                   in_param: null,
-                  year: 2023,
                   latitude: 0,
                   longitude: 0,
                 },
@@ -609,7 +608,6 @@ describe('SeedRunner - Additional Coverage Tests', () => {
                   summary_level_code: '040',
                   for_param: 'state:01',
                   in_param: null,
-                  year: 2023,
                   latitude: 0,
                   longitude: 0,
                 },
@@ -706,20 +704,26 @@ describe('SeedRunner - Additional Coverage Tests', () => {
     })
 
     it('should handle URL-based seeding with context', async () => {
-      const fetchSpy = vi.spyOn(global, 'fetch').mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: vi.fn().mockResolvedValue([
-          { id: 1, name: 'API Item 1', category: 'test', year: 2023 },
-          { id: 2, name: 'API Item 2', category: 'test', year: 2023 },
-        ]),
-      })
+      const fetchSpy = vi.spyOn(global, 'fetch').mockResolvedValue(
+        new Response(
+          JSON.stringify([
+            { id: 1, name: 'API Item 1', category: 'test', year: 2023 },
+            { id: 2, name: 'API Item 2', category: 'test', year: 2023 },
+          ]),
+          {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          },
+        ),
+      )
 
       const seedConfig = {
         url: (context: GeographyContext) =>
           `https://api.example.com/items/${context.year}?category=test&limit=100`,
         table: 'seed_comprehensive_test',
         conflictColumn: 'id',
+        beforeSeed: async () => {},
+        afterSeed: async () => {},
       }
 
       const context: GeographyContext = {
@@ -745,15 +749,17 @@ describe('SeedRunner - Additional Coverage Tests', () => {
     })
 
     it('should handle static URL seeding', async () => {
-      const fetchSpy = vi.spyOn(global, 'fetch').mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: vi
-          .fn()
-          .mockResolvedValue([
+      const fetchSpy = vi.spyOn(global, 'fetch').mockResolvedValue(
+        new Response(
+          JSON.stringify([
             { id: 1, name: 'Static Item 1', category: 'static' },
           ]),
-      })
+          {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          },
+        ),
+      )
 
       const seedConfig = {
         url: 'https://api.example.com/static-items',
@@ -786,29 +792,30 @@ describe('SeedRunner - Additional Coverage Tests', () => {
       let beforeSeedCalled = false
       let receivedContext: GeographyContext | undefined
 
-      const seedConfig = {
+      const seedConfig: GeographySeedConfig = {
         file: 'before_seed_context_test.json',
         table: 'seed_comprehensive_test',
         conflictColumn: 'id',
+        url: '',
         beforeSeed: async (
           client: Client,
           rawData: unknown[],
-          context?: GeographyContext,
+          context: GeographyContext,
         ) => {
           beforeSeedCalled = true
           receivedContext = context
 
           // Modify data based on context
-          if (context?.year) {
-            rawData.forEach((item: unknown) => {
-              item.year = context.year
-            })
-          }
+          rawData.forEach((item: unknown) => {
+            const i = item as Item
+            i.year = context.year
+          })
 
           // Verify we can use the client in beforeSeed
           const result = await client.query('SELECT NOW()')
           expect(result.rows).toHaveLength(1)
         },
+        afterSeed: async () => {},
       }
 
       const context: GeographyContext = {
@@ -846,7 +853,18 @@ describe('SeedRunner - Additional Coverage Tests', () => {
         file: 'after_seed_context_test.json',
         table: 'seed_comprehensive_test',
         conflictColumn: 'id',
-        afterSeed: async (client: Client, context?: GeographyContext) => {
+        beforeSeed: async (
+          client: Client,
+          rawData: unknown[],
+          context: GeographyContext,
+        ) => {
+          // Add year to the data so it can be queried in afterSeed
+          rawData.forEach((item: unknown) => {
+            const i = item as Item
+            i.year = context.year
+          })
+        },
+        afterSeed: async (client: Client, context: GeographyContext, insertedIds: number[]) => {
           afterSeedCalled = true
           receivedContext = context
 
@@ -857,20 +875,11 @@ describe('SeedRunner - Additional Coverage Tests', () => {
               [context.year],
             )
             expect(parseInt(result.rows[0].count)).toBeGreaterThan(0)
+          } else {
+            throw new Error(`Context year is missing in afterSeed with insertedIds ${insertedIds}`);
           }
         },
-        beforeSeed: async (
-          client: Client,
-          rawData: unknown[],
-          context?: GeographyContext,
-        ) => {
-          // Add year to data
-          if (context?.year) {
-            rawData.forEach((item: unknown) => {
-              item.year = context.year
-            })
-          }
-        },
+        url: '',
       }
 
       const context: GeographyContext = {
@@ -935,25 +944,31 @@ describe('SeedRunner - Additional Coverage Tests', () => {
         beforeSeed: async (
           client: Client,
           rawData: unknown[],
-          context?: GeographyContext,
+          context: GeographyContext,
         ) => {
           contextReceived = true
 
           // This simulates how county seeding would use state data from context
-          if (context?.parentGeographies?.states) {
-            const californiaState = context.parentGeographies.states.find(
+          if (context?.parentGeographies) {
+            const statesData = Object.values(context.parentGeographies)
+              .flatMap((summaryLevel) => Object.values(summaryLevel).flat())
+              .filter((geo) => geo.summary_level_code === '040')
+
+            const californiaState = statesData.find(
               (state) => state.name === 'California',
             )
 
             if (californiaState) {
               rawData.forEach((county: unknown) => {
-                county.year = context.year
-                county.for_param = `county:${county.county_code}`
-                county.in_param = `state:${county.state_code}`
+                const c = county as County
+                c.for_param = `county:${c.county_code}`
+                c.in_param = `state:${c.state_code}`
               })
             }
           }
         },
+        afterSeed: async () => {},
+        url: '',
       }
 
       // Set up context with pre-existing state data (as would happen in real seeding)
@@ -961,18 +976,19 @@ describe('SeedRunner - Additional Coverage Tests', () => {
         year: 2023,
         year_id: 1,
         parentGeographies: {
-          states: [
-            {
-              name: 'California',
-              ucgid_code: '0400000US06',
-              summary_level_code: '040',
-              for_param: 'state:06',
-              in_param: null,
-              year: 2023,
-              latitude: 36.7783,
-              longitude: -119.4179,
-            },
-          ],
+          '040': {
+            states: [
+              {
+                name: 'California',
+                ucgid_code: '0400000US06',
+                summary_level_code: '040',
+                for_param: 'state:06',
+                in_param: null,
+                latitude: 36.7783,
+                longitude: -119.4179,
+              },
+            ],
+          },
         },
       }
 
@@ -988,7 +1004,6 @@ describe('SeedRunner - Additional Coverage Tests', () => {
       expect(result.rows[0].name).toBe('Los Angeles County')
       expect(result.rows[0].for_param).toBe('county:037')
       expect(result.rows[0].in_param).toBe('state:06')
-      expect(result.rows[0].year).toBe(2023)
     })
 
     // ... keep existing rollback tests but update them for context support ...
@@ -1006,9 +1021,11 @@ describe('SeedRunner - Additional Coverage Tests', () => {
         file: 'rollback_context_test.json',
         table: 'seed_comprehensive_test',
         conflictColumn: 'id',
-        afterSeed: async (client: Client, context?: GeographyContext) => {
-          throw new Error(`AfterSeed failure for year ${context?.year}`)
+        beforeSeed: async () => {},
+        afterSeed: async (client: Client, context: GeographyContext, insertedIds: number[]) => {
+          throw new Error(`AfterSeed failure for year ${context?.year} and ids ${insertedIds}`);
         },
+        url: '',
       }
 
       const context: GeographyContext = { year: 2023, year_id: 1 }

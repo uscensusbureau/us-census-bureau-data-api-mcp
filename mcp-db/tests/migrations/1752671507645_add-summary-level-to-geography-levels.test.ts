@@ -24,7 +24,7 @@ describe('Migration 1752671507645 - Add Summary Level to Geography Levels Table'
       addColumns: addColumnsSpy,
       dropColumns: dropColumnsSpy,
       createIndex: createIndexSpy,
-    } as MigrationBuilder
+    } as Partial<MigrationBuilder> as MigrationBuilder
   })
 
   afterEach(() => {

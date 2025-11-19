@@ -34,7 +34,7 @@ describe('Migration 1752162656501 - Create Geography Levels Table', () => {
       dropColumns: dropColumnsSpy,
       addConstraint: addConstraintSpy,
       createIndex: createIndexSpy,
-    } as MigrationBuilder
+    } as Partial<MigrationBuilder> as MigrationBuilder
   })
 
   afterEach(() => {

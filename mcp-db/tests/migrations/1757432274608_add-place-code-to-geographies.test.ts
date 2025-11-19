@@ -18,7 +18,7 @@ describe('Migration 1757432274608 - Add Place Code to Geographies', () => {
     mockPgm = {
       addColumns: addColumnsSpy,
       dropColumns: dropColumnsSpy,
-    } as MigrationBuilder
+    } as Partial<MigrationBuilder> as MigrationBuilder
   })
 
   afterEach(() => {

@@ -21,7 +21,7 @@ describe('Migration 1757432274608 - Add County Subdivision Code to Geographies',
       addColumns: addColumnsSpy,
       alterColumn: alterColumnSpy,
       dropColumns: dropColumnsSpy,
-    } as MigrationBuilder
+    } as Partial<MigrationBuilder> as MigrationBuilder
   })
 
   afterEach(() => {

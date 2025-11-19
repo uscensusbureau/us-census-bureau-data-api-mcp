@@ -21,7 +21,7 @@ describe('Migration 1754681809226 - Add Params to Geographies', () => {
       addColumns: addColumnsSpy,
       dropColumns: dropColumnsSpy,
       renameColumn: renameColumnSpy,
-    } as MigrationBuilder
+    } as Partial<MigrationBuilder> as MigrationBuilder
   })
 
   afterEach(() => {

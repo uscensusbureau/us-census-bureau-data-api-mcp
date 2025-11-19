@@ -42,7 +42,7 @@ describe('Migration 1754492912609 - Rename Geo Tables', () => {
       addConstraint: addConstraintSpy,
       dropConstraint: dropConstraintSpy,
       renameTable: renameTableSpy,
-    } as MigrationBuilder
+    } as Partial<MigrationBuilder> as MigrationBuilder
   })
 
   afterEach(() => {

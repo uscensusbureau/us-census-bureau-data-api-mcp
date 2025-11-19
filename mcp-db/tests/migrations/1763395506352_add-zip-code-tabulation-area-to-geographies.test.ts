@@ -18,7 +18,7 @@ describe('Migration 1763395506352 - Add Zip Code Tabulation Area Geographies', (
     mockPgm = {
       addColumns: addColumnsSpy,
       dropColumns: dropColumnsSpy,
-    } as MigrationBuilder
+    } as Partial<MigrationBuilder> as MigrationBuilder
   })
 
   afterEach(() => {
