@@ -131,7 +131,7 @@ export CENSUS_API_KEY='your_api_key'
 This section covers tools that can be called.
 
 ### List Datasets
-The `list-datasets` tool returns a data catalog containing a subset of metadata for all datasets available through the Census Bureau's API. The tool includes guidance for LLMs on dataset selection, prioritizing exact year matches and specific datasets over general ones. It requires no arguments.
+For detailed information about the `list-datasets` tool, see the [Available Tools](../../README.md#available-tools) section in the main README.
 
 #### How to Run via CLI (Raw)
 ```
@@ -159,9 +159,7 @@ export CENSUS_API_KEY='your_api_key'
 ```
 
 ### Fetch Dataset Geography
-The `fetch-dataset-geography` tool is used for fetching available geography levels for filtering a given dataset. It accepts the following arguments:
-* Dataset (Required) - The identifier of the dataset, e.g. `'cbp'`
-* Year (Optional) - The vintage of the dataset, e.g. `2022`
+For detailed information about the `fetch-dataset-geography` tool, see the [Available Tools](../../README.md#available-tools) section in the main README.
 
 #### How to Run via CLI (Raw)
 ```
@@ -193,17 +191,7 @@ export CENSUS_API_KEY='your_api_key'
 ```
 
 ### Fetch Aggregate Data
-The `fetch-aggregate-data` tool is used for fetching  aggregate data from the Census Bureau’s API. It accepts the following arguments:
-* Dataset (Required) - The identifier of the dataset, e.g. `'acs/acs1'`
-* Year (Required) - The vintage of the dataset, e.g. `2022`
-* Get (Required) - Data to retrieve - specify either:
-	* Variables (optional) - Comma-separated variables, e.g. `'NAME,B01001_001E'`
-	* Group (Optional) - Variable group identifier, e.g. `'S0101'`
-* For (Optional) - A string that restricts geography to various levels and is required in most datasets
-* In (Optional) - A string that restricts geography to smaller areas than state level
-* UCGID (Optional) - A string that restricts geography by Uniform Census Geography Identifier (UCGID), e.g. `0400000US41`
-* Predicates (Optional) - Filter options for the dataset, e.g. `'for': 'state*'`
-* Descriptive (Optional) - Adds variable labels to API response (default: `false`), e.g. `true`
+For detailed information about the `fetch-aggregate-data` tool, see the [Available Tools](../../README.md#available-tools) section in the main README.
 
 #### How to Run via CLI (Raw)
 ```
@@ -238,10 +226,7 @@ export CENSUS_API_KEY='your_api_key'
 ```
 
 ### Resolve Geography FIPS Tool
-The `resolve-geography-fips` tool provides potential matches for Census Bureau geographies. For each result, it returns geography information, correct FIPS codes for the `for` and `in` parameters, and available years (vintages).
-
-* Geography Name (Required) - Name of the geography to search, e.g., 'Philadelphia'
-* Summary Level (Optional) - Summary level to search, e.g., 'Place' or '160'
+For detailed information about the `resolve-geography-fips` tool, see the [Available Tools](../../README.md#available-tools) section in the main README.
 
 #### How to Run via CLI (Raw)
 ```
@@ -272,8 +257,8 @@ export CENSUS_API_KEY='your_api_key'
 This section covers prompts that can be called.
 
 ### Population
-This `get_population_data` prompt retrieves population statistics for US states, counties, cities, and other geographic areas. It resolves geographic names to their corresponding FIPS codes before fetching data. This prompt accepts the following argument:
-- `geography_name` (required): Name of the geographic area (state, county, city, etc.)
+
+For detailed information about the `get_population_data` prompt, see the [Available Prompts](../../README.md#available-prompts) section in the main README.
 
 #### How to Run via CLI (Raw)
 ```
@@ -294,6 +279,3 @@ export CENSUS_API_KEY='your_api_key'
 # JSON output for processing
 ./scripts/get-population-data.sh 'Cook County, Illinois' --json | jq '.result.description'
 ```
-
-## Additional Information
-For more information about the parameters above and all available predicates, review the Census Bureau’s [API documentation](https://www.census.gov/data/developers/guidance/api-user-guide.Core_Concepts.html#list-tab-559651575).

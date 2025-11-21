@@ -22,7 +22,7 @@ show_usage() {
     echo "  resolve-geography-fips <geography> [summary_level]"
     echo "                          Resolve geography name to FIPS codes"
     echo "  get-population-data <geography>"
-    echo "                          Get population data for a geography"
+    echo "                          Get population data prompt"
     echo ""
     echo "Global Options:"
     echo "  --json                  Output only JSON (suitable for piping to jq)"

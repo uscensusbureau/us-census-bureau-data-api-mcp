@@ -19,7 +19,7 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         -h|--help)
-            echo "Usage: $0 <dataset> <year> <variables|group> [for] [in] [ucgid] [--descriptive] [--predicates key:value] [--json]"
+            echo "Usage: $0 <dataset> <year> <variables|group> [for] [in] [ucgid] [predicates] [--descriptive] [--json]"
             echo ""
             echo "Arguments:"
             echo "  dataset     (Required) Dataset identifier, e.g., 'acs/acs1'"
@@ -30,10 +30,10 @@ while [[ $# -gt 0 ]]; do
             echo "  for         (Optional) Geography restriction, e.g., 'state:01,13'"
             echo "  in          (Optional) Constrains the 'for' geography to a parent geography"
             echo "  ucgid       (Optional) Uniform Census Geography Identifier"
+            echo "  predicates  (Optional) Additional dataset specific filters (format: key:value,key2:value2)"
             echo ""
             echo "Options:"
             echo "  --descriptive           Add variable labels to results"
-            echo "  --predicates key:value  Additional filters (can be used multiple times)"
             echo "  --json                  Output only JSON (suitable for piping to jq)"
             echo "  -h, --help              Show this help message"
             echo ""
@@ -58,15 +58,6 @@ while [[ $# -gt 0 ]]; do
             DESCRIPTIVE=true
             shift
             ;;
-        --predicates)
-            if [ -n "$2" ]; then
-                PREDICATES_ARGS+=("$2")
-                shift 2
-            else
-                echo "Error: --predicates requires a key:value pair" >&2
-                exit 1
-            fi
-            ;;
         -*)
             echo "Unknown option: $1" >&2
             exit 1
@@ -84,14 +75,14 @@ set -- "${POSITIONAL_ARGS[@]}"
 # Check if CENSUS_API_KEY is provided
 if [ -z "$CENSUS_API_KEY" ]; then
     echo "Error: CENSUS_API_KEY environment variable is required" >&2
-    echo "Usage: CENSUS_API_KEY=your_key $0 <dataset> <year> <variables|group> [for] [in] [ucgid] [--descriptive] [--predicates key:value] [--json]" >&2
+    echo "Usage: CENSUS_API_KEY=your_key $0 <dataset> <year> <variables|group> [for] [in] [ucgid] [predicates] [--descriptive] [--json]" >&2
     exit 1
 fi
 
 # Check for required arguments
 if [ $# -lt 3 ]; then
     echo "Error: Dataset, year, and variables/group arguments are required" >&2
-    echo "Usage: $0 <dataset> <year> <variables|group> [for] [in] [ucgid] [--descriptive] [--predicates key:value] [--json]" >&2
+    echo "Usage: $0 <dataset> <year> <variables|group> [for] [in] [ucgid] [predicates] [--descriptive] [--json]" >&2
     exit 1
 fi
 
@@ -101,6 +92,12 @@ GET_PARAM="$3"
 FOR_PARAM="$4"
 IN_PARAM="$5"
 UCGID_PARAM="$6"
+PREDICATES_PARAM="$7"
+
+# Parse predicates if provided (format: key:value,key2:value2)
+if [ -n "$PREDICATES_PARAM" ]; then
+    IFS=',' read -ra PREDICATES_ARGS <<< "$PREDICATES_PARAM"
+fi
 
 # Determine if GET_PARAM is variables (comma-separated) or group (single value)
 # If it contains a comma, treat it as variables; otherwise, treat as group
