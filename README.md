@@ -18,6 +18,9 @@ The *U.S. Census Bureau Data API MCP* is a [Model Context Protocol (MCP)](https:
 * [Development](#development)
 * [MCP Server Architecture](#mcp-server-architecture)
 * [Available Methods](#available-methods)
+* [Available Tools](#available-tools)
+* [Available Prompts](#available-prompts)
+* [Additional Information](#additional-information)
 * [Helper Scripts](#helper-scripts)
 
 ## Getting Started
@@ -105,6 +108,46 @@ To run tests, navigate to the `mcp-db/` directoruy and run `npm run test:db`.
 ## Available Methods
 
 The MCP server exposes several methods: `tools/list`, `tools/call`, `prompts/list`, and `prompts/get`.
+
+## Available Tools
+This section covers tools that can be called.
+
+### List Datasets
+The `list-datasets` tool is used for fetching a subset of metadata for all datasets that are available in the Census Bureau's API. \
+It requires no arguments.
+
+### Fetch Dataset Geography
+The `fetch-dataset-geography` tool is used for fetching available geography levels for filtering a given dataset. It accepts the following arguments:
+* Dataset (Required) - The identifier of the dataset, e.g. `'acs/acs1'`
+* Year (Optional) - The vintage of the dataset, e.g. `1987`
+
+### Fetch Aggregate Data
+The `fetch-aggregate-data` tool is used for fetching  aggregate data from the Census Bureau's API. It accepts the following arguments:
+* Dataset (Required) - The identifier of the dataset, e.g. `'acs/acs1'`
+* Year (Required) - The vintage of the dataset, e.g. `1987`
+* Get (Required) - An object that is required that accepts 2 optional arguments:
+	* Variables (optional) - An array of variables for filtering responses by attributes and rows, e.g. `'NAME'`, `'B01001_001E'`
+	* Group (Optional) - A string that returns a larger collection of variables, e.g. `S0101`
+* For (Optional) - A string that restricts geography to various levels and is required in most datasets
+* In (Optional) - A string that restricts geography to smaller areas than state level
+* UCGID (Optional) - A string that restricts geography by Uniform Census Geography Identifier (UCGID), e.g. `0400000US41`
+* Predicates (Optional) - Filter options for the dataset, e.g. `'for': 'state*'`
+* Descriptive (Optional) - Adds variable labels to API response (default: `false`), e.g. `true`
+
+### Resolve Geography FIPS Tool
+The `resolve-geography-fips` tool is used to search across all Census Bureau geographies to return a list of potential matches and the correct FIPS codes and parameters used to query data in them. This tool accepts the following arguments:
+* Geography Name (Required) - The name of the geography to search, e.g. `Philadelphia`
+* Summary Level (Optional) - The summary level to search. Accepts name or summary level code, e.g. `Place`, `160`
+
+## Available Prompts
+This section covers prompts that can be called.
+
+### Population
+This `get_population_data` prompt retrieves population statistics for US states, counties, cities, and other geographic areas. It resolves geographic names to their corresponding FIPS codes before fetching data. This prompt accepts the following argument:
+- `geography_name` (required): Name of the geographic area (state, county, city, etc.)
+
+## Additional Information
+For more information about the parameters above and all available predicates, review the Census Bureau's [API documentation](https://www.census.gov/data/developers/guidance/api-user-guide.Core_Concepts.html#list-tab-559651575).
 
 ## Helper Scripts
 

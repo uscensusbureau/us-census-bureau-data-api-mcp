@@ -31,7 +31,7 @@ The Model Context Protocol (MCP) is designed for client-server interactions thro
 * `fetch-dataset-geography.sh` - Fetch geography levels for a dataset
 * `fetch-aggregate-data.sh` - Fetch aggregate Census data
 * `resolve-geography-fips.sh` - Resolve geography names to FIPS codes
-* `get-population-data.sh` - Get population data for a geography
+* `get-population-data.sh` - Get population data prompt for a geography
 
 
 ## Helper Scripts Usage
@@ -56,50 +56,12 @@ The `census-mcp.sh` script provides a unified interface to all Census MCP tools:
 #   list-datasets           List available Census datasets
 #   fetch-dataset-geography <dataset> [year]
 #                           Fetch geography levels for a dataset
-#   fetch-aggregate-data    <dataset> <year> <variables> [for] [in] [ucgid] [--descriptive] [--predicates key:value]
+#   fetch-aggregate-data    <dataset> <year> <variables> [for] [in] [ucgid] [predicates] [--descriptive]
 #                           Fetch aggregate Census data
-#   resolve-geography-fips  <geography> [summary_level]
+#   resolve-geography-fips  <geography_name> [summary_level]
 #                           Resolve geography name to FIPS codes
-#   get-population-data     <geography>
-#                           Get population data for a geography
-```
-
-#### Examples:
-```bash
-# Basic commands
-./census-mcp.sh list-tools
-./census-mcp.sh list-datasets
-./census-mcp.sh fetch-dataset-geography acs/acs1 2022
-./census-mcp.sh fetch-aggregate-data acs/acs1 2022 'NAME,B01001_001E' 'state:01,13' --descriptive
-./census-mcp.sh resolve-geography-fips 'Philadelphia, Pennsylvania'
-./census-mcp.sh get-population-data 'San Francisco, CA'
-
-# JSON output (suitable for piping to tools like jq)
-./census-mcp.sh list-datasets --json | jq '.result'
-```
-
-### Individual Helper Scripts
-
-You can also use individual scripts directly:
-
-```bash
-# List tools and prompts
-./list-tools.sh
-./list-prompts.sh
-
-# Work with datasets
-./list-datasets.sh
-./fetch-dataset-geography.sh acs/acs1 2022
-
-# Fetch data and resolve geography
-./fetch-aggregate-data.sh acs/acs1 2022 'NAME,B01001_001E' 'state:01,13'
-./resolve-geography-fips.sh 'Philadelphia, Pennsylvania'
-./get-population-data.sh 'San Francisco, CA'
-
-# JSON output examples (pipe to jq for processing)
-./list-datasets.sh --json | jq '.result.content[0].text | fromjson | keys'
-./resolve-geography-fips.sh 'Philadelphia' --json | jq '.result.content[0].text'
-./get-population-data.sh 'California' --json | jq '.result.content[0].text'
+#   get-population-data     <geography_name>
+#                           Get population data prompt
 ```
 
 ### Script Features
