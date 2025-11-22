@@ -20,7 +20,6 @@ The Model Context Protocol (MCP) is designed for client-server interactions thro
   * [Resolve Geography FIPS Tool](#resolve-geography-fips-tool)
 * [Available Prompts](#available-prompts)
   * [Population](#population)
-* [Additional Information](#additional-information)
 
 ## Available Scripts
 
