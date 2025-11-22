@@ -17,7 +17,7 @@ show_usage() {
     echo "  list-datasets           List available Census datasets"
     echo "  fetch-dataset-geography <dataset> [year]"
     echo "                          Fetch geography levels for a dataset"
-    echo "  fetch-aggregate-data <dataset> <year> <variables> [for] [in] [ucgid] [--descriptive] [--predicates key:value]"
+    echo "  fetch-aggregate-data <dataset> <year> <variables> [for] [in] [ucgid] [predicates] [--descriptive]"
     echo "                          Fetch aggregate Census data"
     echo "  resolve-geography-fips <geography> [summary_level]"
     echo "                          Resolve geography name to FIPS codes"

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Get Population Data Helper Script
-# This script wraps the get_population_data prompt to retrieve population statistics
+# This script wraps the get_population_data prompt to format a prompt for retrieving population statistics
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"

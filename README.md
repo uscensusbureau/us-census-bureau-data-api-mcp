@@ -20,8 +20,8 @@ The *U.S. Census Bureau Data API MCP* is a [Model Context Protocol (MCP)](https:
 * [Available Methods](#available-methods)
 * [Available Tools](#available-tools)
 * [Available Prompts](#available-prompts)
-* [Additional Information](#additional-information)
 * [Helper Scripts](#helper-scripts)
+* [Additional Information](#additional-information)
 
 ## Getting Started
 To get started, you will need:
@@ -146,9 +146,10 @@ This section covers prompts that can be called.
 This `get_population_data` prompt retrieves population statistics for US states, counties, cities, and other geographic areas. It resolves geographic names to their corresponding FIPS codes before fetching data. This prompt accepts the following argument:
 - `geography_name` (required): Name of the geographic area (state, county, city, etc.)
 
-## Additional Information
-For more information about the parameters above and all available predicates, review the Census Bureau's [API documentation](https://www.census.gov/data/developers/guidance/api-user-guide.Core_Concepts.html#list-tab-559651575).
-
 ## Helper Scripts
 
 For easier command-line usage, this project includes bash helper scripts in the `scripts/dev` directory that wrap the complex Docker commands and handle the `CENSUS_API_KEY` parameter automatically.
+
+## Additional Information
+For more information about the parameters above and all available predicates, review the Census Bureau's [API documentation](https://www.census.gov/data/developers/guidance/api-user-guide.Core_Concepts.html#list-tab-559651575).
+
