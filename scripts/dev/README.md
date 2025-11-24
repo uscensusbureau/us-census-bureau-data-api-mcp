@@ -83,7 +83,7 @@ To list available tools, use the `tools/list` method with no arguments. `tools/l
 #### How to Run via CLI (Raw)
 ```
 echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | docker exec -i \
--e CENSUS_API_KEY=YOUR_CENSUS_API_KEY mcp-server node dist/index.js
+mcp-server node dist/index.js
 ```
 
 #### How to Run via Helper Script
@@ -109,7 +109,7 @@ To list available prompts, use the `prompts/list` method with no arguments.
 #### How to Run via CLI (Raw)
 ```
 echo '{"jsonrpc":"2.0","id":1,"method":"prompts/list"}' | docker exec -i \
--e CENSUS_API_KEY=YOUR_CENSUS_API_KEY mcp-server node dist/index.js
+mcp-server node dist/index.js
 ```
 
 #### How to Run via Helper Script
