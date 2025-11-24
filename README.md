@@ -140,7 +140,7 @@ The `resolve-geography-fips` tool is used to search across all Census Bureau geo
 * Summary Level (Optional) - The summary level to search. Accepts name or summary level code, e.g. `Place`, `160`
 
 ## Available Prompts
-This section covers prompts that can be called.
+This section covers prompts that can be called. According to the [Model Context Protocol docs](https://modelcontextprotocol.io/docs/learn/server-concepts#:~:text=Pre%2Dbuilt%20instruction%20templates%20that%20tell%20the%20model%20to%20work%20with%20specific%20tools%20and%20resources.), prompts are "pre-built instruction templates that tell the model to work with specific tools and resources". This means that prompts over-ride the default model behavior. Prompts are **not** a menu of allowed questions. They are instructions, not constraints on server capability.
 
 ### Population
 This `get_population_data` prompt retrieves population statistics for US states, counties, cities, and other geographic areas. It resolves geographic names to their corresponding FIPS codes before fetching data. This prompt accepts the following argument:

@@ -246,7 +246,7 @@ export CENSUS_API_KEY='your_api_key'
 ```
 
 ## Available Prompts
-This section covers prompts that can be called.
+This section covers prompts that can be called. Please note that prompts do not return data. Prompts produce instructions that cause the model to generate or request data.
 
 ### Population
 
