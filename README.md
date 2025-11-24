@@ -95,7 +95,7 @@ To run tests, navigate to the `mcp-server/` directory and run `npm run test`. To
 
 A `.env` file needs to be created in the `mcp-db/` directory with a valid `DATABASE_URL` variable defined. The `sample.env` in the same directory includes the default value.
 
-To run tests, navigate to the `mcp-db/` directoruy and run `npm run test:db`.
+To run tests, navigate to the `mcp-db/` directory and run `npm run test`.
 
 ## MCP Server Architecture
 

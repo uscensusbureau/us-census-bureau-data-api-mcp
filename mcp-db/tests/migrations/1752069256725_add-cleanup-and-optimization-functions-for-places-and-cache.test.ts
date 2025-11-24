@@ -17,7 +17,7 @@ describe('Migration 1752069256725 - Add Cleanup and Optimization Functions for P
   beforeEach(() => {
     sqlSpy = vi.fn().mockResolvedValue(undefined)
 
-    mockPgm = { sql: sqlSpy } as MigrationBuilder
+    mockPgm = { sql: sqlSpy } as Partial<MigrationBuilder> as MigrationBuilder
   })
 
   afterEach(() => {

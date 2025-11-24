@@ -34,6 +34,7 @@ describe('Geography Schema', () => {
         COUNTY: 'county_code',
         COUSUB: 'county_subdivision_code',
         PLACE: 'place_code',
+        ZCTA: 'zip_code_tabulation_area',
         INTPTLAT: 'latitude',
         INTPTLON: 'longitude',
       })
@@ -137,6 +138,13 @@ describe('Geography Schema', () => {
         true,
       )
       expect(GeographyValueValidators.PLACE.safeParse(100).success).toBe(false)
+    })
+
+    it('should validate ZCTA field', () => {
+      expect(GeographyValueValidators.ZCTA.safeParse('18901').success).toBe(
+        true,
+      )
+      expect(GeographyValueValidators.ZCTA.safeParse(100).success).toBe(false)
     })
 
     it('should validate INTPTLAT field', () => {

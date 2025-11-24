@@ -9,6 +9,7 @@ export const GeographyMappings: Record<string, keyof GeographyRecord> = {
   COUNTY: 'county_code',
   COUSUB: 'county_subdivision_code',
   PLACE: 'place_code',
+  ZCTA: 'zip_code_tabulation_area',
   region: 'region_code',
   division: 'division_code',
   INTPTLAT: 'latitude',
@@ -28,6 +29,9 @@ export const GeographyValueValidators = {
   COUNTY: z.string().regex(/^\d{3}$/, 'County code must be 3 digits'),
   COUSUB: z.string().regex(/^\d{5}$/, 'County code must be 5 digits'),
   PLACE: z.string().regex(/^\d{5}$/, 'Place code must be 5 digits'),
+  ZCTA: z
+    .string()
+    .regex(/^\d{5}$/, 'Zip code tabulation area must be 5 digits'),
   INTPTLAT: z.number().min(-90).max(90, 'Invalid latitude'),
   INTPTLON: z.number().min(-180).max(180, 'Invalid longitude'),
 } as const
@@ -98,6 +102,17 @@ export const SummaryLevels = {
       'INTPTLON',
     ],
   },
+  zip_code_tabulation_area: {
+    summaryLevel: '860',
+    requiredFields: [
+      'NAME',
+      'SUMLEVEL',
+      'GEO_ID',
+      'INTPTLAT',
+      'INTPTLON',
+      'ZCTA',
+    ],
+  },
 } as const
 
 export const GeographyRecordSchema = z.object({
@@ -114,6 +129,7 @@ export const GeographyRecordSchema = z.object({
   county_code: z.string().optional(),
   county_subdivision_code: z.string().optional(),
   place_code: z.string().optional(),
+  zip_code_tabulation_area: z.string().optional(),
   created_at: z.string().optional(),
   updated_at: z.string().optional(),
 })

@@ -18,7 +18,7 @@ describe('Migration 1755105210305 - Add UCGID to Geographies', () => {
     mockPgm = {
       addConstraint: addConstraintSpy,
       dropConstraint: dropConstraintSpy,
-    } as MigrationBuilder
+    } as Partial<MigrationBuilder> as MigrationBuilder
   })
 
   afterEach(() => {

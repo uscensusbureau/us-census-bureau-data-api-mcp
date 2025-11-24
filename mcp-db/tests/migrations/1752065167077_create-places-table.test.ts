@@ -24,7 +24,7 @@ describe('Migration 1752065167077 - Create Places Table', () => {
       dropTable: dropTableSpy,
       func: funcSpy,
       addConstraint: addConstraintSpy,
-    } as MigrationBuilder
+    } as Partial<MigrationBuilder> as MigrationBuilder
   })
 
   afterEach(() => {

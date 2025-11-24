@@ -33,6 +33,7 @@ import {
   RegionConfig,
   StateConfig,
   YearsConfig,
+  ZipCodeTabulationAreaConfig,
 } from '../../../src/seeds/configs/index'
 import {
   geographySeeds,
@@ -314,7 +315,7 @@ describe('Seed Database', () => {
 
   describe('geographySeeds', () => {
     it('includes geography configs', () => {
-      expect(geographySeeds()).toHaveLength(7)
+      expect(geographySeeds()).toHaveLength(8)
       expect(geographySeeds()).toContain(NationConfig)
       expect(geographySeeds()).toContain(RegionConfig)
       expect(geographySeeds()).toContain(DivisionConfig)
@@ -322,12 +323,14 @@ describe('Seed Database', () => {
       expect(geographySeeds()).toContain(CountyConfig)
       expect(geographySeeds()).toContain(CountySubdivisionConfig)
       expect(geographySeeds()).toContain(PlaceConfig)
+      expect(geographySeeds()).toContain(ZipCodeTabulationAreaConfig)
     })
 
     it('does not include time intensive configs when set to slim', () => {
       process.env.SEED_MODE = 'slim'
       expect(geographySeeds).not.toContain(CountySubdivisionConfig)
       expect(geographySeeds).not.toContain(PlaceConfig)
+      expect(geographySeeds).not.toContain(ZipCodeTabulationAreaConfig)
       delete process.env.SEED_MODE
     })
   })
@@ -347,12 +350,12 @@ describe('Seed Database', () => {
         //
         // 2 Static Configs (Year, Summary Levels) ] = 2
         // +
-        // 2 Years x 6 Std Geo Configs[Nation + Region + Division + State + County + Place] = 12 Runs
+        // 2 Years x 7 Std Geo Configs[Nation + Region + Division + State + County + Place + ZCTA ] = 14 Runs
         // +
         // 2 years x 2 Mocked States x 1 MultiStateConfig[CountySubdivisionConfig] = 4 State-specific Runs
         // ------------
-        // EQUALS 18 Total Config Runs
-        expect(mockRunner.seed).toHaveBeenCalledTimes(18)
+        // EQUALS 20 Total Config Runs
+        expect(mockRunner.seed).toHaveBeenCalledTimes(20)
       } finally {
         SeedRunnerSpy.mockRestore()
       }
@@ -850,10 +853,11 @@ describe('Seed Database', () => {
       expect(
         mockRunnerManager.mockRunner.getAvailableYears,
       ).toHaveBeenCalledOnce()
-      // 2 Years x 6 Std Geo Configs = 12
+      // 2 Years x 7 Std Geo Configs = 14
       // +
       // 2 Years x 2 Mocked States x 1 MultiState Geo Configs = 4
-      expect(mockRunnerManager.mockRunner.seed).toHaveBeenCalledTimes(16)
+      // = 18 Config Runs
+      expect(mockRunnerManager.mockRunner.seed).toHaveBeenCalledTimes(18)
 
       const seedCalls = mockRunnerManager.mockRunner.seed.mock.calls
 

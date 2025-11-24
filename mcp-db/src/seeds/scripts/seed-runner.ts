@@ -75,10 +75,15 @@ export class SeedRunner {
     }))
   }
 
-  getStateCodesForYear(context: GeographyContext, year: number): string[] {
+  async getStateCodesForYear(
+    context: GeographyContext,
+    year: number,
+  ): Promise<string[]> {
+    let stateCodes: string[] = []
+
     if (context?.parentGeographies?.[year]?.states) {
       console.log(`Using state data from parentGeographies for year ${year}`)
-      const stateCodes = context.parentGeographies[year].states
+      stateCodes = context.parentGeographies[year].states
         .map((state: GeographyRecord) => state.state_code)
         .filter((code): code is string => code != null)
         .map((code: string) => String(code).padStart(2, '0')) // Ensure 2-digit format
@@ -91,6 +96,30 @@ export class SeedRunner {
         console.log(`States for ${year}: ${stateCodes.join(', ')}`)
         return stateCodes
       }
+    }
+
+    const stateQuery = await this.client.query(
+      `
+        SELECT state_code 
+        FROM geographies AS g
+        INNER JOIN geography_years AS gy ON g.id = gy.geography_id
+        INNER JOIN years AS y ON gy.year_id = y.id
+        WHERE y.id = $1 AND g.summary_level_code = '040'
+        ORDER BY state_code
+      `,
+      [context.year_id],
+    )
+
+    if (stateQuery.rowCount && stateQuery.rowCount > 0) {
+      stateCodes = stateQuery.rows
+        .map((row: { state_code: string | number | null }) => row.state_code)
+        // Filter out nulls
+        .filter((code): code is string | number => code != null)
+        // Convert to string, ensure 2-digit format
+        .map((code: string | number) => String(code).padStart(2, '0'))
+        .sort()
+
+      return stateCodes
     }
 
     throw Error(`No states found in context of year ${year}`)
@@ -196,19 +225,19 @@ export class SeedRunner {
 
   // Check if an API endpoint has been called before
   async hasApiBeenCalled(url: string): Promise<boolean> {
-    await this.ensureApiCallLogTable();
-    const query = `SELECT 1 FROM api_call_log WHERE url = '${url}' LIMIT 1`;
-    const res = await this.client.query(query);
-  return (res.rowCount ?? 0) > 0;
+    await this.ensureApiCallLogTable()
+    const query = `SELECT 1 FROM api_call_log WHERE url = '${url}' LIMIT 1`
+    const res = await this.client.query(query)
+    return (res.rowCount ?? 0) > 0
   }
 
   // Record an API call in the log
   async recordApiCall(url: string): Promise<void> {
-    await this.ensureApiCallLogTable();
+    await this.ensureApiCallLogTable()
     const query = `INSERT INTO api_call_log (url, last_called) VALUES ('${url}', NOW())
-      ON CONFLICT (url) DO UPDATE SET last_called = NOW();`;
+      ON CONFLICT (url) DO UPDATE SET last_called = NOW();`
 
-    await this.client.query(query);
+    await this.client.query(query)
   }
 
   // Ensure the api_call_log table exists
@@ -216,9 +245,9 @@ export class SeedRunner {
     const createTableQuery = `CREATE TABLE IF NOT EXISTS api_call_log (
       url TEXT PRIMARY KEY,
       last_called TIMESTAMP
-    )`;
+    )`
 
-    await this.client.query(createTableQuery);
+    await this.client.query(createTableQuery)
   }
 
   // Load JSON file and extract data
@@ -231,15 +260,17 @@ export class SeedRunner {
 
     if (isUrl) {
       // Check if this API endpoint has been called before
-      const alreadyCalled = await this.hasApiBeenCalled(source);
+      const alreadyCalled = await this.hasApiBeenCalled(source)
       if (alreadyCalled) {
-        console.log(`API endpoint ${source} has already been called. Skipping fetch.`);
-        return []; // Return empty array to skip processing
+        console.log(
+          `API endpoint ${source} has already been called. Skipping fetch.`,
+        )
+        return [] // Return empty array to skip processing
       }
       // Fetch Data from the API with rate limiting
-      data = await this.fetchFromApi(source);
+      data = await this.fetchFromApi(source)
       // Record the API call
-      await this.recordApiCall(source);
+      await this.recordApiCall(source)
     } else {
       // Use the filepath
       const filePath = path.join(this.dataPath, source)
@@ -381,9 +412,11 @@ export class SeedRunner {
       // Load raw data with rate limiting if from API
       const rawData = await this.loadData(source, config.dataPath, isUrl)
       if (rawData.length === 0) {
-        console.log(`No new data to process for ${config.table}. Skipping seeding.`)
+        console.log(
+          `No new data to process for ${config.table}. Skipping seeding.`,
+        )
 
-        return;
+        return
       }
       if (config.beforeSeed) {
         if (context) {

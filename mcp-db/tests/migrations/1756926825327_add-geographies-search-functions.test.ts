@@ -42,7 +42,7 @@ describe('Migration 1756926825327 - Add Geographies Search Functions', () => {
       dropIndex: dropIndexSpy,
       createFunction: createFunctionSpy,
       dropFunction: dropFunctionSpy,
-    } as MigrationBuilder
+    } as Partial<MigrationBuilder> as MigrationBuilder
   })
 
   afterEach(() => {

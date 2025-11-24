@@ -27,7 +27,7 @@ describe('Migration 1756211211714 - Add Geography Codes to Geographies', () => {
       alterColumn: alterColumnSpy,
       dropColumns: dropColumnsSpy,
       createIndex: createIndexSpy,
-    } as MigrationBuilder
+    } as Partial<MigrationBuilder> as MigrationBuilder
   })
 
   afterEach(() => {

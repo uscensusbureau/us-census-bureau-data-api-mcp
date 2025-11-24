@@ -32,7 +32,7 @@ describe('Migration 1755190777124 - Create Years Table', () => {
       dropTable: dropTableSpy,
       func: funcSpy,
       addConstraint: addConstraintSpy,
-    } as MigrationBuilder
+    } as Partial<MigrationBuilder> as MigrationBuilder
   })
 
   afterEach(() => {

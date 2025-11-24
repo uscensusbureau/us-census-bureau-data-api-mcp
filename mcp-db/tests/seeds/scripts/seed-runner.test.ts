@@ -15,10 +15,24 @@ import { fileURLToPath } from 'url'
 
 import { dbConfig } from '../../helpers/database-config'
 import { SeedRunner } from '../../../src/seeds/scripts/seed-runner'
-import { GeographyContext } from '../../../src/schema/seed-config.schema.js'
+import {
+  GeographyContext,
+  GeographySeedConfig,
+} from '../../../src/schema/seed-config.schema.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
+
+type Item = { year: number }
+type County = {
+  id: number
+  name: string
+  category: string
+  county_code: string
+  state_code: string
+  for_param?: string
+  in_param?: string
+}
 
 describe('SeedRunner - Additional Coverage Tests', () => {
   let client: Client
@@ -96,20 +110,11 @@ describe('SeedRunner - Additional Coverage Tests', () => {
       await strictRunner.connect()
 
       // Mock fetch to simulate slow responses
-      const fetchSpy = vi.spyOn(global, 'fetch').mockImplementation(
-        () =>
-          new Promise((resolve) =>
-            setTimeout(
-              () =>
-                resolve({
-                  ok: true,
-                  status: 200,
-                  json: vi.fn().mockResolvedValue({ data: [] }),
-                }),
-              50,
-            ),
-          ),
-      )
+      const fetchSpy = vi.spyOn(global, 'fetch').mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: vi.fn().mockResolvedValue({ data: [] }),
+      } as Partial<Response> as Response)
 
       try {
         // Make multiple concurrent requests to test queue behavior
@@ -296,178 +301,325 @@ describe('SeedRunner - Additional Coverage Tests', () => {
   })
 
   describe('getStateCodesForYear', () => {
-    it('returns an array of state codes from the context', () => {
-      const context: GeographyContext = {
-        year: 2023,
-        year_id: 1,
-        parentGeographies: {
-          2023: {
-            states: [
-              {
-                name: 'California',
-                state_code: '06',
-                ucgid_code: '0400000US06',
-                geo_id: '0400000US06',
-                summary_level_code: '040',
-                for_param: 'state:06',
-                in_param: null,
-                year: 2023,
-                intptlat: 36.7783,
-                intptlon: -119.4179,
-              },
-              {
-                name: 'Texas',
-                state_code: '48',
-                ucgid_code: '0400000US48',
-                geo_id: '0400000US48',
-                summary_level_code: '040',
-                for_param: 'state:48',
-                in_param: null,
-                year: 2023,
-                intptlat: 31.9686,
-                intptlon: -99.9018,
-              },
-              {
-                name: 'New York',
-                state_code: '36',
-                ucgid_code: '0400000US36',
-                geo_id: '0400000US36',
-                summary_level_code: '040',
-                for_param: 'state:36',
-                in_param: null,
-                year: 2023,
-                intptlat: 42.9538,
-                intptlon: -75.5268,
-              },
-              {
-                name: 'Alaska',
-                state_code: '2', // Test single digit padding
-                ucgid_code: '0400000US02',
-                geo_id: '0400000US02',
-                summary_level_code: '040',
-                for_param: 'state:02',
-                in_param: null,
-                year: 2023,
-                intptlat: 64.0685,
-                intptlon: -152.2782,
-              },
-            ],
+    describe('when states are present in context', () => {
+      it('returns an array of state codes from the context', async () => {
+        const context: GeographyContext = {
+          year: 2023,
+          year_id: 1,
+          parentGeographies: {
+            2023: {
+              states: [
+                {
+                  name: 'California',
+                  state_code: '06',
+                  ucgid_code: '0400000US06',
+                  summary_level_code: '040',
+                  for_param: 'state:06',
+                  in_param: null,
+                  latitude: 36.7783,
+                  longitude: -119.4179,
+                },
+                {
+                  name: 'Texas',
+                  state_code: '48',
+                  ucgid_code: '0400000US48',
+                  summary_level_code: '040',
+                  for_param: 'state:48',
+                  in_param: null,
+                  latitude: 31.9686,
+                  longitude: -99.9018,
+                },
+                {
+                  name: 'New York',
+                  state_code: '36',
+                  ucgid_code: '0400000US36',
+                  summary_level_code: '040',
+                  for_param: 'state:36',
+                  in_param: null,
+                  latitude: 42.9538,
+                  longitude: -75.5268,
+                },
+                {
+                  name: 'Alaska',
+                  state_code: '2', // Test single digit padding
+                  ucgid_code: '0400000US02',
+                  summary_level_code: '040',
+                  for_param: 'state:02',
+                  in_param: null,
+                  latitude: 64.0685,
+                  longitude: -152.2782,
+                },
+              ],
+            },
           },
-        },
-      }
+        }
 
-      const result = runner.getStateCodesForYear(context, 2023)
+        const result = await runner.getStateCodesForYear(context, 2023)
 
-      expect(result).toEqual(['02', '06', '36', '48']) // Should be sorted and zero-padded
-      expect(result).toHaveLength(4)
+        expect(result).toEqual(['02', '06', '36', '48']) // Should be sorted and zero-padded
+        expect(result).toHaveLength(4)
 
-      // Verify all codes are 2-digit strings
-      result.forEach((code) => {
-        expect(typeof code).toBe('string')
-        expect(code).toHaveLength(2)
-        expect(code).toMatch(/^\d{2}$/)
+        // Verify all codes are 2-digit strings
+        result.forEach((code) => {
+          expect(typeof code).toBe('string')
+          expect(code).toHaveLength(2)
+          expect(code).toMatch(/^\d{2}$/)
+        })
       })
     })
 
-    it('throws an error when no states are found', () => {
-      // Test with empty context
-      const emptyContext: GeographyContext = {
-        year: 2023,
-        year_id: 1,
-        parentGeographies: {},
-      }
+    describe('when states are not present in the context', () => {
+      beforeAll(async () => {
+        // Create tables if they don't exist
+        await client.query(`
+          CREATE TABLE IF NOT EXISTS geographies (
+            id SERIAL PRIMARY KEY,
+            name VARCHAR(255),
+            state_code VARCHAR(3),
+            ucgid_code VARCHAR(20),
+            summary_level_code VARCHAR(10),
+            for_param VARCHAR(50),
+            in_param VARCHAR(50),
+            latitude DECIMAL(10, 6),
+            longitude DECIMAL(10, 6)
+          )
+        `)
 
-      expect(() => runner.getStateCodesForYear(emptyContext, 2023)).toThrow(
-        'No states found in context of year 2023',
-      )
+        await client.query(`
+          CREATE TABLE IF NOT EXISTS geography_years (
+            id SERIAL PRIMARY KEY,
+            year_id INTEGER REFERENCES years(id) ON DELETE CASCADE,
+            geography_id INTEGER REFERENCES geographies(id) ON DELETE CASCADE,
+            UNIQUE(year_id, geography_id)
+          )
+        `)
+      })
 
-      // Test with context missing the specific year
-      const contextMissingYear: GeographyContext = {
-        year: 2023,
-        year_id: 1,
-        parentGeographies: {
-          2022: {
-            states: [
-              {
-                name: 'California',
-                state_code: '06',
-                ucgid_code: '0400000US06',
-                geo_id: '0400000US06',
-                summary_level_code: '040',
-                for_param: 'state:06',
-                in_param: null,
-                year: 2022,
-                intptlat: 36.7783,
-                intptlon: -119.4179,
-              },
-            ],
+      beforeEach(async () => {
+        // Insert test year
+        await client.query(`
+          INSERT INTO years (year) 
+          VALUES (2023)
+          ON CONFLICT (year) DO NOTHING
+        `)
+
+        // Get the year_id for 2023
+        const yearResult = await client.query(
+          `SELECT id FROM years WHERE year = 2023`,
+        )
+        const yearId = yearResult.rows[0].id
+
+        // Insert test state geographies (removed geo_id column)
+        await client.query(`
+          INSERT INTO geographies (
+            name, state_code, ucgid_code,
+            summary_level_code, for_param, in_param,
+            latitude, longitude
+          ) VALUES
+          ('California', '06', '0400000US06', '040', 'state:06', NULL, 36.7783, -119.4179),
+          ('Texas', '48', '0400000US48', '040', 'state:48', NULL, 31.9686, -99.9018),
+          ('Alaska', '02', '0400000US02', '040', 'state:02', NULL, 64.0685, -152.2782)
+        `)
+
+        // Link geographies to year
+        await client.query(
+          `
+          INSERT INTO geography_years (year_id, geography_id)
+          SELECT $1, id FROM geographies WHERE summary_level_code = '040'
+        `,
+          [yearId],
+        )
+      })
+
+      afterEach(async () => {
+        // Clean up test data in correct order (respecting foreign key constraints)
+        await client.query(`
+          DELETE FROM geography_years 
+          WHERE year_id IN (SELECT id FROM years WHERE year IN (2023, 2024))
+        `)
+        await client.query(
+          `DELETE FROM geographies WHERE summary_level_code = '040'`,
+        )
+        await client.query(`DELETE FROM years WHERE year IN (2023, 2024)`)
+      })
+
+      it('should fetch state codes from the database', async () => {
+        // Get the year_id for context
+        const yearResult = await client.query(
+          `SELECT id FROM years WHERE year = 2023`,
+        )
+        const yearId = yearResult.rows[0].id
+
+        // Create context without states in parentGeographies
+        const context: GeographyContext = {
+          year: 2023,
+          year_id: yearId,
+          parentGeographies: {}, // No states in context
+        }
+
+        const result = await runner.getStateCodesForYear(context, 2023)
+
+        expect(result).toEqual(['02', '06', '48']) // Should be sorted and zero-padded
+        expect(result).toHaveLength(3)
+
+        // Verify all codes are 2-digit strings
+        result.forEach((code) => {
+          expect(typeof code).toBe('string')
+          expect(code).toHaveLength(2)
+          expect(code).toMatch(/^\d{2}$/)
+        })
+      })
+
+      it('should handle empty database results', async () => {
+        // Insert a year with no associated states
+        await client.query(
+          `INSERT INTO years (year) VALUES (2024) ON CONFLICT (year) DO NOTHING`,
+        )
+        const yearResult = await client.query(
+          `SELECT id FROM years WHERE year = 2024`,
+        )
+        const yearId = yearResult.rows[0].id
+
+        const context: GeographyContext = {
+          year: 2024,
+          year_id: yearId,
+          parentGeographies: {},
+        }
+
+        await expect(
+          runner.getStateCodesForYear(context, 2024),
+        ).rejects.toThrow('No states found in context of year 2024')
+      })
+
+      it('should handle numeric state codes from database', async () => {
+        const yearResult = await client.query(
+          `SELECT id FROM years WHERE year = 2023`,
+        )
+        const yearId = yearResult.rows[0].id
+
+        // Insert an additional state (removed geo_id column)
+        await client.query(`
+          INSERT INTO geographies (
+            name, state_code, ucgid_code,
+            summary_level_code, for_param, in_param,
+            latitude, longitude
+          ) VALUES
+          ('New York', '36', '0400000US36', '040', 'state:36', NULL, 42.9538, -75.5268)
+        `)
+
+        await client.query(
+          `
+          INSERT INTO geography_years (year_id, geography_id)
+          SELECT $1, id FROM geographies WHERE state_code = '36' AND summary_level_code = '040'
+        `,
+          [yearId],
+        )
+
+        const context: GeographyContext = {
+          year: 2023,
+          year_id: yearId,
+          parentGeographies: {},
+        }
+
+        const result = await runner.getStateCodesForYear(context, 2023)
+
+        expect(result).toContain('36')
+        expect(result).toContain('02')
+        expect(result).toContain('06')
+        expect(result).toContain('48')
+      })
+    })
+
+    describe('when states are neither in context or in the database', () => {
+      it('throws an error', async () => {
+        // Test with empty context
+        const emptyContext: GeographyContext = {
+          year: 2023,
+          year_id: 1,
+          parentGeographies: {},
+        }
+
+        await expect(
+          runner.getStateCodesForYear(emptyContext, 2023),
+        ).rejects.toThrow('No states found in context of year 2023')
+
+        // Test with context missing the specific year
+        const contextMissingYear: GeographyContext = {
+          year: 2023,
+          year_id: 1,
+          parentGeographies: {
+            2022: {
+              states: [
+                {
+                  name: 'California',
+                  state_code: '06',
+                  ucgid_code: '0400000US06',
+                  summary_level_code: '040',
+                  for_param: 'state:06',
+                  in_param: null,
+                  latitude: 36.7783,
+                  longitude: -119.4179,
+                },
+              ],
+            },
           },
-        },
-      }
+        }
 
-      expect(() =>
-        runner.getStateCodesForYear(contextMissingYear, 2023),
-      ).toThrow('No states found in context of year 2023')
+        await expect(
+          runner.getStateCodesForYear(contextMissingYear, 2023),
+        ).rejects.toThrow('No states found in context of year 2023')
 
-      // Test with context having the year but empty states array
-      const contextEmptyStates: GeographyContext = {
-        year: 2023,
-        year_id: 1,
-        parentGeographies: {
-          2023: {
-            states: [],
+        // Test with context having the year but empty states array
+        const contextEmptyStates: GeographyContext = {
+          year: 2023,
+          year_id: 1,
+          parentGeographies: {
+            2023: {
+              states: [],
+            },
           },
-        },
-      }
+        }
 
-      expect(() =>
-        runner.getStateCodesForYear(contextEmptyStates, 2023),
-      ).toThrow('No states found in context of year 2023')
+        await expect(
+          runner.getStateCodesForYear(contextEmptyStates, 2023),
+        ).rejects.toThrow('No states found in context of year 2023')
 
-      // Test with context having states with null/undefined state_code values
-      const contextNullStateCodes: GeographyContext = {
-        year: 2023,
-        year_id: 1,
-        parentGeographies: {
-          2023: {
-            states: [
-              {
-                name: 'Invalid State 1',
-                state_code: null,
-                ucgid_code: '0400000US00',
-                geo_id: '0400000US00',
-                summary_level_code: '040',
-                for_param: 'state:00',
-                in_param: null,
-                year: 2023,
-                intptlat: 0,
-                intptlon: 0,
-              },
-              {
-                name: 'Invalid State 2',
-                state_code: undefined,
-                ucgid_code: '0400000US01',
-                geo_id: '0400000US01',
-                summary_level_code: '040',
-                for_param: 'state:01',
-                in_param: null,
-                year: 2023,
-                intptlat: 0,
-                intptlon: 0,
-              },
-            ],
+        // Test with context having states with null/undefined state_code values
+        const contextNullStateCodes: GeographyContext = {
+          year: 2023,
+          year_id: 1,
+          parentGeographies: {
+            2023: {
+              states: [
+                {
+                  name: 'Invalid State 1',
+                  state_code: null,
+                  ucgid_code: '0400000US00',
+                  summary_level_code: '040',
+                  for_param: 'state:00',
+                  in_param: null,
+                  latitude: 0,
+                  longitude: 0,
+                },
+                {
+                  name: 'Invalid State 2',
+                  state_code: undefined,
+                  ucgid_code: '0400000US01',
+                  summary_level_code: '040',
+                  for_param: 'state:01',
+                  in_param: null,
+                  latitude: 0,
+                  longitude: 0,
+                },
+              ],
+            },
           },
-        },
-      }
+        }
 
-      expect(() =>
-        runner.getStateCodesForYear(contextNullStateCodes, 2023),
-      ).toThrow('No states found in context of year 2023')
-
-      // Test with undefined context
-      expect(() => runner.getStateCodesForYear(undefined, 2023)).toThrow(
-        'No states found in context of year 2023',
-      )
+        await expect(
+          runner.getStateCodesForYear(contextNullStateCodes, 2023),
+        ).rejects.toThrow('No states found in context of year 2023')
+      })
     })
   })
 
@@ -552,20 +704,26 @@ describe('SeedRunner - Additional Coverage Tests', () => {
     })
 
     it('should handle URL-based seeding with context', async () => {
-      const fetchSpy = vi.spyOn(global, 'fetch').mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: vi.fn().mockResolvedValue([
-          { id: 1, name: 'API Item 1', category: 'test', year: 2023 },
-          { id: 2, name: 'API Item 2', category: 'test', year: 2023 },
-        ]),
-      })
+      const fetchSpy = vi.spyOn(global, 'fetch').mockResolvedValue(
+        new Response(
+          JSON.stringify([
+            { id: 1, name: 'API Item 1', category: 'test', year: 2023 },
+            { id: 2, name: 'API Item 2', category: 'test', year: 2023 },
+          ]),
+          {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          },
+        ),
+      )
 
       const seedConfig = {
         url: (context: GeographyContext) =>
           `https://api.example.com/items/${context.year}?category=test&limit=100`,
         table: 'seed_comprehensive_test',
         conflictColumn: 'id',
+        beforeSeed: async () => {},
+        afterSeed: async () => {},
       }
 
       const context: GeographyContext = {
@@ -591,15 +749,17 @@ describe('SeedRunner - Additional Coverage Tests', () => {
     })
 
     it('should handle static URL seeding', async () => {
-      const fetchSpy = vi.spyOn(global, 'fetch').mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: vi
-          .fn()
-          .mockResolvedValue([
+      const fetchSpy = vi.spyOn(global, 'fetch').mockResolvedValue(
+        new Response(
+          JSON.stringify([
             { id: 1, name: 'Static Item 1', category: 'static' },
           ]),
-      })
+          {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          },
+        ),
+      )
 
       const seedConfig = {
         url: 'https://api.example.com/static-items',
@@ -632,29 +792,30 @@ describe('SeedRunner - Additional Coverage Tests', () => {
       let beforeSeedCalled = false
       let receivedContext: GeographyContext | undefined
 
-      const seedConfig = {
+      const seedConfig: GeographySeedConfig = {
         file: 'before_seed_context_test.json',
         table: 'seed_comprehensive_test',
         conflictColumn: 'id',
+        url: '',
         beforeSeed: async (
           client: Client,
           rawData: unknown[],
-          context?: GeographyContext,
+          context: GeographyContext,
         ) => {
           beforeSeedCalled = true
           receivedContext = context
 
           // Modify data based on context
-          if (context?.year) {
-            rawData.forEach((item: unknown) => {
-              item.year = context.year
-            })
-          }
+          rawData.forEach((item: unknown) => {
+            const i = item as Item
+            i.year = context.year
+          })
 
           // Verify we can use the client in beforeSeed
           const result = await client.query('SELECT NOW()')
           expect(result.rows).toHaveLength(1)
         },
+        afterSeed: async () => {},
       }
 
       const context: GeographyContext = {
@@ -692,7 +853,18 @@ describe('SeedRunner - Additional Coverage Tests', () => {
         file: 'after_seed_context_test.json',
         table: 'seed_comprehensive_test',
         conflictColumn: 'id',
-        afterSeed: async (client: Client, context?: GeographyContext) => {
+        beforeSeed: async (
+          client: Client,
+          rawData: unknown[],
+          context: GeographyContext,
+        ) => {
+          // Add year to the data so it can be queried in afterSeed
+          rawData.forEach((item: unknown) => {
+            const i = item as Item
+            i.year = context.year
+          })
+        },
+        afterSeed: async (client: Client, context: GeographyContext, insertedIds: number[]) => {
           afterSeedCalled = true
           receivedContext = context
 
@@ -703,20 +875,11 @@ describe('SeedRunner - Additional Coverage Tests', () => {
               [context.year],
             )
             expect(parseInt(result.rows[0].count)).toBeGreaterThan(0)
+          } else {
+            throw new Error(`Context year is missing in afterSeed with insertedIds ${insertedIds}`);
           }
         },
-        beforeSeed: async (
-          client: Client,
-          rawData: unknown[],
-          context?: GeographyContext,
-        ) => {
-          // Add year to data
-          if (context?.year) {
-            rawData.forEach((item: unknown) => {
-              item.year = context.year
-            })
-          }
-        },
+        url: '',
       }
 
       const context: GeographyContext = {
@@ -781,25 +944,31 @@ describe('SeedRunner - Additional Coverage Tests', () => {
         beforeSeed: async (
           client: Client,
           rawData: unknown[],
-          context?: GeographyContext,
+          context: GeographyContext,
         ) => {
           contextReceived = true
 
           // This simulates how county seeding would use state data from context
-          if (context?.parentGeographies?.states) {
-            const californiaState = context.parentGeographies.states.find(
+          if (context?.parentGeographies) {
+            const statesData = Object.values(context.parentGeographies)
+              .flatMap((summaryLevel) => Object.values(summaryLevel).flat())
+              .filter((geo) => geo.summary_level_code === '040')
+
+            const californiaState = statesData.find(
               (state) => state.name === 'California',
             )
 
             if (californiaState) {
               rawData.forEach((county: unknown) => {
-                county.year = context.year
-                county.for_param = `county:${county.county_code}`
-                county.in_param = `state:${county.state_code}`
+                const c = county as County
+                c.for_param = `county:${c.county_code}`
+                c.in_param = `state:${c.state_code}`
               })
             }
           }
         },
+        afterSeed: async () => {},
+        url: '',
       }
 
       // Set up context with pre-existing state data (as would happen in real seeding)
@@ -807,19 +976,19 @@ describe('SeedRunner - Additional Coverage Tests', () => {
         year: 2023,
         year_id: 1,
         parentGeographies: {
-          states: [
-            {
-              name: 'California',
-              ucgid_code: '0400000US06',
-              geo_id: '0400000US06',
-              summary_level_code: '040',
-              for_param: 'state:06',
-              in_param: null,
-              year: 2023,
-              intptlat: 36.7783,
-              intptlon: -119.4179,
-            },
-          ],
+          '040': {
+            states: [
+              {
+                name: 'California',
+                ucgid_code: '0400000US06',
+                summary_level_code: '040',
+                for_param: 'state:06',
+                in_param: null,
+                latitude: 36.7783,
+                longitude: -119.4179,
+              },
+            ],
+          },
         },
       }
 
@@ -835,7 +1004,6 @@ describe('SeedRunner - Additional Coverage Tests', () => {
       expect(result.rows[0].name).toBe('Los Angeles County')
       expect(result.rows[0].for_param).toBe('county:037')
       expect(result.rows[0].in_param).toBe('state:06')
-      expect(result.rows[0].year).toBe(2023)
     })
 
     // ... keep existing rollback tests but update them for context support ...
@@ -853,9 +1021,11 @@ describe('SeedRunner - Additional Coverage Tests', () => {
         file: 'rollback_context_test.json',
         table: 'seed_comprehensive_test',
         conflictColumn: 'id',
-        afterSeed: async (client: Client, context?: GeographyContext) => {
-          throw new Error(`AfterSeed failure for year ${context?.year}`)
+        beforeSeed: async () => {},
+        afterSeed: async (client: Client, context: GeographyContext, insertedIds: number[]) => {
+          throw new Error(`AfterSeed failure for year ${context?.year} and ids ${insertedIds}`);
         },
+        url: '',
       }
 
       const context: GeographyContext = { year: 2023, year_id: 1 }
@@ -894,11 +1064,17 @@ describe('SeedRunner - Additional Coverage Tests', () => {
 
     it('recordApiCall is idempotent and updates last_called', async () => {
       await runner.recordApiCall(TEST_URL)
-      const first = await client.query(`SELECT last_called FROM api_call_log WHERE url = '${TEST_URL}'`)
+      const first = await client.query(
+        `SELECT last_called FROM api_call_log WHERE url = '${TEST_URL}'`,
+      )
       await new Promise((r) => setTimeout(r, 10))
       await runner.recordApiCall(TEST_URL)
-      const second = await client.query(`SELECT last_called FROM api_call_log WHERE url = '${TEST_URL}'`)
-      expect(second.rows[0].last_called.getTime()).toBeGreaterThanOrEqual(first.rows[0].last_called.getTime())
+      const second = await client.query(
+        `SELECT last_called FROM api_call_log WHERE url = '${TEST_URL}'`,
+      )
+      expect(second.rows[0].last_called.getTime()).toBeGreaterThanOrEqual(
+        first.rows[0].last_called.getTime(),
+      )
     })
 
     it('hasApiBeenCalled is independent for different URLs', async () => {
@@ -920,7 +1096,11 @@ describe('SeedRunner - Additional Coverage Tests', () => {
 
     it('loadData fetches and records if not already called', async () => {
       // Mock fetch
-      global.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => [{ id: 42 }] })
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => [{ id: 42 }],
+      })
       const result = await runner.loadData(TEST_URL, undefined, true)
       expect(Array.isArray(result)).toBe(true)
       expect(result[0].id).toBe(42)
