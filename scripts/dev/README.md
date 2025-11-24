@@ -134,10 +134,8 @@ For detailed information about the `list-datasets` tool, see the [Available Tool
 
 #### How to Run via CLI (Raw)
 ```
-echo '{"jsonrpc":"2.0","id":1,"method":"tools/call", \
-"params":{"name":"list-datasets","arguments":{}}}' \
-| docker exec -i -e CENSUS_API_KEY=YOUR_CENSUS_API_KEY \
-mcp-server node dist/index.js
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/call", "params":{"name":"list-datasets","arguments":{}}}' \
+| docker exec -i -e CENSUS_API_KEY=YOUR_CENSUS_API_KEY mcp-server node dist/index.js
 ```
 
 #### How to Run via Helper Script
@@ -162,11 +160,8 @@ For detailed information about the `fetch-dataset-geography` tool, see the [Avai
 
 #### How to Run via CLI (Raw)
 ```
-echo '{"jsonrpc":"2.0","id":1,"method":"tools/call", \
-"params":{"name":"fetch-dataset-geography", \
-"arguments":{"dataset":"cbp","year":2022}}}' \
-| docker exec -i -e CENSUS_API_KEY=YOUR_CENSUS_API_KEY \
-mcp-server node dist/index.js
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/call", "params":{"name":"fetch-dataset-geography", "arguments":{"dataset":"cbp","year":2022}}}' \
+| docker exec -i -e CENSUS_API_KEY=YOUR_CENSUS_API_KEY mcp-server node dist/index.js
 ```
 
 #### How to Run via Helper Script
@@ -194,9 +189,8 @@ For detailed information about the `fetch-aggregate-data` tool, see the [Availab
 
 #### How to Run via CLI (Raw)
 ```
-echo '{"jsonrpc":"2.0","id":1,"method":"tools/call", "params":{"name":"fetch-aggregate-data", \
-"arguments":{"dataset":"acs/acs1","year":2022, "get": { "variables":["NAME","B01001_001E"] }, \
-"for":"state:01,13"}}}' | docker exec -i -e CENSUS_API_KEY=YOUR_CENSUS_API_KEY mcp-server node dist/index.js
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/call", "params":{"name":"fetch-aggregate-data", "arguments":{"dataset":"acs/acs1","year":2022, "get": { "variables":["NAME","B01001_001E"] }, "for":"state:01,13"}}}' \
+| docker exec -i -e CENSUS_API_KEY=YOUR_CENSUS_API_KEY mcp-server node dist/index.js
 ```
 
 #### How to Run via Helper Script
@@ -229,8 +223,7 @@ For detailed information about the `resolve-geography-fips` tool, see the [Avail
 
 #### How to Run via CLI (Raw)
 ```
-echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"resolve-geography-fips", \
-"arguments":{"geography_name":"Philadelphia, Pennsylvania"}}}' \
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"resolve-geography-fips", "arguments":{"geography_name":"Philadelphia, Pennsylvania"}}}' \
 | docker exec -i -e CENSUS_API_KEY=YOUR_CENSUS_API_KEY mcp-server node dist/index.js
 ```
 
@@ -261,7 +254,8 @@ For detailed information about the `get_population_data` prompt, see the [Availa
 
 #### How to Run via CLI (Raw)
 ```
-echo '{"jsonrpc":"2.0","id":1,"method":"prompts/get", "params":{"name":"get_population_data","arguments":{"geography_name":"San Francisco, CA"}}}' | docker exec -i -e CENSUS_API_KEY=YOUR_CENSUS_API_KEY mcp-server node dist/index.js
+echo '{"jsonrpc":"2.0","id":1,"method":"prompts/get", "params":{"name":"get_population_data","arguments":{"geography_name":"San Francisco, CA"}}}' \
+| docker exec -i -e CENSUS_API_KEY=YOUR_CENSUS_API_KEY mcp-server node dist/index.js
 ```
 
 #### How to Run via Helper Script
