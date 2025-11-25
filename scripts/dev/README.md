@@ -83,7 +83,7 @@ To list available tools, use the `tools/list` method with no arguments. `tools/l
 #### How to Run via CLI (Raw)
 ```
 echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | docker exec -i \
--e CENSUS_API_KEY=YOUR_CENSUS_API_KEY mcp-server node dist/index.js
+mcp-server node dist/index.js
 ```
 
 #### How to Run via Helper Script
@@ -91,16 +91,16 @@ echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | docker exec -i \
 export CENSUS_API_KEY='your_api_key'
 
 # List all available tools
-./scripts/list-tools.sh
+./scripts/dev/list-tools.sh
 
 # Using unified wrapper  
-./scripts/census-mcp.sh list-tools
+./scripts/dev/census-mcp.sh list-tools
 
 # JSON output for processing (count tools)
-./scripts/list-tools.sh --json | jq '.result.tools | length'
+./scripts/dev/list-tools.sh --json | jq '.result.tools | length'
 
 # Extract tool names
-./scripts/list-tools.sh --json | jq '.result.tools[].name'
+./scripts/dev/list-tools.sh --json | jq '.result.tools[].name'
 ```
 
 ## Listing Prompts
@@ -109,7 +109,7 @@ To list available prompts, use the `prompts/list` method with no arguments.
 #### How to Run via CLI (Raw)
 ```
 echo '{"jsonrpc":"2.0","id":1,"method":"prompts/list"}' | docker exec -i \
--e CENSUS_API_KEY=YOUR_CENSUS_API_KEY mcp-server node dist/index.js
+mcp-server node dist/index.js
 ```
 
 #### How to Run via Helper Script
@@ -117,13 +117,13 @@ echo '{"jsonrpc":"2.0","id":1,"method":"prompts/list"}' | docker exec -i \
 export CENSUS_API_KEY='your_api_key'
 
 # List all available prompts
-./scripts/list-prompts.sh
+./scripts/dev/list-prompts.sh
 
 # Using unified wrapper
-./scripts/census-mcp.sh list-prompts
+./scripts/dev/census-mcp.sh list-prompts
 
 # JSON output for processing (extract prompt name)
-./scripts/list-prompts.sh --json | jq '.result.prompts[0].name'
+./scripts/dev/list-prompts.sh --json | jq '.result.prompts[0].name'
 ```
 
 ## Available Tools
@@ -134,10 +134,8 @@ For detailed information about the `list-datasets` tool, see the [Available Tool
 
 #### How to Run via CLI (Raw)
 ```
-echo '{"jsonrpc":"2.0","id":1,"method":"tools/call", \
-"params":{"name":"list-datasets","arguments":{}}}' \
-| docker exec -i -e CENSUS_API_KEY=YOUR_CENSUS_API_KEY \
-mcp-server node dist/index.js
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/call", "params":{"name":"list-datasets","arguments":{}}}' \
+| docker exec -i -e CENSUS_API_KEY=YOUR_CENSUS_API_KEY mcp-server node dist/index.js
 ```
 
 #### How to Run via Helper Script
@@ -145,16 +143,16 @@ mcp-server node dist/index.js
 export CENSUS_API_KEY='your_api_key'
 
 # List all available datasets
-./scripts/list-datasets.sh
+./scripts/dev/list-datasets.sh
 
 # Using unified wrapper
-./scripts/census-mcp.sh list-datasets
+./scripts/dev/census-mcp.sh list-datasets
 
 # JSON output for processing (count datasets)
-./scripts/list-datasets.sh --json | jq '.result.content[0].text | fromjson | length'
+./scripts/dev/list-datasets.sh --json | jq '.result.content[0].text | fromjson | length'
 
 # Extract specific dataset info
-./scripts/list-datasets.sh --json | jq '.result.content[0].text | fromjson | .[] | select(.dataset=="acs/acs5")'
+./scripts/dev/list-datasets.sh --json | jq '.result.content[0].text | fromjson | .[] | select(.dataset=="acs/acs5")'
 ```
 
 ### Fetch Dataset Geography
@@ -162,11 +160,8 @@ For detailed information about the `fetch-dataset-geography` tool, see the [Avai
 
 #### How to Run via CLI (Raw)
 ```
-echo '{"jsonrpc":"2.0","id":1,"method":"tools/call", \
-"params":{"name":"fetch-dataset-geography", \
-"arguments":{"dataset":"cbp","year":2022}}}' \
-| docker exec -i -e CENSUS_API_KEY=YOUR_CENSUS_API_KEY \
-mcp-server node dist/index.js
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/call", "params":{"name":"fetch-dataset-geography", "arguments":{"dataset":"cbp","year":2022}}}' \
+| docker exec -i -e CENSUS_API_KEY=YOUR_CENSUS_API_KEY mcp-server node dist/index.js
 ```
 
 #### How to Run via Helper Script
@@ -174,19 +169,19 @@ mcp-server node dist/index.js
 export CENSUS_API_KEY='your_api_key'
 
 # Get geography levels for CBP data
-./scripts/fetch-dataset-geography.sh cbp 2022
+./scripts/dev/fetch-dataset-geography.sh cbp 2022
 
 # Using unified wrapper
-./scripts/census-mcp.sh fetch-dataset-geography cbp 2022
+./scripts/dev/census-mcp.sh fetch-dataset-geography cbp 2022
 
 # Using unified wrapper with JSON output
-./scripts/census-mcp.sh fetch-dataset-geography cbp 2022 --json | jq -r '.result.content[0].text' | tail -n +3 | jq 'length'
+./scripts/dev/census-mcp.sh fetch-dataset-geography cbp 2022 --json | jq -r '.result.content[0].text' | tail -n +3 | jq 'length'
 
 # JSON output for processing (count geography levels)
-./scripts/fetch-dataset-geography.sh cbp 2022 --json | jq -r '.result.content[0].text' | tail -n +3 | jq 'length'
+./scripts/dev/fetch-dataset-geography.sh cbp 2022 --json | jq -r '.result.content[0].text' | tail -n +3 | jq 'length'
 
 # Extract specific geography query example
-./scripts/fetch-dataset-geography.sh cbp 2022 --json | jq -r '.result.content[0].text' | tail -n +3 | jq '.[] | select(.name == "state") | .queryExample'
+./scripts/dev/fetch-dataset-geography.sh cbp 2022 --json | jq -r '.result.content[0].text' | tail -n +3 | jq '.[] | select(.name == "state") | .queryExample'
 ```
 
 ### Fetch Aggregate Data
@@ -194,9 +189,8 @@ For detailed information about the `fetch-aggregate-data` tool, see the [Availab
 
 #### How to Run via CLI (Raw)
 ```
-echo '{"jsonrpc":"2.0","id":1,"method":"tools/call", "params":{"name":"fetch-aggregate-data", \
-"arguments":{"dataset":"acs/acs1","year":2022, "get": { "variables":["NAME","B01001_001E"] }, \
-"for":"state:01,13"}}}' | docker exec -i -e CENSUS_API_KEY=YOUR_CENSUS_API_KEY mcp-server node dist/index.js
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/call", "params":{"name":"fetch-aggregate-data", "arguments":{"dataset":"acs/acs1","year":2022, "get": { "variables":["NAME","B01001_001E"] }, "for":"state:01,13"}}}' \
+| docker exec -i -e CENSUS_API_KEY=YOUR_CENSUS_API_KEY mcp-server node dist/index.js
 ```
 
 #### How to Run via Helper Script
@@ -204,24 +198,24 @@ echo '{"jsonrpc":"2.0","id":1,"method":"tools/call", "params":{"name":"fetch-agg
 export CENSUS_API_KEY='your_api_key'
 
 # Using variables (comma-separated) - requires geography for ACS
-./scripts/fetch-aggregate-data.sh acs/acs1 2022 'NAME,B01001_001E' 'state:01'
-./scripts/fetch-aggregate-data.sh acs/acs1 2022 'NAME,B01001_001E' 'state:01,13'
+./scripts/dev/fetch-aggregate-data.sh acs/acs1 2022 'NAME,B01001_001E' 'state:01'
+./scripts/dev/fetch-aggregate-data.sh acs/acs1 2022 'NAME,B01001_001E' 'state:01,13'
 
 # Using a group (single identifier) - example with CBP dataset  
-./scripts/fetch-aggregate-data.sh cbp 2022 'NAME,EMP' 'state:01'
-./scripts/fetch-aggregate-data.sh cbp 2022 'NAME,EMP' 'state:*'
+./scripts/dev/fetch-aggregate-data.sh cbp 2022 'NAME,EMP' 'state:01'
+./scripts/dev/fetch-aggregate-data.sh cbp 2022 'NAME,EMP' 'state:*'
 
 # With descriptive labels enabled
-./scripts/fetch-aggregate-data.sh acs/acs1 2022 'NAME,B01001_001E' 'state:01' --descriptive
+./scripts/dev/fetch-aggregate-data.sh acs/acs1 2022 'NAME,B01001_001E' 'state:01' --descriptive
 
 # With predicates
-./scripts/fetch-aggregate-data.sh acs/acs1 2022 'NAME,B01001_001E' --predicates 'NAICS2017:31-33'
+./scripts/dev/fetch-aggregate-data.sh acs/acs1 2022 'NAME,B01001_001E' --predicates 'NAICS2017:31-33'
 
 # Using unified wrapper
-./scripts/census-mcp.sh fetch-aggregate-data acs/acs1 2022 'NAME,B01001_001E' 'state:01'
+./scripts/dev/census-mcp.sh fetch-aggregate-data acs/acs1 2022 'NAME,B01001_001E' 'state:01'
 
 # JSON output for processing
-./scripts/fetch-aggregate-data.sh acs/acs1 2022 'NAME,B01001_001E' 'state:01' --json | jq '.result.content[0].text'
+./scripts/dev/fetch-aggregate-data.sh acs/acs1 2022 'NAME,B01001_001E' 'state:01' --json | jq '.result.content[0].text'
 ```
 
 ### Resolve Geography FIPS Tool
@@ -229,8 +223,7 @@ For detailed information about the `resolve-geography-fips` tool, see the [Avail
 
 #### How to Run via CLI (Raw)
 ```
-echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"resolve-geography-fips", \
-"arguments":{"geography_name":"Philadelphia, Pennsylvania"}}}' \
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"resolve-geography-fips", "arguments":{"geography_name":"Philadelphia, Pennsylvania"}}}' \
 | docker exec -i -e CENSUS_API_KEY=YOUR_CENSUS_API_KEY mcp-server node dist/index.js
 ```
 
@@ -239,21 +232,21 @@ echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"resolve-ge
 export CENSUS_API_KEY='your_api_key'
 
 # Basic geography search
-./scripts/resolve-geography-fips.sh 'Philadelphia, Pennsylvania'
+./scripts/dev/resolve-geography-fips.sh 'Philadelphia, Pennsylvania'
 
 # With summary level filter
-./scripts/resolve-geography-fips.sh 'Philadelphia' 'Place'
-./scripts/resolve-geography-fips.sh 'Cook County' '050'
+./scripts/dev/resolve-geography-fips.sh 'Philadelphia' 'Place'
+./scripts/dev/resolve-geography-fips.sh 'Cook County' '050'
 
 # Using unified wrapper
-./scripts/census-mcp.sh resolve-geography-fips 'Philadelphia, Pennsylvania'
+./scripts/dev/census-mcp.sh resolve-geography-fips 'Philadelphia, Pennsylvania'
 
 # JSON output for processing  
-./scripts/resolve-geography-fips.sh 'Cook County' '050' --json | jq -r '.result.content[0].text' | tail -n +3 | jq '.[0].for_param'
+./scripts/dev/resolve-geography-fips.sh 'Cook County' '050' --json | jq -r '.result.content[0].text' | tail -n +3 | jq '.[0].for_param'
 ```
 
 ## Available Prompts
-This section covers prompts that can be called.
+This section covers prompts that can be called. Please note that prompts do not return data. Prompts produce instructions that cause the model to generate or request data.
 
 ### Population
 
@@ -261,7 +254,8 @@ For detailed information about the `get_population_data` prompt, see the [Availa
 
 #### How to Run via CLI (Raw)
 ```
-echo '{"jsonrpc":"2.0","id":1,"method":"prompts/get", "params":{"name":"get_population_data","arguments":{"geography_name":"San Francisco, CA"}}}' | docker exec -i -e CENSUS_API_KEY=YOUR_CENSUS_API_KEY mcp-server node dist/index.js
+echo '{"jsonrpc":"2.0","id":1,"method":"prompts/get", "params":{"name":"get_population_data","arguments":{"geography_name":"San Francisco, CA"}}}' \
+| docker exec -i -e CENSUS_API_KEY=YOUR_CENSUS_API_KEY mcp-server node dist/index.js
 ```
 
 #### How to Run via Helper Script
@@ -269,12 +263,12 @@ echo '{"jsonrpc":"2.0","id":1,"method":"prompts/get", "params":{"name":"get_popu
 export CENSUS_API_KEY='your_api_key'
 
 # Basic usage
-./scripts/get-population-data.sh 'San Francisco, CA'
-./scripts/get-population-data.sh 'California'
+./scripts/dev/get-population-data.sh 'San Francisco, CA'
+./scripts/dev/get-population-data.sh 'California'
 
 # Using unified wrapper
-./scripts/census-mcp.sh get-population-data 'San Francisco, CA'
+./scripts/dev/census-mcp.sh get-population-data 'San Francisco, CA'
 
 # JSON output for processing
-./scripts/get-population-data.sh 'Cook County, Illinois' --json | jq '.result.description'
+./scripts/dev/get-population-data.sh 'Cook County, Illinois' --json | jq '.result.description'
 ```
