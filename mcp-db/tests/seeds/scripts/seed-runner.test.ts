@@ -864,7 +864,11 @@ describe('SeedRunner - Additional Coverage Tests', () => {
             i.year = context.year
           })
         },
-        afterSeed: async (client: Client, context: GeographyContext, insertedIds: number[]) => {
+        afterSeed: async (
+          client: Client,
+          context: GeographyContext,
+          insertedIds: number[],
+        ) => {
           afterSeedCalled = true
           receivedContext = context
 
@@ -876,7 +880,9 @@ describe('SeedRunner - Additional Coverage Tests', () => {
             )
             expect(parseInt(result.rows[0].count)).toBeGreaterThan(0)
           } else {
-            throw new Error(`Context year is missing in afterSeed with insertedIds ${insertedIds}`);
+            throw new Error(
+              `Context year is missing in afterSeed with insertedIds ${insertedIds}`,
+            )
           }
         },
         url: '',
@@ -1022,8 +1028,14 @@ describe('SeedRunner - Additional Coverage Tests', () => {
         table: 'seed_comprehensive_test',
         conflictColumn: 'id',
         beforeSeed: async () => {},
-        afterSeed: async (client: Client, context: GeographyContext, insertedIds: number[]) => {
-          throw new Error(`AfterSeed failure for year ${context?.year} and ids ${insertedIds}`);
+        afterSeed: async (
+          client: Client,
+          context: GeographyContext,
+          insertedIds: number[],
+        ) => {
+          throw new Error(
+            `AfterSeed failure for year ${context?.year} and ids ${insertedIds}`,
+          )
         },
         url: '',
       }
