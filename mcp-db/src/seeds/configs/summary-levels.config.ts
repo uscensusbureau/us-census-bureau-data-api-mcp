@@ -1,13 +1,8 @@
 import { Client } from 'pg'
 import { z } from 'zod'
 
-import { DATABASE_URL } from '../../helpers/database.helper.js'
 import { SeedConfig } from '../../schema/seed-config.schema.js'
-import { SeedRunner } from '../scripts/seed-runner.js'
-import {
-  SummaryLevelsArraySchema,
-  SummaryLevelSchema,
-} from '../../schema/summary-level.schema.js'
+import { SummaryLevelsArraySchema } from '../../schema/summary-level.schema.js'
 
 export const SummaryLevelsConfig: SeedConfig = {
   file: 'summary_levels.json',

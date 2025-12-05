@@ -1,5 +1,5 @@
 import { Client } from 'pg'
-import { z, ZodSchema } from 'zod'
+import { z } from 'zod'
 
 import { GeographyRecordSchema } from './geography.schema.js'
 

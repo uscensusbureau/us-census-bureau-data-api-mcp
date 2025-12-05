@@ -9,9 +9,6 @@ import {
   vi,
 } from 'vitest'
 import { Client } from 'pg'
-import fs from 'fs/promises'
-import path from 'path'
-import { fileURLToPath } from 'url'
 
 vi.mock('../../../src/schema/geography.schema', async (importOriginal) => {
   const actual = await importOriginal()
@@ -29,18 +26,14 @@ import { cleanupWithRetry } from '../../helpers/database-cleanup'
 import { dbConfig } from '../../helpers/database-config'
 import { NationConfig } from '../../../src/seeds/configs/nation.config'
 import { SeedRunner } from '../../../src/seeds/scripts/seed-runner'
-import { GeographyContext } from '../../../src/schema/seed-config'
+import { GeographyContext } from '../../../src/schema/seed-config.schema'
 import { transformApiGeographyData } from '../../../src/schema/geography.schema'
 import { createGeographyYear } from '../../../src/helpers/geography-years.helper'
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
 
 describe('Nation Config', () => {
   let runner: SeedRunner
   let client: Client
   let databaseUrl: string
-  let fixturesPath: string
 
   beforeAll(async () => {
     client = new Client(dbConfig)
@@ -48,9 +41,6 @@ describe('Nation Config', () => {
 
     // Construct database URL for SeedRunner
     databaseUrl = `postgresql://${dbConfig.user}:${dbConfig.password}@${dbConfig.host}:${dbConfig.port}/${dbConfig.database}`
-
-    // Set up fixtures path
-    fixturesPath = path.join(__dirname, 'fixtures')
   })
 
   afterAll(async () => {
@@ -62,14 +52,7 @@ describe('Nation Config', () => {
     vi.mocked(transformApiGeographyData).mockClear()
     vi.mocked(createGeographyYear).mockClear()
 
-    // Create test fixtures directory
-    try {
-      await fs.mkdir(fixturesPath, { recursive: true })
-    } catch {
-      console.log('Directory already exists.')
-    }
-
-    runner = new SeedRunner(databaseUrl, fixturesPath)
+    runner = new SeedRunner(databaseUrl)
     await runner.connect()
 
     await cleanupWithRetry(client, ['geographies', 'summary_levels', 'years'])
