@@ -246,10 +246,10 @@ describe('SeedRunner - Additional Coverage Tests', () => {
       await client.query('DELETE FROM years WHERE year IN (2020, 2021, 2023)')
 
       await client.query(`
-        INSERT INTO years (year) VALUES
-        (2020),
-        (2021),
-        (2023)
+        INSERT INTO years (year, import_geographies) VALUES
+        (2020, true),
+        (2021, false),
+        (2023, true)
       `)
     })
 
@@ -261,15 +261,7 @@ describe('SeedRunner - Additional Coverage Tests', () => {
     it('should return available years ordered by year', async () => {
       const result = await runner.getAvailableYears()
 
-      expect(result).toHaveLength(3)
-
-      // Don't assert specific IDs since they're auto-generated
-      expect(result.map((r) => r.year)).toEqual([2020, 2021, 2023])
-
-      // Verify structure and ordering
-      expect(result[0].year).toBe(2020)
-      expect(result[1].year).toBe(2021)
-      expect(result[2].year).toBe(2023)
+      expect(result.map((r) => r.year)).toEqual([2020, 2023])
 
       // Verify all have valid IDs
       result.forEach((yearRow) => {

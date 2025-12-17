@@ -67,7 +67,7 @@ export class SeedRunner {
 
   async getAvailableYears(): Promise<{ id: number; year: number }[]> {
     const result = await this.client.query(
-      'SELECT id, year FROM years ORDER BY year',
+      'SELECT id, year FROM years WHERE import_geographies = true ORDER BY year',
     )
     return result.rows.map((row) => ({
       id: parseInt(row.id, 10),
