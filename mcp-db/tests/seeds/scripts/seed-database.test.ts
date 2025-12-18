@@ -23,15 +23,16 @@ import {
   MultiStateGeographySeedConfig,
 } from '../../../src/schema/seed-config.schema.js'
 import { SeedRunner } from '../../../src/seeds/scripts/seed-runner'
-import { SummaryLevelsConfig } from '../../../src/seeds/configs/summary-levels.config'
 import {
   CountyConfig,
   CountySubdivisionConfig,
+  DatasetConfig,
   DivisionConfig,
   NationConfig,
   PlaceConfig,
   RegionConfig,
   StateConfig,
+  SummaryLevelsConfig,
   YearsConfig,
   ZipCodeTabulationAreaConfig,
 } from '../../../src/seeds/configs/index'
@@ -307,9 +308,10 @@ describe('Seed Database', () => {
 
   describe('seeds', () => {
     it('includes all configs', () => {
-      expect(seeds).toHaveLength(2)
+      expect(seeds).toHaveLength(3)
       expect(seeds).toContain(SummaryLevelsConfig)
       expect(seeds).toContain(YearsConfig)
+      expect(seeds).toContain(DatasetConfig)
     })
   })
 
@@ -348,14 +350,14 @@ describe('Seed Database', () => {
 
         // Time for Math!
         //
-        // 2 Static Configs (Year, Summary Levels) ] = 2
+        // 3 Static Configs (Year, Summary Levels, DatasetConfig) ] = 3
         // +
         // 2 Years x 7 Std Geo Configs[Nation + Region + Division + State + County + Place + ZCTA ] = 14 Runs
         // +
         // 2 years x 2 Mocked States x 1 MultiStateConfig[CountySubdivisionConfig] = 4 State-specific Runs
         // ------------
-        // EQUALS 20 Total Config Runs
-        expect(mockRunner.seed).toHaveBeenCalledTimes(20)
+        // EQUALS 21 Total Config Runs
+        expect(mockRunner.seed).toHaveBeenCalledTimes(21)
       } finally {
         SeedRunnerSpy.mockRestore()
       }
@@ -402,14 +404,14 @@ describe('Seed Database', () => {
   })
 
   describe('runSeedsWithRunner', () => {
-    it('should run static seed configs', async () => {
+    it('should run seed configs', async () => {
       const { mockRunner, SeedRunnerSpy, mockRunnerInstance } =
         await setupMockSeedRunner()
 
       try {
         await runSeedsWithRunner(mockRunnerInstance)
 
-        expect(mockRunner.seed).toHaveBeenCalledTimes(2)
+        expect(mockRunner.seed).toHaveBeenCalledTimes(3)
         expect(mockRunner.seed).toHaveBeenCalledWith(
           expect.objectContaining({
             file: 'summary_levels.json',
@@ -418,6 +420,12 @@ describe('Seed Database', () => {
         expect(mockRunner.seed).toHaveBeenCalledWith(
           expect.objectContaining({
             file: 'years.json',
+          }),
+        )
+
+        expect(mockRunner.seed).toHaveBeenCalledWith(
+          expect.objectContaining({
+            url: 'https://api.census.gov/data/',
           }),
         )
       } finally {

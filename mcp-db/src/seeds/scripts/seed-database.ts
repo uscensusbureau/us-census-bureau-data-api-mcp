@@ -21,6 +21,7 @@ import { SeedRunner } from './seed-runner.js'
 import {
   CountyConfig,
   CountySubdivisionConfig,
+  DatasetConfig,
   DivisionConfig,
   NationConfig,
   PlaceConfig,
@@ -32,7 +33,7 @@ import {
 } from '../configs/index.js'
 
 // Seed configurations
-export const seeds: SeedConfig[] = [SummaryLevelsConfig, YearsConfig]
+export const seeds: SeedConfig[] = [SummaryLevelsConfig, YearsConfig, DatasetConfig]
 
 let baseGeographySeeds: EnhancedGeographySeedConfig[] = [
   NationConfig,

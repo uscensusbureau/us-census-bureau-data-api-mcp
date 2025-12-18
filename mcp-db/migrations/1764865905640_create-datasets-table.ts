@@ -7,7 +7,6 @@ export const datasetsArgs = {
   year_id: {
     type: 'bigint',
     references: 'years(id)',
-    notNull: true,
     onDelete: 'CASCADE',
   },
   created_at: {

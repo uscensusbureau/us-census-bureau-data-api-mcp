@@ -24,6 +24,10 @@ export const DatasetConfig: SeedConfig = {
         if (c_vintage) {
           const yearId = await getOrCreateYear(client, c_vintage)
           return { ...datasetFields, year_id: yearId }
+        } else {
+          console.warn(
+            `No year found for dataset: ${record.dataset_id}`,
+          )
         }
 
         return datasetFields
