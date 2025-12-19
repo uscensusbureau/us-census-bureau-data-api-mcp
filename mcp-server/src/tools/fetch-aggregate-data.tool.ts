@@ -2,6 +2,7 @@ import { Tool } from '@modelcontextprotocol/sdk/types.js'
 import { z } from 'zod'
 
 import { BaseTool } from './base.tool.js'
+import { buildCitation } from '../helpers/citation.js'
 import {
   FetchAggregateDataToolSchema,
   TableArgs,
@@ -119,8 +120,10 @@ export class FetchAggregateDataTool extends BaseTool<TableArgs> {
         .map((row) => headers.map((h, i) => `${h}: ${row[i]}`).join(', '))
         .join('\n')
 
+      const citation = buildCitation(url)
+
       return this.createSuccessResponse(
-        `Response from ${args.dataset}:\n${output}`,
+        `Response from ${args.dataset}:\n${output}\n${citation}`,
       )
     } catch (err) {
       return this.createErrorResponse(`Fetch failed: ${(err as Error).message}`)

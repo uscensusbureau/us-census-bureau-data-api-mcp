@@ -5,6 +5,7 @@ vi.mock('node-fetch', () => ({
 }))
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { buildCitation } from '../../../src/helpers/citation'
 import {
   FetchAggregateDataTool,
   toolDescription,
@@ -17,6 +18,12 @@ import {
 } from '../../helpers/test-utils'
 
 import { sampleTableByGroupData } from '../../helpers/test-data'
+
+vi.mock('../../../src/helpers/citation', () => ({
+  buildCitation: vi.fn((url: string) => {
+    return `Source: U.S. Census Bureau Data API (${url})`
+  }),
+}))
 
 describe('FetchAggregateDataTool', () => {
   let tool: FetchAggregateDataTool
@@ -31,6 +38,39 @@ describe('FetchAggregateDataTool', () => {
   afterEach(() => {
     vi.clearAllMocks()
     vi.resetModules()
+  })
+
+  describe('toolHandler', () => {
+    beforeEach(() => {
+      vi.clearAllMocks()
+    })
+
+    it('invokes buildCitation', async () => {
+      const mockBuildCitation = buildCitation as ReturnType<typeof vi.fn>
+      const testData = [
+        ['NAME', 'B01001_001E', 'state'],
+        ['Test State', '1000000', '01'],
+      ]
+      mockFetch.mockResolvedValue(createMockResponse(testData))
+
+      const args = {
+        dataset: 'acs/acs1',
+        year: 2022,
+        get: {
+          group: 'B01001',
+        },
+        for: 'state:01',
+      }
+
+      const response = await tool.toolHandler(args, process.env.CENSUS_API_KEY)
+
+      expect(mockBuildCitation).toHaveBeenCalledWith(
+        `https://api.census.gov/data/2022/acs/acs1?get=group%28B01001%29&for=state%3A01&descriptive=false&key=${process.env.CENSUS_API_KEY}`,
+      )
+      expect(response.content[0].text).to.include(
+        'Source: U.S. Census Bureau Data API',
+      )
+    })
   })
 
   describe('Tool Configuration', () => {
@@ -392,7 +432,7 @@ describe('FetchAggregateDataTool', () => {
 
       expect(responseText).toContain('Response from acs/acs1:')
       // Should not contain any data rows
-      expect(responseText.split('\n')).toHaveLength(2)
+      expect(responseText.split('\n')).toHaveLength(3)
     })
   })
 
