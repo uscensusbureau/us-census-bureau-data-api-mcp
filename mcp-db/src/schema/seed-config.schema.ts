@@ -9,6 +9,7 @@ export const BaseSeedConfigSchema = z.object({
   url: z.string().optional(),
   conflictColumn: z.string().min(1),
   dataPath: z.string().optional(),
+  alwaysFetch: z.boolean().optional(),
 
   // Custom logic for pre and post processing data
   beforeSeed: z.any().optional(),

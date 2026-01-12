@@ -40,7 +40,7 @@ describe('Migration 1765999444982 - Add import_geographies column to Years Table
         import_geographies: {
           type: 'boolean',
           default: false,
-          notNull: true
+          notNull: true,
         },
       })
     })

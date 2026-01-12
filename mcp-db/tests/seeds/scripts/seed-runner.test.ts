@@ -1055,7 +1055,7 @@ describe('SeedRunner - Additional Coverage Tests', () => {
     await client.query('DELETE FROM api_call_log')
   }
 
-  describe('SeedRunner API call log', () => {
+  describe('loadData API Call Logging & Skipping', () => {
     afterEach(async () => {
       await cleanupApiLog(client)
     })
@@ -1087,7 +1087,7 @@ describe('SeedRunner - Additional Coverage Tests', () => {
       expect(await runner.hasApiBeenCalled(TEST_URL_2)).toBe(false)
     })
 
-    it('loadData skips fetch if API endpoint already called', async () => {
+    it('skips fetch if API endpoint already called', async () => {
       // Write a dummy file for fallback
       const dummyFile = path.join(__dirname, 'fixtures', 'dummy.json')
       await fs.writeFile(dummyFile, JSON.stringify([{ id: 1 }]))
@@ -1098,7 +1098,7 @@ describe('SeedRunner - Additional Coverage Tests', () => {
       expect(result).toEqual([])
     })
 
-    it('loadData fetches and records if not already called', async () => {
+    it('fetches and records if not already called', async () => {
       // Mock fetch
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,
@@ -1110,6 +1110,72 @@ describe('SeedRunner - Additional Coverage Tests', () => {
       expect(result[0].id).toBe(42)
       // Now should be marked as called
       expect(await runner.hasApiBeenCalled(TEST_URL)).toBe(true)
+    })
+  })
+
+  describe('alwaysFetch functionality', () => {
+    const mockData = [{ id: 1, value: 'test' }]
+
+    beforeEach(async () => {
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => mockData,
+      })
+    })
+
+    afterEach(async () => {
+      await cleanupApiLog(client)
+    })
+
+    it('skips cached URLs by default', async () => {
+      await runner.recordApiCall(TEST_URL)
+
+      const result = await runner.loadData(TEST_URL, undefined, true)
+
+      expect(fetch).not.toHaveBeenCalled()
+      expect(result).toEqual([])
+    })
+
+    it('fetches cached URLs when alwaysFetch is true', async () => {
+      await runner.recordApiCall(TEST_URL)
+
+      const result = await runner.loadData(TEST_URL, undefined, true, true)
+
+      expect(fetch).toHaveBeenCalled()
+      expect(result).toEqual(mockData)
+    })
+
+    it('fetches multiple times with alwaysFetch true', async () => {
+      await runner.loadData(TEST_URL, undefined, true, true)
+      await runner.loadData(TEST_URL, undefined, true, true)
+
+      expect(fetch).toHaveBeenCalledTimes(2)
+    })
+
+    it('uses alwaysFetch from config', async () => {
+      // Create test table first
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS test_table (
+          id INTEGER PRIMARY KEY
+        )
+      `)
+
+      const config = {
+        url: TEST_URL,
+        table: 'test_table',
+        conflictColumn: 'id',
+        alwaysFetch: true,
+      }
+
+      await runner.recordApiCall(TEST_URL)
+      vi.spyOn(runner, 'insertOrSkip').mockResolvedValue([1])
+
+      await runner.seed(config)
+
+      expect(fetch).toHaveBeenCalled()
+
+      // Clean up test table
+      await client.query('DROP TABLE IF EXISTS test_table')
     })
   })
 })
