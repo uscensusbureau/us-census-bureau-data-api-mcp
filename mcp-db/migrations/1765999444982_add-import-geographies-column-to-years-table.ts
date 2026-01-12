@@ -11,7 +11,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
     import_geographies: {
       type: 'boolean',
       default: false,
-      notNull: true
+      notNull: true,
     },
   })
   pgm.sql(importYearsSQL)

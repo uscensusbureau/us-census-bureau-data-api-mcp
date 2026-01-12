@@ -2,10 +2,10 @@
 -- PostgreSQL database dump
 --
 
-\restrict qGt9PpopsHGNcWHHmwRfbfky4210LZSSe11FND4kw7f7IRQSAssysx6SJbIjrWy
+\restrict hKrx26OuixRMgMrSQzwLpcPBxZzAtjreCx3tsUKEhinkBcQwQIn4EQMlglkBDGo
 
--- Dumped from database version 16.10 (Debian 16.10-1.pgdg13+1)
--- Dumped by pg_dump version 16.10 (Debian 16.10-1.pgdg13+1)
+-- Dumped from database version 16.11 (Debian 16.11-1.pgdg13+1)
+-- Dumped by pg_dump version 16.11 (Debian 16.11-1.pgdg13+1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -309,6 +309,46 @@ ALTER SEQUENCE public.census_data_cache_id_seq OWNED BY public.census_data_cache
 
 
 --
+-- Name: datasets; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.datasets (
+    id bigint NOT NULL,
+    name character varying(255) NOT NULL,
+    dataset_id character varying(255) NOT NULL,
+    year_id bigint,
+    created_at timestamp with time zone DEFAULT now(),
+    updated_at timestamp with time zone DEFAULT now(),
+    dataset_param character varying(100) NOT NULL,
+    description text NOT NULL,
+    type character varying(30) NOT NULL,
+    temporal_start date,
+    temporal_end date,
+    CONSTRAINT datasets_type_check CHECK (((type)::text = ANY ((ARRAY['aggregate'::character varying, 'microdata'::character varying, 'timeseries'::character varying])::text[]))),
+    CONSTRAINT valid_temporal_range CHECK (((temporal_start IS NULL) OR (temporal_end IS NULL) OR (temporal_start <= temporal_end)))
+);
+
+
+--
+-- Name: datasets_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.datasets_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: datasets_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.datasets_id_seq OWNED BY public.datasets.id;
+
+
+--
 -- Name: geographies; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -477,7 +517,8 @@ CREATE TABLE public.years (
     id bigint NOT NULL,
     year integer NOT NULL,
     created_at timestamp with time zone DEFAULT now(),
-    updated_at timestamp with time zone DEFAULT now()
+    updated_at timestamp with time zone DEFAULT now(),
+    import_geographies boolean DEFAULT false NOT NULL
 );
 
 
@@ -505,6 +546,13 @@ ALTER SEQUENCE public.years_id_seq OWNED BY public.years.id;
 --
 
 ALTER TABLE ONLY public.census_data_cache ALTER COLUMN id SET DEFAULT nextval('public.census_data_cache_id_seq'::regclass);
+
+
+--
+-- Name: datasets id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.datasets ALTER COLUMN id SET DEFAULT nextval('public.datasets_id_seq'::regclass);
 
 
 --
@@ -556,6 +604,22 @@ ALTER TABLE ONLY public.census_data_cache
 
 ALTER TABLE ONLY public.census_data_cache
     ADD CONSTRAINT census_data_cache_request_hash_key UNIQUE (request_hash);
+
+
+--
+-- Name: datasets datasets_dataset_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.datasets
+    ADD CONSTRAINT datasets_dataset_id_unique UNIQUE (dataset_id);
+
+
+--
+-- Name: datasets datasets_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.datasets
+    ADD CONSTRAINT datasets_pkey PRIMARY KEY (id);
 
 
 --
@@ -688,6 +752,20 @@ CREATE INDEX census_data_cache_last_accessed_index ON public.census_data_cache U
 --
 
 CREATE INDEX census_data_cache_request_hash_index ON public.census_data_cache USING btree (request_hash);
+
+
+--
+-- Name: datasets_dataset_id_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX datasets_dataset_id_index ON public.datasets USING btree (dataset_id);
+
+
+--
+-- Name: datasets_type_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX datasets_type_index ON public.datasets USING btree (type);
 
 
 --
@@ -873,6 +951,14 @@ CREATE TRIGGER update_geographies_updated_at BEFORE UPDATE ON public.geographies
 
 
 --
+-- Name: datasets datasets_year_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.datasets
+    ADD CONSTRAINT datasets_year_id_fkey FOREIGN KEY (year_id) REFERENCES public.years(id) ON DELETE CASCADE;
+
+
+--
 -- Name: summary_levels geography_levels_parent_geography_level_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -916,5 +1002,5 @@ ALTER TABLE ONLY public.geographies
 -- PostgreSQL database dump complete
 --
 
-\unrestrict qGt9PpopsHGNcWHHmwRfbfky4210LZSSe11FND4kw7f7IRQSAssysx6SJbIjrWy
+\unrestrict hKrx26OuixRMgMrSQzwLpcPBxZzAtjreCx3tsUKEhinkBcQwQIn4EQMlglkBDGo
 

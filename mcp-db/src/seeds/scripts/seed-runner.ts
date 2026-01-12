@@ -255,18 +255,24 @@ export class SeedRunner {
     source: string,
     extractPath?: string,
     isUrl: boolean = false,
+    alwaysFetch: boolean = false,
   ): Promise<any[]> {
     let data: unknown
 
     if (isUrl) {
       // Check if this API endpoint has been called before
-      const alreadyCalled = await this.hasApiBeenCalled(source)
-      if (alreadyCalled) {
-        console.log(
-          `API endpoint ${source} has already been called. Skipping fetch.`,
-        )
-        return [] // Return empty array to skip processing
+      if (!alwaysFetch) {
+        const alreadyCalled = await this.hasApiBeenCalled(source)
+        if (alreadyCalled) {
+          console.log(
+            `API endpoint ${source} has already been called. Skipping fetch.`,
+          )
+          return [] // Return empty array to skip processing
+        }
+      } else {
+        console.log(`API endpoint ${source} marked as alwaysFetch. Fetching...`)
       }
+
       // Fetch Data from the API with rate limiting
       data = await this.fetchFromApi(source)
       // Record the API call
@@ -410,7 +416,12 @@ export class SeedRunner {
       await this.client.query('BEGIN')
 
       // Load raw data with rate limiting if from API
-      const rawData = await this.loadData(source, config.dataPath, isUrl)
+      const rawData = await this.loadData(
+        source,
+        config.dataPath,
+        isUrl,
+        config.alwaysFetch ?? false,
+      )
       if (rawData.length === 0) {
         console.log(
           `No new data to process for ${config.table}. Skipping seeding.`,

@@ -13,6 +13,7 @@ describe('Dataset Schema', () => {
         description: 'A great dataset.',
         dataset_id: 'ACSY123456',
         dataset_param: 'acs/acs1',
+        type: 'aggregate',
         year_id: 1,
       }
 
@@ -25,6 +26,7 @@ describe('Dataset Schema', () => {
         description: 'A great dataset.',
         dataset_id: 'ACSY123456',
         dataset_param: 'acs/acs1',
+        type: 'aggregate',
         year_id: 1,
       }
 
@@ -40,6 +42,7 @@ describe('Dataset Schema', () => {
         {
           c_vintage: 1994,
           c_dataset: ['cps', 'basic', 'jun'],
+          c_isMicrodata: true,
           title: 'Dataset 1',
           identifier: 'https://api.census.gov/data/id/DATA1',
           description: 'Description 1',
@@ -47,6 +50,7 @@ describe('Dataset Schema', () => {
         {
           c_vintage: 2020,
           c_dataset: ['acs', 'acs1'],
+          c_isAggregate: true,
           title: 'Dataset 2',
           identifier: 'https://api.census.gov/data/id/DATA2',
           description: 'Description 2',
@@ -60,6 +64,7 @@ describe('Dataset Schema', () => {
       expect(transformedData[0].c_vintage).toEqual(rawApiData[0].c_vintage)
       expect(transformedData[0].dataset_param).toEqual('cps/basic/jun')
       expect(transformedData[0].dataset_id).toEqual('DATA1')
+      expect(transformedData[0].type).toEqual('microdata')
     })
 
     it('skips datasets lacking c_dataset', () => {
@@ -67,12 +72,14 @@ describe('Dataset Schema', () => {
         {
           c_vintage: 1994,
           c_dataset: ['cps', 'basic', 'jun'],
+          c_isMicrodata: true,
           title: 'Dataset 1',
           identifier: 'https://api.census.gov/data/id/DATA1',
           description: 'Description 1',
         },
         {
           c_vintage: 2020,
+          c_isAggregate: true,
           title: 'Dataset 2',
           identifier: 'https://api.census.gov/data/id/DATA2',
           description: 'Description 2',

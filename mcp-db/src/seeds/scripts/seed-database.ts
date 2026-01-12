@@ -33,7 +33,11 @@ import {
 } from '../configs/index.js'
 
 // Seed configurations
-export const seeds: SeedConfig[] = [SummaryLevelsConfig, YearsConfig, DatasetConfig]
+export const seeds: SeedConfig[] = [
+  SummaryLevelsConfig,
+  YearsConfig,
+  DatasetConfig,
+]
 
 let baseGeographySeeds: EnhancedGeographySeedConfig[] = [
   NationConfig,

@@ -74,6 +74,7 @@ describe('Dataset Config', () => {
     expect(datasetSeed?.table).toBe('datasets')
     expect(datasetSeed?.conflictColumn).toBe('dataset_id')
     expect(datasetSeed?.dataPath).toBe('dataset')
+    expect(datasetSeed?.alwaysFetch).toBe(true)
     expect(datasetSeed?.beforeSeed).toBeDefined()
   })
 
@@ -248,6 +249,8 @@ describe('Dataset Config', () => {
         description: 'Description 1',
         dataset_id: 'DATA1',
         dataset_param: 'cps/basic/jun',
+        temporal_start: null,
+        temporal_end: null,
         year_id: 42,
       })
       expect(processedDataset).not.toHaveProperty('c_vintage')
