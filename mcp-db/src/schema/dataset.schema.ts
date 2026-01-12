@@ -46,6 +46,29 @@ export interface ApiResponse {
   [key: string]: unknown
 }
 
+/**
+ * Parses a temporal range string from the Census API into start and end Date objects.
+ *
+ * @param temporal - A temporal range string in the format 'YYYY/YYYY' or 'YYYY-MM/YYYY-MM',
+ *                   where the start and end dates are separated by a forward slash.
+ *                   Examples: '2010/2020', '2015-01/2020-12'
+ * @returns An object containing:
+ *          - temporal_start: Date object representing the first day of the start period, or null if parsing fails
+ *          - temporal_end: Date object representing the last day of the end period, or null if parsing fails
+ *
+ * @remarks
+ * - For YYYY format, defaults to January 1 for start date and December 31 for end date
+ * - For YYYY-MM format, uses the first day of the month for start date and last day of the month for end date
+ * - If parsing fails for any reason, logs a warning to console and returns null for both dates
+ *
+ * @example
+ * parseTemporalRange('2010/2020')
+ * // Returns: { temporal_start: Date(2010, 0, 1), temporal_end: Date(2020, 11, 31) }
+ *
+ * @example
+ * parseTemporalRange('2015-06/2020-12')
+ * // Returns: { temporal_start: Date(2015, 5, 1), temporal_end: Date(2020, 11, 31) }
+ */
 export function parseTemporalRange(temporal: string): {
   temporal_start: Date | null
   temporal_end: Date | null
