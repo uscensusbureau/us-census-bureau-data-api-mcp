@@ -30,7 +30,7 @@ export const TopicMappings: Record<string, keyof TopicRecord> = {
   TOPIC_LABEL: 'name',
   PARENT_TOPIC_STRING: 'parent_topic_string',
   DESCRIPTION: 'description',
-} as const
+}
 
 export function transformTopicData(rawData: unknown): TopicRecord[] {
   let validated

@@ -9,7 +9,7 @@ export const topicsTableArgs = (pgm: MigrationBuilder) => ({
   parent_topic_id: {
     type: 'bigint',
     references: 'topics(id)',
-    onDelete: 'CASCADE' as const,
+    onDelete: 'SET NULL' as const,
   },
 
   created_at: {
@@ -26,8 +26,6 @@ export const topicsTableArgs = (pgm: MigrationBuilder) => ({
 
 export async function up(pgm: MigrationBuilder): Promise<void> {
   pgm.createTable('topics', topicsTableArgs(pgm))
-
-  pgm.createIndex('topics', 'topic_string') // For assigning parent topic ids during import
   pgm.createIndex('topics', 'parent_topic_id')
 }
 

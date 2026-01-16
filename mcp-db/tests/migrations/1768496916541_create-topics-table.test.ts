@@ -46,7 +46,6 @@ describe('Migration 1768496916541 - Create Topics Table', () => {
     })
 
     it('creates indexes for the Topics table', () => {
-      expect(createIndexSpy).toHaveBeenCalledWith('topics', 'topic_string')
       expect(createIndexSpy).toHaveBeenCalledWith('topics', 'parent_topic_id')
     })
   })
