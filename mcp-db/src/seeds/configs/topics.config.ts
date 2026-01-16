@@ -9,7 +9,7 @@ export const TopicsConfig: SeedConfig = {
   dataPath: 'topics',
   conflictColumn: 'topic_string',
   beforeSeed: (client: Client, rawData: unknown[]): void => {
-    //Validate and Map Raw Topic Data to Topic fields
+    // Validate and Map Raw Topic Data to Topic fields
     const transformedData = transformTopicData(rawData)
 
     rawData.length = 0

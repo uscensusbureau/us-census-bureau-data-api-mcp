@@ -316,7 +316,7 @@ describe('Seed Database', () => {
   })
 
   describe('seeds', () => {
-    it('includes all non- configs', () => {
+    it('includes all non-geography configs', () => {
       expect(seeds).toHaveLength(4)
       expect(seeds).toContain(configs.SummaryLevelsConfig)
       expect(seeds).toContain(configs.YearsConfig)
