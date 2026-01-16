@@ -54,8 +54,8 @@ export const DatasetConfig: SeedConfig = {
 
     // Filter out any items without dataset_id
     const validData = processedData.filter(
-      (item): item is Partial<DatasetRecord> & { dataset_id: string } => 
-        item.dataset_id !== undefined && item.dataset_id !== ''
+      (item): item is Partial<DatasetRecord> & { dataset_id: string } =>
+        item.dataset_id !== undefined && item.dataset_id !== '',
     )
 
     // Check for duplicates
@@ -65,11 +65,13 @@ export const DatasetConfig: SeedConfig = {
       duplicateCheck.set(item.dataset_id, count + 1)
     })
 
-    const duplicates = Array.from(duplicateCheck.entries()).filter(([_, count]) => count > 1)
+    const duplicates = Array.from(duplicateCheck.entries()).filter(
+      ([_, count]) => count > 1,
+    )
     if (duplicates.length > 0) {
       console.warn(
         `Found ${duplicates.length} duplicate dataset_id(s); keeping last occurence of each:`,
-        duplicates.map(([id, count]) => `${id} (${count} occurrences)`)
+        duplicates.map(([id, count]) => `${id} (${count} occurrences)`),
       )
     }
 

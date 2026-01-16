@@ -135,7 +135,7 @@ describe('Dataset Schema', () => {
           description: 'A dataset with no type flag.',
         }
         expect(() => determineDatasetType(datasetNoType)).toThrow(
-          'Dataset 3456 has no type flag set'
+          'Dataset 3456 has no type flag set',
         )
       })
     })
@@ -148,8 +148,12 @@ describe('Dataset Schema', () => {
         const expected_start_date = new Date(2026, 0, 1)
         const expected_end_date = new Date(2026, 11, 31)
 
-        expect(parseTemporalRange(temporal).temporal_start).toEqual(expected_start_date)
-        expect(parseTemporalRange(temporal).temporal_end).toEqual(expected_end_date)
+        expect(parseTemporalRange(temporal).temporal_start).toEqual(
+          expected_start_date,
+        )
+        expect(parseTemporalRange(temporal).temporal_end).toEqual(
+          expected_end_date,
+        )
       })
     })
 
@@ -159,8 +163,12 @@ describe('Dataset Schema', () => {
         const expected_start_date = new Date(2026, 0, 1)
         const expected_end_date = new Date(2026, 0, 31)
 
-        expect(parseTemporalRange(temporal).temporal_start).toEqual(expected_start_date)
-        expect(parseTemporalRange(temporal).temporal_end).toEqual(expected_end_date)
+        expect(parseTemporalRange(temporal).temporal_start).toEqual(
+          expected_start_date,
+        )
+        expect(parseTemporalRange(temporal).temporal_end).toEqual(
+          expected_end_date,
+        )
       })
     })
 
@@ -211,8 +219,12 @@ describe('Dataset Schema', () => {
 
     describe('when an unexpected error occurs during parsing', () => {
       it('returns null values for temporal_start and temporal_end', () => {
-        const temporal = { split: () => { throw new Error('Unexpected error') } } as any
-        
+        const temporal = {
+          split: () => {
+            throw new Error('Unexpected error')
+          },
+        } as unknown as string
+
         expect(parseTemporalRange(temporal).temporal_start).toBe(null)
         expect(parseTemporalRange(temporal).temporal_end).toBe(null)
       })

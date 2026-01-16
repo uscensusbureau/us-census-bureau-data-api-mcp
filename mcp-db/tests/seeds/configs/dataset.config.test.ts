@@ -490,7 +490,9 @@ describe('Dataset Config', () => {
         })
         vi.mocked(getOrCreateYear).mockResolvedValue(1)
 
-        const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+        const consoleWarnSpy = vi
+          .spyOn(console, 'warn')
+          .mockImplementation(() => {})
 
         await DatasetConfig.beforeSeed!(mockClient as Client, rawApiData)
 
@@ -501,7 +503,7 @@ describe('Dataset Config', () => {
         expect(processedDataset.description).toBe('Second occurrence')
         expect(consoleWarnSpy).toHaveBeenCalledWith(
           'Found 1 duplicate dataset_id(s); keeping last occurence of each:',
-          ['DUPLICATE (2 occurrences)']
+          ['DUPLICATE (2 occurrences)'],
         )
 
         consoleWarnSpy.mockRestore()
@@ -612,14 +614,16 @@ describe('Dataset Config', () => {
         })
         vi.mocked(getOrCreateYear).mockResolvedValue(1)
 
-        const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+        const consoleWarnSpy = vi
+          .spyOn(console, 'warn')
+          .mockImplementation(() => {})
 
         await DatasetConfig.beforeSeed!(mockClient as Client, rawApiData)
 
         expect(rawApiData).toHaveLength(2)
         expect(consoleWarnSpy).not.toHaveBeenCalledWith(
           expect.stringContaining('duplicate'),
-          expect.anything()
+          expect.anything(),
         )
 
         consoleWarnSpy.mockRestore()

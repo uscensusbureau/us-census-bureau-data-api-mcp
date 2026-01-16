@@ -7,6 +7,7 @@ export default defineConfig({
     hookTimeout: 10000,
     environment: 'node',
     globalSetup: ['./tests/globalSetup.ts'],
+    globals: true,
     coverage: {
       reporter: ['text', 'json-summary', 'json'],
       thresholds: {
