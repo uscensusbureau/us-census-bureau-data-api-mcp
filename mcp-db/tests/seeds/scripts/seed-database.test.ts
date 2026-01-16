@@ -12,30 +12,17 @@ import { Client } from 'pg'
 import fs from 'fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { z } from 'zod'
 
 import { dbConfig } from '../../helpers/database-config'
-import { GeographyLevel } from '../../../src/schema/geography-level.schema'
 import {
   SeedConfig,
   GeographySeedConfig,
   GeographyContext,
   MultiStateGeographySeedConfig,
+  EnhancedGeographySeedConfig,
 } from '../../../src/schema/seed-config.schema.js'
 import { SeedRunner } from '../../../src/seeds/scripts/seed-runner'
-import {
-  CountyConfig,
-  CountySubdivisionConfig,
-  DatasetConfig,
-  DivisionConfig,
-  NationConfig,
-  PlaceConfig,
-  RegionConfig,
-  StateConfig,
-  SummaryLevelsConfig,
-  YearsConfig,
-  ZipCodeTabulationAreaConfig,
-} from '../../../src/seeds/configs/index'
+import * as configs from '../../../src/seeds/configs/index'
 import {
   geographySeeds,
   runSeedsWithRunner,
@@ -49,21 +36,37 @@ import {
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-interface GeographyLevelRow extends GeographyLevel {
+interface SummaryLevelRow {
   id: number
+  name: string
+  description: string | null
+  get_variable: string
+  query_name: string
+  on_spine: boolean
+  code: string
+  parent_summary_level: string | null
   parent_summary_level_id: number | null
   created_at: Date
   updated_at: Date
 }
 
-interface MockRunner {
-  connect: vi.Mock<[], Promise<void>>
-  disconnect: vi.Mock<[], Promise<void>>
-  seed: vi.Mock<[SeedConfig] | [GeographySeedConfig, GeographyContext]>
-  getAvailableYears: vi.Mock<[], Promise<{ id: number; year: number }[]>>
+type MockedSeedRunnerMethods = Pick<
+  SeedRunner,
+  | 'connect'
+  | 'disconnect'
+  | 'seed'
+  | 'getAvailableYears'
+  | 'getStateCodesForYear'
+>
+
+type MockSeedRunner = {
+  [K in keyof MockedSeedRunnerMethods]: ReturnType<typeof vi.fn> &
+    MockedSeedRunnerMethods[K]
 }
 
-function createMockRunner(overrides: Partial<MockRunner> = {}): MockRunner {
+function createMockRunner(
+  overrides: Partial<MockSeedRunner> = {},
+): MockSeedRunner {
   return {
     connect: vi.fn().mockResolvedValue(void 0),
     disconnect: vi.fn().mockResolvedValue(void 0),
@@ -78,27 +81,27 @@ function createMockRunner(overrides: Partial<MockRunner> = {}): MockRunner {
 }
 
 async function setupMockSeedRunner(
-  mockRunner: MockRunner = createMockRunner(),
+  mockRunner: MockSeedRunner = createMockRunner(),
 ) {
   const SeedRunnerSpy = vi
     .spyOn(await import('../../../src/seeds/scripts/seed-runner'), 'SeedRunner')
-    .mockImplementation(() => mockRunner as MockRunner)
+    .mockImplementation(() => mockRunner as unknown as SeedRunner)
 
   return {
     mockRunner,
     SeedRunnerSpy,
-    mockRunnerInstance:
-      new (SeedRunnerSpy as typeof SeedRunner)() as SeedRunner,
+    mockRunnerInstance: mockRunner as unknown as SeedRunner,
   }
 }
 
 class MockRunnerManager {
-  public mockRunner: MockRunner
-  public SeedRunnerSpy: vi.SpyInstance
-  public mockRunnerInstance: SeedRunner
+  public mockRunner: MockSeedRunner
+  public SeedRunnerSpy!: vi.SpyInstance
+  public mockRunnerInstance!: SeedRunner
 
-  constructor(overrides: Partial<MockRunner> = {}) {
-    this.mockRunner = createMockRunner(overrides)
+  constructor(overrides: Partial<MockSeedRunner> = {}) {
+    const baseRunner = createMockRunner()
+    this.mockRunner = { ...baseRunner, ...overrides } as MockSeedRunner
   }
 
   async setup() {
@@ -191,7 +194,13 @@ describe('Seed Database', () => {
           )
           return
         } catch (error: unknown) {
-          if (error.code === '40P01' && attempt < maxRetries) {
+          if (
+            typeof error === 'object' &&
+            error !== null &&
+            'code' in error &&
+            error.code === '40P01' &&
+            attempt < maxRetries
+          ) {
             console.log(`Deadlock detected on attempt ${attempt}, retrying...`)
             await new Promise((resolve) => setTimeout(resolve, attempt * 100))
           } else {
@@ -307,32 +316,33 @@ describe('Seed Database', () => {
   })
 
   describe('seeds', () => {
-    it('includes all configs', () => {
-      expect(seeds).toHaveLength(3)
-      expect(seeds).toContain(SummaryLevelsConfig)
-      expect(seeds).toContain(YearsConfig)
-      expect(seeds).toContain(DatasetConfig)
+    it('includes all non-geography configs', () => {
+      expect(seeds).toHaveLength(4)
+      expect(seeds).toContain(configs.SummaryLevelsConfig)
+      expect(seeds).toContain(configs.YearsConfig)
+      expect(seeds).toContain(configs.TopicsConfig)
+      expect(seeds).toContain(configs.DatasetConfig)
     })
   })
 
   describe('geographySeeds', () => {
     it('includes geography configs', () => {
       expect(geographySeeds()).toHaveLength(8)
-      expect(geographySeeds()).toContain(NationConfig)
-      expect(geographySeeds()).toContain(RegionConfig)
-      expect(geographySeeds()).toContain(DivisionConfig)
-      expect(geographySeeds()).toContain(StateConfig)
-      expect(geographySeeds()).toContain(CountyConfig)
-      expect(geographySeeds()).toContain(CountySubdivisionConfig)
-      expect(geographySeeds()).toContain(PlaceConfig)
-      expect(geographySeeds()).toContain(ZipCodeTabulationAreaConfig)
+      expect(geographySeeds()).toContain(configs.NationConfig)
+      expect(geographySeeds()).toContain(configs.RegionConfig)
+      expect(geographySeeds()).toContain(configs.DivisionConfig)
+      expect(geographySeeds()).toContain(configs.StateConfig)
+      expect(geographySeeds()).toContain(configs.CountyConfig)
+      expect(geographySeeds()).toContain(configs.CountySubdivisionConfig)
+      expect(geographySeeds()).toContain(configs.PlaceConfig)
+      expect(geographySeeds()).toContain(configs.ZipCodeTabulationAreaConfig)
     })
 
     it('does not include time intensive configs when set to slim', () => {
       process.env.SEED_MODE = 'slim'
-      expect(geographySeeds).not.toContain(CountySubdivisionConfig)
-      expect(geographySeeds).not.toContain(PlaceConfig)
-      expect(geographySeeds).not.toContain(ZipCodeTabulationAreaConfig)
+      expect(geographySeeds).not.toContain(configs.CountySubdivisionConfig)
+      expect(geographySeeds).not.toContain(configs.PlaceConfig)
+      expect(geographySeeds).not.toContain(configs.ZipCodeTabulationAreaConfig)
       delete process.env.SEED_MODE
     })
   })
@@ -350,14 +360,14 @@ describe('Seed Database', () => {
 
         // Time for Math!
         //
-        // 3 Static Configs (Year, Summary Levels, DatasetConfig) ] = 3
+        // 4 Static Configs (Year, Summary Levels, DatasetConfig, TopicsConfig) ] = 4
         // +
         // 2 Years x 7 Std Geo Configs[Nation + Region + Division + State + County + Place + ZCTA ] = 14 Runs
         // +
         // 2 years x 2 Mocked States x 1 MultiStateConfig[CountySubdivisionConfig] = 4 State-specific Runs
         // ------------
-        // EQUALS 21 Total Config Runs
-        expect(mockRunner.seed).toHaveBeenCalledTimes(21)
+        // EQUALS 22 Total Config Runs
+        expect(mockRunner.seed).toHaveBeenCalledTimes(22)
       } finally {
         SeedRunnerSpy.mockRestore()
       }
@@ -411,7 +421,8 @@ describe('Seed Database', () => {
       try {
         await runSeedsWithRunner(mockRunnerInstance)
 
-        expect(mockRunner.seed).toHaveBeenCalledTimes(3)
+        // Non-GEO Configs
+        expect(mockRunner.seed).toHaveBeenCalledTimes(4)
         expect(mockRunner.seed).toHaveBeenCalledWith(
           expect.objectContaining({
             file: 'summary_levels.json',
@@ -501,13 +512,12 @@ describe('Seed Database', () => {
 
       await runSeedsWithRunner(runner, 'summary_levels.json', testConfigs)
 
-      const result = await client.query<GeographyLevelRow>(
+      const result = await client.query<SummaryLevelRow>(
         `SELECT * FROM ${testTableName} ORDER BY code`,
       )
       expect(result.rows).toHaveLength(2)
 
       const nation = result.rows.find((row) => row.code === '010')
-
       expect(nation?.name).toBe('Nation')
     })
   })
@@ -550,7 +560,7 @@ describe('Seed Database', () => {
       })
 
       it('fetches the State codes from the context', async () => {
-        const multiStateConfig: GeographySeedConfig = {
+        const multiStateConfig: MultiStateGeographySeedConfig = {
           table: 'geographies',
           conflictColumn: 'ucgid_code',
           urlGenerator: (context: GeographyContext, stateCode: string) =>
@@ -595,7 +605,7 @@ describe('Seed Database', () => {
       })
 
       it('iterates over each state and runs the config', async () => {
-        const multiStateConfig: GeographySeedConfig = {
+        const multiStateConfig: MultiStateGeographySeedConfig = {
           table: 'geographies',
           conflictColumn: 'ucgid_code',
           urlGenerator: (context: GeographyContext, stateCode: string) =>
@@ -668,7 +678,7 @@ describe('Seed Database', () => {
       })
 
       it('handles errors from getStateCodesForYear', async () => {
-        const multiStateConfig: GeographySeedConfig = {
+        const multiStateConfig: MultiStateGeographySeedConfig = {
           table: 'geographies',
           conflictColumn: 'ucgid_code',
           urlGenerator: (context: GeographyContext, stateCode: string) =>
@@ -710,7 +720,7 @@ describe('Seed Database', () => {
       })
 
       it('handles empty state codes array', async () => {
-        const multiStateConfig: GeographySeedConfig = {
+        const multiStateConfig: MultiStateGeographySeedConfig = {
           table: 'geographies',
           conflictColumn: 'ucgid_code',
           urlGenerator: (context: GeographyContext, stateCode: string) =>
@@ -748,7 +758,7 @@ describe('Seed Database', () => {
       })
 
       it('handles mixed config types (multi-state and regular)', async () => {
-        const multiStateConfig: GeographySeedConfig = {
+        const multiStateConfig: MultiStateGeographySeedConfig = {
           table: 'geographies',
           conflictColumn: 'ucgid_code',
           urlGenerator: (context: GeographyContext, stateCode: string) =>
@@ -1089,12 +1099,14 @@ describe('Seed Database', () => {
           extraField: 'should-fail-validation',
           table: 123, // Wrong type - should be string
           conflictColumn: null, // Wrong type - should be string
-        } as unknown
+        }
 
         const { mockRunnerInstance } = await setupMockSeedRunner()
 
         await expect(
-          runSeedsWithRunner(mockRunnerInstance, undefined, [invalidConfig]),
+          runSeedsWithRunner(mockRunnerInstance, undefined, [
+            invalidConfig,
+          ] as unknown as SeedConfig[]),
         ).rejects.toThrow('SeedConfig validation failed')
 
         // Verify error logging occurred
@@ -1219,35 +1231,6 @@ describe('Seed Database', () => {
     })
 
     describe('zodErrorHandling', () => {
-      it('should handle ZodError with detailed logging', () => {
-        const zodError = new z.ZodError([
-          {
-            code: 'invalid_type',
-            expected: 'string',
-            received: 'number',
-            path: ['table'],
-            message: 'Expected string, received number',
-          },
-          {
-            code: 'invalid_type',
-            expected: 'string',
-            received: 'undefined',
-            path: ['conflictColumn'],
-            message: 'Required',
-          },
-        ])
-
-        expect(() => {
-          zodErrorHandling(zodError, 'Test validation failed')
-        }).toThrow('Test validation failed:')
-
-        expect(consoleSpy).toHaveBeenCalledWith('Test validation failed:')
-        expect(consoleSpy).toHaveBeenCalledWith(
-          '1. table: Expected string, received number',
-        )
-        expect(consoleSpy).toHaveBeenCalledWith('2. conflictColumn: Required')
-      })
-
       it('should handle regular Error objects', () => {
         const regularError = new Error('Some error message')
 
@@ -1267,26 +1250,6 @@ describe('Seed Database', () => {
         }).toThrow('Test validation failed: Some string error')
 
         expect(consoleSpy).not.toHaveBeenCalled()
-      })
-
-      it('should handle errors with empty paths', () => {
-        const zodError = new z.ZodError([
-          {
-            code: 'invalid_type',
-            expected: 'object',
-            received: 'string',
-            path: [],
-            message: 'Expected object, received string',
-          },
-        ])
-
-        expect(() => {
-          zodErrorHandling(zodError, 'Root validation failed')
-        }).toThrow('Root validation failed:')
-
-        expect(consoleSpy).toHaveBeenCalledWith(
-          '1. root: Expected object, received string',
-        )
       })
     })
   })

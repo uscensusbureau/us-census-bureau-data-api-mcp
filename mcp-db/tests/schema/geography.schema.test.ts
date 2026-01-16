@@ -218,8 +218,8 @@ describe('Geography Schema', () => {
           summary_level_code: '010',
           latitude: 34.7366771,
           longitude: -103.2852703,
-          created_at: mockTime.toISOString(),
-          updated_at: mockTime.toISOString(),
+          created_at: mockTime,
+          updated_at: mockTime,
         },
       ])
     })
@@ -369,11 +369,11 @@ describe('Geography Schema', () => {
       })
 
       it('defines created_at', () => {
-        expect(record.created_at).toEqual(mockTime.toISOString())
+        expect(record.created_at).toEqual(mockTime)
       })
 
       it('defines updated_at', () => {
-        expect(record.updated_at).toEqual(mockTime.toISOString())
+        expect(record.updated_at).toEqual(mockTime)
       })
     })
 

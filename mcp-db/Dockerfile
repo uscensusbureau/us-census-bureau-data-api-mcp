@@ -1,3 +1,4 @@
+# Development Environment
 FROM node:20-alpine AS dev
 WORKDIR /app
 COPY package*.json ./

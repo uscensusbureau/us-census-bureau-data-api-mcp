@@ -53,7 +53,9 @@ export function parseTemporalRange(temporal: string): {
   try {
     const parts = temporal.split('/')
     if (parts.length !== 2 || !parts[0]?.trim() || !parts[1]?.trim()) {
-      console.warn(`Failed to parse temporal string (invalid format): ${temporal}`)
+      console.warn(
+        `Failed to parse temporal string (invalid format): ${temporal}`,
+      )
       return { temporal_start: null, temporal_end: null }
     }
 

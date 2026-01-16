@@ -7,47 +7,34 @@ import {
   EnhancedGeographySeedConfig,
   EnhancedGeographySeedConfigSchema,
   GeographySeedConfig,
-  GeographySeedConfigSchema,
   GeographyContext,
   GeographyContextSchema,
   isMultiStateConfig,
-  MultiStateGeographySeedConfig,
   SeedConfig,
   validateEnhancedGeographySeedConfigConstraints,
   validateSeedConfigConstraints,
 } from '../../schema/seed-config.schema.js'
 import { SeedRunner } from './seed-runner.js'
+import * as configs from '../configs/index.js'
 
-import {
-  CountyConfig,
-  CountySubdivisionConfig,
-  DatasetConfig,
-  DivisionConfig,
-  NationConfig,
-  PlaceConfig,
-  RegionConfig,
-  StateConfig,
-  SummaryLevelsConfig,
-  YearsConfig,
-  ZipCodeTabulationAreaConfig,
-} from '../configs/index.js'
-
-// Seed configurations
+// Non-geographic Seed Configs
 export const seeds: SeedConfig[] = [
-  SummaryLevelsConfig,
-  YearsConfig,
-  DatasetConfig,
+  configs.SummaryLevelsConfig,
+  configs.YearsConfig,
+  configs.TopicsConfig,
+  configs.DatasetConfig,
 ]
 
+// Geographic Seed Configs
 let baseGeographySeeds: EnhancedGeographySeedConfig[] = [
-  NationConfig,
-  RegionConfig,
-  DivisionConfig,
-  StateConfig,
-  CountyConfig,
-  CountySubdivisionConfig,
-  PlaceConfig,
-  ZipCodeTabulationAreaConfig,
+  configs.NationConfig,
+  configs.RegionConfig,
+  configs.DivisionConfig,
+  configs.StateConfig,
+  configs.CountyConfig,
+  configs.CountySubdivisionConfig,
+  configs.PlaceConfig,
+  configs.ZipCodeTabulationAreaConfig,
 ]
 
 export function geographySeeds(): EnhancedGeographySeedConfig[] {
@@ -55,9 +42,9 @@ export function geographySeeds(): EnhancedGeographySeedConfig[] {
     // Remove Configs That Take Forever to Run if SEED_MODE Set to Slim (For Testing Builds)
     baseGeographySeeds = baseGeographySeeds.filter(
       (config) =>
-        config !== CountySubdivisionConfig &&
-        config !== PlaceConfig &&
-        config !== ZipCodeTabulationAreaConfig,
+        config !== configs.CountySubdivisionConfig &&
+        config !== configs.PlaceConfig &&
+        config !== configs.ZipCodeTabulationAreaConfig,
     )
   }
 

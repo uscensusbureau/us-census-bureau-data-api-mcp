@@ -130,8 +130,8 @@ export const GeographyRecordSchema = z.object({
   county_subdivision_code: z.string().optional(),
   place_code: z.string().optional(),
   zip_code_tabulation_area: z.string().optional(),
-  created_at: z.string().optional(),
-  updated_at: z.string().optional(),
+  created_at: z.coerce.date().optional(),
+  updated_at: z.coerce.date().optional(),
 })
 
 export type GeographyRecord = z.infer<typeof GeographyRecordSchema>
@@ -189,7 +189,8 @@ export function transformApiGeographyData(
       )
     }
 
-    const record: Record<string, string | number | null> = {
+    // Use a type that allows assignment of all possible field types
+    const record: Record<string, string | number | Date | null> = {
       name: '',
       for_param: '',
       in_param: null,
@@ -205,26 +206,26 @@ export function transformApiGeographyData(
         return
       }
 
-      let value: unknown = row[columnIndex]
+      const value = row[columnIndex]
 
       // Type conversion
       if (['INTPTLAT', 'INTPTLON'].includes(header)) {
-        value = parseFloat(value as string)
-        if (isNaN(value as number)) {
+        const numValue = parseFloat(value)
+        if (isNaN(numValue)) {
           throw new Error(
-            `Row ${index + 1}: Invalid number for ${header}: "${row[columnIndex]}"`,
+            `Row ${index + 1}: Invalid number for ${header}: "${value}"`,
           )
         }
 
-        record[dbColumn] = parseFloat(value as string)
+        record[dbColumn] = numValue
       } else {
-        record[dbColumn] = value as string
+        record[dbColumn] = value
       }
     })
 
-    // Add standard timestamps
-    record.created_at = new Date().toISOString()
-    record.updated_at = new Date().toISOString()
+    // Add standard timestamps as Date objects to match the schema
+    record.created_at = new Date()
+    record.updated_at = new Date()
 
     return record as GeographyRecord
   })
@@ -276,11 +277,9 @@ function createDynamicGeographySchema(
 ) {
   const geoConfig = SummaryLevels[summaryLevel]
 
-  // Build schema fields based on what's actually in the data
   const schemaFields: Record<string, z.ZodType> = {
-    created_at: z.string().datetime(),
-    updated_at: z.string().datetime(),
-    // Note: for_param and in_param are added by configs after transformation
+    created_at: z.coerce.date(),
+    updated_at: z.coerce.date(),
   }
 
   // Add validation for each header that has a mapping
