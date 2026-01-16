@@ -1,0 +1,1944 @@
+{
+  "topics": [
+    {
+      "TOPIC_STRING": "Government_Employment_and_Payroll",
+      "TOPIC_LABEL": "Government Employment and Payroll",
+      "PARENT_TOPIC_STRING": "Government",
+      "DESCRIPTION": "Statistics on the number of state and local government civilian employees and their gross payrolls for the month of March."
+    },
+    {
+      "TOPIC_STRING": "State_and_Local_Government_Finances",
+      "TOPIC_LABEL": "State and Local Government Finances",
+      "PARENT_TOPIC_STRING": "Government",
+      "DESCRIPTION": "Government finances include revenues, expenditures (spending), debt, and assets (cash and security holdings)."
+    },
+    {
+      "TOPIC_STRING": "State_Government_Finances",
+      "TOPIC_LABEL": "State Government Finances",
+      "PARENT_TOPIC_STRING": "State_and_Local_Government_Finances",
+      "DESCRIPTION": "Government finances include revenues, expenditures (spending), debt, and assets (cash and security holdings)."
+    },
+    {
+      "TOPIC_STRING": "Local_Government_Finances",
+      "TOPIC_LABEL": "Local Government Finances",
+      "PARENT_TOPIC_STRING": "State_and_Local_Government_Finances",
+      "DESCRIPTION": "Government finances include revenues, expenditures (spending), debt, and assets (cash and security holdings)."
+    },
+    {
+      "TOPIC_STRING": "Public_Education_Finances",
+      "TOPIC_LABEL": "Public Education Finances",
+      "PARENT_TOPIC_STRING": "State_and_Local_Government_Finances",
+      "DESCRIPTION": "Education finance data include revenues, expenditures, debt, and assets [cash and security holdings] of elementary and secondary public school systems."
+    },
+    {
+      "TOPIC_STRING": "Public_Pension_Systems",
+      "TOPIC_LABEL": "Public Pension Systems",
+      "PARENT_TOPIC_STRING": "State_and_Local_Government_Finances",
+      "DESCRIPTION": "Public pension systems provide revenues, expenditures, financial assets, and membership information for state and local government defined benefit retirement systems."
+    },
+    {
+      "TOPIC_STRING": "Taxation_Revenue",
+      "TOPIC_LABEL": "Taxation Revenue",
+      "PARENT_TOPIC_STRING": "State_and_Local_Government_Finances",
+      "DESCRIPTION": "State and local government tax collections by major tax category including property, income, and sales taxes."
+    },
+    {
+      "TOPIC_STRING": "Redistricting",
+      "TOPIC_LABEL": "Redistricting",
+      "PARENT_TOPIC_STRING": "Government",
+      "DESCRIPTION": "The Census Bureau provides state legislatures with the small area census population tabulations necessary for legislative redistricting."
+    },
+    {
+      "TOPIC_STRING": "Employment_and_Labor_Force_Status",
+      "TOPIC_LABEL": "Employment and Labor Force Status",
+      "PARENT_TOPIC_STRING": "Employment",
+      "DESCRIPTION": "Information about the nation s workforce, changes in employment rates and unemployment rates at the national, state, county or city level."
+    },
+    {
+      "TOPIC_STRING": "Work_Experience",
+      "TOPIC_LABEL": "Work Experience",
+      "PARENT_TOPIC_STRING": "Employment",
+      "DESCRIPTION": "Work experience includes data on employment patterns, work history, hours worked, and employment duration."
+    },
+    {
+      "TOPIC_STRING": "Usual_Hours_and_Weeks_Worked",
+      "TOPIC_LABEL": "Usual Hours and Weeks Worked",
+      "PARENT_TOPIC_STRING": "Work_Experience",
+      "DESCRIPTION": "Data on the usual number of hours worked per week and weeks worked per year by employed persons."
+    },
+    {
+      "TOPIC_STRING": "Part_or_Full_Time",
+      "TOPIC_LABEL": "Part or Full-Time",
+      "PARENT_TOPIC_STRING": "Work_Experience",
+      "DESCRIPTION": "Classification of workers by whether they work part-time (less than 35 hours per week) or full-time (35 hours or more per week)."
+    },
+    {
+      "TOPIC_STRING": "Temporary_or_Permanent",
+      "TOPIC_LABEL": "Temporary or Permanent",
+      "PARENT_TOPIC_STRING": "Work_Experience",
+      "DESCRIPTION": "Classification of employment by job tenure characteristics, distinguishing temporary from permanent positions."
+    },
+    {
+      "TOPIC_STRING": "Employment_History",
+      "TOPIC_LABEL": "Employment History",
+      "PARENT_TOPIC_STRING": "Work_Experience",
+      "DESCRIPTION": "Data on workers' employment duration, job changes, and career progression over time."
+    },
+    {
+      "TOPIC_STRING": "Occupation",
+      "TOPIC_LABEL": "Occupation",
+      "PARENT_TOPIC_STRING": "Employment",
+      "DESCRIPTION": "The Census Bureau collects data on occupation for Americans in the labor force across several surveys."
+    },
+    {
+      "TOPIC_STRING": "Industry",
+      "TOPIC_LABEL": "Industry",
+      "PARENT_TOPIC_STRING": "Employment",
+      "DESCRIPTION": "The Census Bureau collects data on industry across several surveys."
+    },
+    {
+      "TOPIC_STRING": "Class_of_Worker",
+      "TOPIC_LABEL": "Class of Worker",
+      "PARENT_TOPIC_STRING": "Employment",
+      "DESCRIPTION": "The Census Bureau collects data on class of worker for Americans in the labor force across several surveys."
+    },
+    {
+      "TOPIC_STRING": "Commuting",
+      "TOPIC_LABEL": "Commuting",
+      "PARENT_TOPIC_STRING": "Employment",
+      "DESCRIPTION": "Commuting including means of transportation, time of departure, mean travel time to work, vehicles available, distance traveled, and expenses."
+    },
+    {
+      "TOPIC_STRING": "Work_from_Home",
+      "TOPIC_LABEL": "Work from Home",
+      "PARENT_TOPIC_STRING": "Employment",
+      "DESCRIPTION": "Work from home refers to a worker s usage of the home as a workplace."
+    },
+    {
+      "TOPIC_STRING": "Housing_Units",
+      "TOPIC_LABEL": "Housing Units",
+      "PARENT_TOPIC_STRING": "Housing",
+      "DESCRIPTION": "Housing units are defined as a house, apartment, mobile home, or group of rooms occupied or intended as separate living quarters with direct access from the outside or a common hall."
+    },
+    {
+      "TOPIC_STRING": "Absorption_Rate",
+      "TOPIC_LABEL": "Absorption Rate",
+      "PARENT_TOPIC_STRING": "Housing",
+      "DESCRIPTION": "Measuring how quickly new multifamily rental and condo/co-op units (5+ units/building) are rented or sold after completion."
+    },
+    {
+      "TOPIC_STRING": "Homeownership_Rate",
+      "TOPIC_LABEL": "Homeownership Rate",
+      "PARENT_TOPIC_STRING": "Housing",
+      "DESCRIPTION": "The proportion of households that are occupied by the owners, measured as the percentage of owner-occupied housing units."
+    },
+    {
+      "TOPIC_STRING": "Vacancy",
+      "TOPIC_LABEL": "Vacancy",
+      "PARENT_TOPIC_STRING": "Housing",
+      "DESCRIPTION": "Data on housing units that are not occupied, including their characteristics and reasons for vacancy."
+    },
+    {
+      "TOPIC_STRING": "Vacancy_Rates",
+      "TOPIC_LABEL": "Vacancy Rates",
+      "PARENT_TOPIC_STRING": "Vacancy",
+      "DESCRIPTION": "The percentage of housing units that are vacant, calculated separately for rental and homeowner inventory."
+    },
+    {
+      "TOPIC_STRING": "Vacancy_Characteristics",
+      "TOPIC_LABEL": "Vacancy Characteristics",
+      "PARENT_TOPIC_STRING": "Vacancy",
+      "DESCRIPTION": "Detailed information about vacant housing units including duration of vacancy, condition, and intended use."
+    },
+    {
+      "TOPIC_STRING": "Financial_Characteristics",
+      "TOPIC_LABEL": "Financial Characteristics",
+      "PARENT_TOPIC_STRING": "Housing",
+      "DESCRIPTION": "Economic aspects of housing including costs, values, mortgages, taxes, and insurance."
+    },
+    {
+      "TOPIC_STRING": "Housing_Value_and_Purchase_Price",
+      "TOPIC_LABEL": "Housing Value and Purchase Price",
+      "PARENT_TOPIC_STRING": "Financial_Characteristics",
+      "DESCRIPTION": "The estimated market value of owner-occupied housing units and the price paid for home purchases."
+    },
+    {
+      "TOPIC_STRING": "Insurance_Utilities_and_Other_Fees",
+      "TOPIC_LABEL": "Insurance, Utilities, and Other Fees",
+      "PARENT_TOPIC_STRING": "Financial_Characteristics",
+      "DESCRIPTION": "Costs for homeowner or renter insurance, utility services (electricity, gas, water, sewer), and other housing-related fees."
+    },
+    {
+      "TOPIC_STRING": "Home_Improvement_and_Repairs",
+      "TOPIC_LABEL": "Home Improvement and Repairs",
+      "PARENT_TOPIC_STRING": "Financial_Characteristics",
+      "DESCRIPTION": "Expenditures on renovations, repairs, and improvements to housing units."
+    },
+    {
+      "TOPIC_STRING": "Real_Estate_Taxes",
+      "TOPIC_LABEL": "Real Estate Taxes",
+      "PARENT_TOPIC_STRING": "Financial_Characteristics",
+      "DESCRIPTION": "Annual property taxes assessed on housing units and land."
+    },
+    {
+      "TOPIC_STRING": "Mortgage_Costs",
+      "TOPIC_LABEL": "Mortgage Costs",
+      "PARENT_TOPIC_STRING": "Financial_Characteristics",
+      "DESCRIPTION": "Monthly mortgage payments including principal, interest, and related financing costs."
+    },
+    {
+      "TOPIC_STRING": "Renter_Costs",
+      "TOPIC_LABEL": "Renter Costs",
+      "PARENT_TOPIC_STRING": "Financial_Characteristics",
+      "DESCRIPTION": "Monthly gross rent including contract rent and estimated utilities and fuels."
+    },
+    {
+      "TOPIC_STRING": "Deliquent_Payments_Foreclosures_and_Evictions",
+      "TOPIC_LABEL": "Deliquent Payments, Foreclosures, and Evictions",
+      "PARENT_TOPIC_STRING": "Financial_Characteristics",
+      "DESCRIPTION": "Data on late housing payments, mortgage foreclosures, and rental evictions."
+    },
+    {
+      "TOPIC_STRING": "Government_Subsidies_and_Tax_Credit",
+      "TOPIC_LABEL": "Government Subsidies and Tax Credit",
+      "PARENT_TOPIC_STRING": "Financial_Characteristics",
+      "DESCRIPTION": "Federal, state, or local housing assistance programs and tax benefits for homeowners or renters."
+    },
+    {
+      "TOPIC_STRING": "Rental_Property_Ownership",
+      "TOPIC_LABEL": "Rental Property Ownership",
+      "PARENT_TOPIC_STRING": "Financial_Characteristics",
+      "DESCRIPTION": "Characteristics of landlords and entities that own rental housing properties."
+    },
+    {
+      "TOPIC_STRING": "Occupancy_Characteristics",
+      "TOPIC_LABEL": "Occupancy Characteristics",
+      "PARENT_TOPIC_STRING": "Housing",
+      "DESCRIPTION": "Characteristics of occupied housing units including household composition and living arrangements."
+    },
+    {
+      "TOPIC_STRING": "Selected_Household_Characteristics",
+      "TOPIC_LABEL": "Selected Household Characteristics",
+      "PARENT_TOPIC_STRING": "Occupancy_Characteristics",
+      "DESCRIPTION": "Demographic and socioeconomic characteristics of household members in occupied housing units."
+    },
+    {
+      "TOPIC_STRING": "Occupants_Per_Room",
+      "TOPIC_LABEL": "Occupants Per Room",
+      "PARENT_TOPIC_STRING": "Occupancy_Characteristics",
+      "DESCRIPTION": "The number of persons per room in occupied housing units, used as a measure of crowding."
+    },
+    {
+      "TOPIC_STRING": "Square_Feet_Per_Occupant",
+      "TOPIC_LABEL": "Square Feet Per Occupant",
+      "PARENT_TOPIC_STRING": "Occupancy_Characteristics",
+      "DESCRIPTION": "The amount of living space available per person in a housing unit."
+    },
+    {
+      "TOPIC_STRING": "Transportation",
+      "TOPIC_LABEL": "Transportation",
+      "PARENT_TOPIC_STRING": "Occupancy_Characteristics",
+      "DESCRIPTION": "Vehicles available to households and transportation access from housing units."
+    },
+    {
+      "TOPIC_STRING": "Physical_Characteristics",
+      "TOPIC_LABEL": "Physical Characteristics",
+      "PARENT_TOPIC_STRING": "Housing",
+      "DESCRIPTION": "Structural and amenity features of housing units."
+    },
+    {
+      "TOPIC_STRING": "Year_Structure_Built",
+      "TOPIC_LABEL": "Year Structure Built",
+      "PARENT_TOPIC_STRING": "Physical_Characteristics",
+      "DESCRIPTION": "The year construction was completed on the housing structure."
+    },
+    {
+      "TOPIC_STRING": "Lot_Size",
+      "TOPIC_LABEL": "Lot Size",
+      "PARENT_TOPIC_STRING": "Physical_Characteristics",
+      "DESCRIPTION": "The size of the land parcel on which a housing structure sits."
+    },
+    {
+      "TOPIC_STRING": "Unit_Size_Square_Feet",
+      "TOPIC_LABEL": "Unit Size (Square Feet)",
+      "PARENT_TOPIC_STRING": "Physical_Characteristics",
+      "DESCRIPTION": "The total floor area of a housing unit measured in square feet."
+    },
+    {
+      "TOPIC_STRING": "Units_and_Stories_in_Structure",
+      "TOPIC_LABEL": "Units and Stories in Structure",
+      "PARENT_TOPIC_STRING": "Physical_Characteristics",
+      "DESCRIPTION": "The number of housing units and floors in a building or structure."
+    },
+    {
+      "TOPIC_STRING": "Types_of_Rooms",
+      "TOPIC_LABEL": "Types of Rooms",
+      "PARENT_TOPIC_STRING": "Physical_Characteristics",
+      "DESCRIPTION": "The number and types of rooms in a housing unit, such as bedrooms, bathrooms, and kitchens."
+    },
+    {
+      "TOPIC_STRING": "Heating_and_Air_Conditioning_HVAC",
+      "TOPIC_LABEL": "Heating and Air Conditioning (HVAC)",
+      "PARENT_TOPIC_STRING": "Physical_Characteristics",
+      "DESCRIPTION": "Equipment and fuel types used for heating and cooling housing units."
+    },
+    {
+      "TOPIC_STRING": "Water_Sewage_and_Plumbing_Facilities",
+      "TOPIC_LABEL": "Water, Sewage, and Plumbing Facilities",
+      "PARENT_TOPIC_STRING": "Physical_Characteristics",
+      "DESCRIPTION": "Water source, sewage disposal, and plumbing fixtures available in housing units."
+    },
+    {
+      "TOPIC_STRING": "Telephone_Computer_and_Internet_Access",
+      "TOPIC_LABEL": "Telephone, Computer, and Internet Access",
+      "PARENT_TOPIC_STRING": "Physical_Characteristics",
+      "DESCRIPTION": "Availability of telecommunications and internet services in housing units."
+    },
+    {
+      "TOPIC_STRING": "Parking_Garage",
+      "TOPIC_LABEL": "Parking/Garage",
+      "PARENT_TOPIC_STRING": "Physical_Characteristics",
+      "DESCRIPTION": "Parking facilities and garage space available with housing units."
+    },
+    {
+      "TOPIC_STRING": "Outdoor_Features",
+      "TOPIC_LABEL": "Outdoor Features",
+      "PARENT_TOPIC_STRING": "Physical_Characteristics",
+      "DESCRIPTION": "Exterior amenities such as yards, porches, decks, and outdoor structures."
+    },
+    {
+      "TOPIC_STRING": "Building_Materials_and_Structural_Features",
+      "TOPIC_LABEL": "Building Materials and Structural Features",
+      "PARENT_TOPIC_STRING": "Physical_Characteristics",
+      "DESCRIPTION": "Construction materials and structural elements of housing units including walls, roofs, and foundations."
+    },
+    {
+      "TOPIC_STRING": "Neighborhood_Features",
+      "TOPIC_LABEL": "Neighborhood Features",
+      "PARENT_TOPIC_STRING": "Physical_Characteristics",
+      "DESCRIPTION": "Characteristics of the surrounding area including access to services and community amenities."
+    },
+    {
+      "TOPIC_STRING": "Health_and_Safety_Characteristics",
+      "TOPIC_LABEL": "Health and Safety Characteristics",
+      "PARENT_TOPIC_STRING": "Housing",
+      "DESCRIPTION": "Conditions affecting health, safety, and accessibility of housing units."
+    },
+    {
+      "TOPIC_STRING": "Home_Accessibility",
+      "TOPIC_LABEL": "Home Accessibility",
+      "PARENT_TOPIC_STRING": "Health_and_Safety_Characteristics",
+      "DESCRIPTION": "Features that accommodate persons with disabilities, such as ramps, grab bars, and accessible bathrooms."
+    },
+    {
+      "TOPIC_STRING": "Emergency_and_Disaster_Preparedness",
+      "TOPIC_LABEL": "Emergency and Disaster Preparedness",
+      "PARENT_TOPIC_STRING": "Health_and_Safety_Characteristics",
+      "DESCRIPTION": "Housing features related to emergency response and disaster readiness."
+    },
+    {
+      "TOPIC_STRING": "Problems_and_Pests",
+      "TOPIC_LABEL": "Problems and Pests",
+      "PARENT_TOPIC_STRING": "Health_and_Safety_Characteristics",
+      "DESCRIPTION": "Housing quality issues including structural problems, water leaks, and pest infestations."
+    },
+    {
+      "TOPIC_STRING": "Owner_Renter_Householder_Characteristics",
+      "TOPIC_LABEL": "Owner/Renter (Householder) Characteristics",
+      "PARENT_TOPIC_STRING": "Housing",
+      "DESCRIPTION": "Characteristics of the person (householder) who owns or rents the housing unit."
+    },
+    {
+      "TOPIC_STRING": "Owner_Renter_Tenure",
+      "TOPIC_LABEL": "Owner/Renter (Tenure)",
+      "PARENT_TOPIC_STRING": "Owner_Renter_Householder_Characteristics",
+      "DESCRIPTION": "Whether a housing unit is owner-occupied or renter-occupied."
+    },
+    {
+      "TOPIC_STRING": "Selected_Householder_Characteristics",
+      "TOPIC_LABEL": "Selected Householder Characteristics",
+      "PARENT_TOPIC_STRING": "Owner_Renter_Householder_Characteristics",
+      "DESCRIPTION": "Demographic and economic characteristics of householders including age, race, and income."
+    },
+    {
+      "TOPIC_STRING": "First_Time_Owner",
+      "TOPIC_LABEL": "First Time Owner",
+      "PARENT_TOPIC_STRING": "Owner_Renter_Householder_Characteristics",
+      "DESCRIPTION": "Homeowners who have never previously owned a home."
+    },
+    {
+      "TOPIC_STRING": "Year_Householder_Moved_Into_Unit",
+      "TOPIC_LABEL": "Year Householder Moved Into Unit",
+      "PARENT_TOPIC_STRING": "Owner_Renter_Householder_Characteristics",
+      "DESCRIPTION": "The year the current householder began occupying the housing unit."
+    },
+    {
+      "TOPIC_STRING": "Prior_Occupancy",
+      "TOPIC_LABEL": "Prior Occupancy",
+      "PARENT_TOPIC_STRING": "Owner_Renter_Householder_Characteristics",
+      "DESCRIPTION": "Previous residence and moving patterns of householders."
+    },
+    {
+      "TOPIC_STRING": "New_and_Existing_Units",
+      "TOPIC_LABEL": "New and Existing Units",
+      "PARENT_TOPIC_STRING": "Housing",
+      "DESCRIPTION": "Data on both newly constructed and existing housing inventory."
+    },
+    {
+      "TOPIC_STRING": "Annual_Housing_Unit_Change",
+      "TOPIC_LABEL": "Annual Housing Unit Change",
+      "PARENT_TOPIC_STRING": "New_and_Existing_Units",
+      "DESCRIPTION": "Net change in housing units from year to year, including new construction, demolitions, and conversions."
+    },
+    {
+      "TOPIC_STRING": "New_Housing_Construction_and_Sales",
+      "TOPIC_LABEL": "New Housing (Construction and Sales)",
+      "PARENT_TOPIC_STRING": "New_and_Existing_Units",
+      "DESCRIPTION": "Statistics on newly built housing units including building permits, starts, completions, and sales."
+    },
+    {
+      "TOPIC_STRING": "Manufactured_Mobile_Homes",
+      "TOPIC_LABEL": "Manufactured/Mobile Homes",
+      "PARENT_TOPIC_STRING": "New_and_Existing_Units",
+      "DESCRIPTION": "Factory-built housing units that are transportable in one or more sections."
+    },
+    {
+      "TOPIC_STRING": "Condos_and_Co_ops",
+      "TOPIC_LABEL": "Condos and Co-ops",
+      "PARENT_TOPIC_STRING": "New_and_Existing_Units",
+      "DESCRIPTION": "Housing units in multi-unit structures where owners hold title to individual units (condos) or shares in a corporation (co-ops)."
+    },
+    {
+      "TOPIC_STRING": "Income_and_Earnings",
+      "TOPIC_LABEL": "Income and Earnings",
+      "PARENT_TOPIC_STRING": "Income_and_Poverty",
+      "DESCRIPTION": "Money income from all sources including earnings, investments, and transfer payments."
+    },
+    {
+      "TOPIC_STRING": "Income_Households_Families_Individuals",
+      "TOPIC_LABEL": "Income (Households, Families, Individuals)",
+      "PARENT_TOPIC_STRING": "Income_and_Earnings",
+      "DESCRIPTION": "Total income received by households, families, and individuals before taxes."
+    },
+    {
+      "TOPIC_STRING": "Earnings_Individuals",
+      "TOPIC_LABEL": "Earnings (Individuals)",
+      "PARENT_TOPIC_STRING": "Income_and_Earnings",
+      "DESCRIPTION": "Income from wages, salaries, and self-employment for individuals."
+    },
+    {
+      "TOPIC_STRING": "Cash_Assistance_and_Social_Insurance",
+      "TOPIC_LABEL": "Cash Assistance and Social Insurance",
+      "PARENT_TOPIC_STRING": "Income_and_Earnings",
+      "DESCRIPTION": "Public assistance payments and social insurance benefits such as Social Security and unemployment compensation."
+    },
+    {
+      "TOPIC_STRING": "SNAP_Food_Stamps",
+      "TOPIC_LABEL": "SNAP/Food Stamps",
+      "PARENT_TOPIC_STRING": "Income_and_Earnings",
+      "DESCRIPTION": "Supplemental Nutrition Assistance Program benefits for purchasing food."
+    },
+    {
+      "TOPIC_STRING": "Income_Inequality",
+      "TOPIC_LABEL": "Income Inequality",
+      "PARENT_TOPIC_STRING": "Income_and_Earnings",
+      "DESCRIPTION": "Measures of income distribution such as Gini coefficients and income ratios."
+    },
+    {
+      "TOPIC_STRING": "Poverty",
+      "TOPIC_LABEL": "Poverty",
+      "PARENT_TOPIC_STRING": "Income_and_Poverty",
+      "DESCRIPTION": "Data measuring economic hardship based on income thresholds."
+    },
+    {
+      "TOPIC_STRING": "Official_Poverty_Measure",
+      "TOPIC_LABEL": "Official Poverty Measure",
+      "PARENT_TOPIC_STRING": "Poverty",
+      "DESCRIPTION": "Federal poverty thresholds based on pre-tax cash income compared to family size and composition."
+    },
+    {
+      "TOPIC_STRING": "Supplemental_Poverty_Measure",
+      "TOPIC_LABEL": "Supplemental Poverty Measure",
+      "PARENT_TOPIC_STRING": "Poverty",
+      "DESCRIPTION": "Alternative poverty measure that accounts for taxes, work expenses, and non-cash benefits."
+    },
+    {
+      "TOPIC_STRING": "Well_Being",
+      "TOPIC_LABEL": "Well-Being",
+      "PARENT_TOPIC_STRING": "Poverty",
+      "DESCRIPTION": "Broader measures of economic security and material hardship beyond income poverty."
+    },
+    {
+      "TOPIC_STRING": "Wealth_and_Assets",
+      "TOPIC_LABEL": "Wealth and Assets",
+      "PARENT_TOPIC_STRING": "Income_and_Poverty",
+      "DESCRIPTION": "Net worth including owned assets minus debts, such as home equity, savings, and investments."
+    },
+    {
+      "TOPIC_STRING": "Job_Creation_and_Destruction",
+      "TOPIC_LABEL": "Job Creation and Destruction",
+      "PARENT_TOPIC_STRING": "Business_and_Workforce_Dynamics",
+      "DESCRIPTION": "The number of jobs gained and lost through business expansions, contractions, births, and deaths."
+    },
+    {
+      "TOPIC_STRING": "Inventories",
+      "TOPIC_LABEL": "Inventories",
+      "PARENT_TOPIC_STRING": "Business_and_Economy",
+      "DESCRIPTION": "Product inventories, including raw materials, partially finished products, and more."
+    },
+    {
+      "TOPIC_STRING": "Total_Inventories",
+      "TOPIC_LABEL": "Total Inventories",
+      "PARENT_TOPIC_STRING": "Inventories",
+      "DESCRIPTION": "The total value of raw materials, work-in-process goods, and finished products held by businesses."
+    },
+    {
+      "TOPIC_STRING": "Inventories_by_Valuation_Method",
+      "TOPIC_LABEL": "Inventories by Valuation Method",
+      "PARENT_TOPIC_STRING": "Inventories",
+      "DESCRIPTION": "Business inventories classified by accounting method (FIFO, LIFO, or other valuation approaches)."
+    },
+    {
+      "TOPIC_STRING": "Inventories_Subject_to_LIFO",
+      "TOPIC_LABEL": "Inventories Subject to LIFO",
+      "PARENT_TOPIC_STRING": "Inventories",
+      "DESCRIPTION": "Inventories valued using the Last-In, First-Out accounting method."
+    },
+    {
+      "TOPIC_STRING": "Business_Dynamics",
+      "TOPIC_LABEL": "Business Dynamics",
+      "PARENT_TOPIC_STRING": "Business_and_Workforce_Dynamics",
+      "DESCRIPTION": "Measures of business formation, growth, contraction, and closure over time."
+    },
+    {
+      "TOPIC_STRING": "Australia_and_New_Zealand_Subregion",
+      "TOPIC_LABEL": "Australia and New Zealand Subregion",
+      "PARENT_TOPIC_STRING": "Oceania",
+      "DESCRIPTION": "Geographic subregion of Oceania comprising Australia and New Zealand."
+    },
+    {
+      "TOPIC_STRING": "Melanesia",
+      "TOPIC_LABEL": "Melanesia",
+      "PARENT_TOPIC_STRING": "Oceania",
+      "DESCRIPTION": "Subregion of Oceania including Papua New Guinea, Fiji, Solomon Islands, Vanuatu, and New Caledonia."
+    },
+    {
+      "TOPIC_STRING": "Micronesia",
+      "TOPIC_LABEL": "Micronesia",
+      "PARENT_TOPIC_STRING": "Oceania",
+      "DESCRIPTION": "Subregion of Oceania consisting of thousands of small islands including the Federated States of Micronesia, Palau, Guam, and the Marshall Islands."
+    },
+    {
+      "TOPIC_STRING": "Polynesia",
+      "TOPIC_LABEL": "Polynesia",
+      "PARENT_TOPIC_STRING": "Oceania",
+      "DESCRIPTION": "Subregion of Oceania including Hawaii, Samoa, Tonga, French Polynesia, and other Pacific island groups."
+    },
+    {
+      "TOPIC_STRING": "Alaska_Native_alone",
+      "TOPIC_LABEL": "Alaska Native alone",
+      "PARENT_TOPIC_STRING": "Detailed_American_Indian_and_Alaska_Native_Alone",
+      "DESCRIPTION": "Persons having origins in any of the original peoples of Alaska who maintain cultural identification through tribal affiliation or community attachment, reporting only Alaska Native."
+    },
+    {
+      "TOPIC_STRING": "Alaska_Native_alone_or_in_any_combination",
+      "TOPIC_LABEL": "Alaska Native alone or in any combination",
+      "PARENT_TOPIC_STRING": "Detailed_American_Indian_and_Alaska_Native_Alone_or_in_Any_combination",
+      "DESCRIPTION": "Persons reporting Alaska Native alone or in combination with one or more other race categories."
+    },
+    {
+      "TOPIC_STRING": "American_Indian_alone",
+      "TOPIC_LABEL": "American Indian alone",
+      "PARENT_TOPIC_STRING": "Detailed_American_Indian_and_Alaska_Native_Alone",
+      "DESCRIPTION": "Persons having origins in any of the original peoples of North and South America (including Central America) who maintain cultural identification through tribal affiliation or community attachment, reporting only American Indian."
+    },
+    {
+      "TOPIC_STRING": "American_Indian_alone_or_in_any_combination",
+      "TOPIC_LABEL": "American Indian alone or in any combination",
+      "PARENT_TOPIC_STRING": "Detailed_American_Indian_and_Alaska_Native_Alone_or_in_Any_combination",
+      "DESCRIPTION": "Persons reporting American Indian alone or in combination with one or more other race categories."
+    },
+    {
+      "TOPIC_STRING": "Canadian_Indian_and_French_American_Indian_alone",
+      "TOPIC_LABEL": "Canadian Indian and French American Indian alone",
+      "PARENT_TOPIC_STRING": "Detailed_American_Indian_and_Alaska_Native_Alone",
+      "DESCRIPTION": "Persons reporting specifically Canadian Indian or French American Indian tribal affiliations as their only race."
+    },
+    {
+      "TOPIC_STRING": "Canadian_Indian_and_French_American_Indian_alone_or_in_any_combination",
+      "TOPIC_LABEL": "Canadian Indian and French American Indian alone or in any combination",
+      "PARENT_TOPIC_STRING": "Detailed_American_Indian_and_Alaska_Native_Alone_or_in_Any_combination",
+      "DESCRIPTION": "Persons reporting Canadian Indian or French American Indian alone or in combination with other races."
+    },
+    {
+      "TOPIC_STRING": "Caribbean",
+      "TOPIC_LABEL": "Caribbean",
+      "PARENT_TOPIC_STRING": "Latin_America",
+      "DESCRIPTION": "Geographic region comprising Caribbean islands including Cuba, Jamaica, Haiti, Dominican Republic, and other island nations."
+    },
+    {
+      "TOPIC_STRING": "Caribbean_Alone",
+      "TOPIC_LABEL": "Caribbean alone",
+      "PARENT_TOPIC_STRING": "Detailed_Black_or_African_American_Alone",
+      "DESCRIPTION": "Persons with origins in the Caribbean region reporting this as their only racial identity."
+    },
+    {
+      "TOPIC_STRING": "Central_American",
+      "TOPIC_LABEL": "Central American",
+      "PARENT_TOPIC_STRING": "Detailed_Hispanic_or_Latino",
+      "DESCRIPTION": "Persons with origins in Central American countries including Guatemala, Honduras, El Salvador, Nicaragua, Costa Rica, Panama, and Belize."
+    },
+    {
+      "TOPIC_STRING": "Central_Asian_alone",
+      "TOPIC_LABEL": "Central Asian alone",
+      "PARENT_TOPIC_STRING": "Detailed_Asian_Alone",
+      "DESCRIPTION": "Persons with origins in Central Asian countries including Kazakhstan, Kyrgyzstan, Tajikistan, Turkmenistan, and Uzbekistan, reporting only Central Asian."
+    },
+    {
+      "TOPIC_STRING": "Central_Asian_alone_or_in_any_combination",
+      "TOPIC_LABEL": "Central Asian alone or in any combination",
+      "PARENT_TOPIC_STRING": "Detailed_Asian_Alone_or_in_Any_Combination",
+      "DESCRIPTION": "Persons reporting Central Asian alone or in combination with other race categories."
+    },
+    {
+      "TOPIC_STRING": "Detailed_Some_Other_Race_Alone",
+      "TOPIC_LABEL": "Detailed Some Other Race Alone",
+      "PARENT_TOPIC_STRING": "Some_Other_Race",
+      "DESCRIPTION": "Detailed breakdowns of persons reporting Some Other Race as their only racial category."
+    },
+    {
+      "TOPIC_STRING": "Detailed_American_Indian_and_Alaska_Native_Alone_or_in_Any_combination",
+      "TOPIC_LABEL": "Detailed American Indian and Alaska Native Alone or in Any combination",
+      "PARENT_TOPIC_STRING": "American_Indian_and_Alaska_Native",
+      "DESCRIPTION": "Detailed tribal and indigenous group data for American Indian and Alaska Native persons alone or in combination."
+    },
+    {
+      "TOPIC_STRING": "Detailed_Black_or_African_American_Alone",
+      "TOPIC_LABEL": "Detailed Black or African American Alone",
+      "PARENT_TOPIC_STRING": "Black_or_African_American",
+      "DESCRIPTION": "Detailed ancestry data for Black or African American persons reporting only this race."
+    },
+    {
+      "TOPIC_STRING": "Detailed_White_Alone",
+      "TOPIC_LABEL": "Detailed White Alone",
+      "PARENT_TOPIC_STRING": "White",
+      "DESCRIPTION": "Detailed ancestry and origin data for White persons reporting only White."
+    },
+    {
+      "TOPIC_STRING": "East_Asian_alone",
+      "TOPIC_LABEL": "East Asian alone",
+      "PARENT_TOPIC_STRING": "Detailed_Asian_Alone",
+      "DESCRIPTION": "Persons with origins in East Asian countries including China, Japan, Korea, and Mongolia, reporting only East Asian."
+    },
+    {
+      "TOPIC_STRING": "East_Asian_alone_or_in_any_combination",
+      "TOPIC_LABEL": "East Asian alone or in any combination",
+      "PARENT_TOPIC_STRING": "Detailed_Asian_Alone_or_in_Any_Combination",
+      "DESCRIPTION": "Persons reporting East Asian alone or in combination with other race categories."
+    },
+    {
+      "TOPIC_STRING": "European_alone",
+      "TOPIC_LABEL": "European Alone",
+      "PARENT_TOPIC_STRING": "Detailed_White_Alone",
+      "DESCRIPTION": "Persons with origins in Europe, reporting only European as their race."
+    },
+    {
+      "TOPIC_STRING": "European_alone_or_in_any_combination",
+      "TOPIC_LABEL": "European alone or in any combination",
+      "PARENT_TOPIC_STRING": "Detailed_White_Alone_or_in_Any_Combination",
+      "DESCRIPTION": "Persons reporting European alone or in combination with other race categories."
+    },
+    {
+      "TOPIC_STRING": "Hispanic_responses_alone_or_in_any_combination",
+      "TOPIC_LABEL": "Hispanic responses alone or in any combination",
+      "PARENT_TOPIC_STRING": "Detailed_Some_Other_Race_Alone_or_in_Any_Combination",
+      "DESCRIPTION": "Persons reporting Hispanic responses alone or in combination with other race categories."
+    },
+    {
+      "TOPIC_STRING": "Latin_American_Indian_alone",
+      "TOPIC_LABEL": "Latin American Indian alone",
+      "PARENT_TOPIC_STRING": "Detailed_American_Indian_and_Alaska_Native_Alone",
+      "DESCRIPTION": "Persons with indigenous origins in Latin America, reporting only Latin American Indian."
+    },
+    {
+      "TOPIC_STRING": "Latin_American_Indian_alone_or_in_any_combination",
+      "TOPIC_LABEL": "Latin American Indian alone or in any combination",
+      "PARENT_TOPIC_STRING": "Detailed_American_Indian_and_Alaska_Native_Alone_or_in_Any_combination",
+      "DESCRIPTION": "Persons reporting Latin American Indian alone or in combination with other race categories."
+    },
+    {
+      "TOPIC_STRING": "Melanesian_alone",
+      "TOPIC_LABEL": "Melanesian alone",
+      "PARENT_TOPIC_STRING": "Detailed_Native_Hawaiian_and_Other_Pacific_Islander_Alone",
+      "DESCRIPTION": "Persons with origins in Melanesian islands, reporting only Melanesian."
+    },
+    {
+      "TOPIC_STRING": "Melanesian_alone_or_in_any_combination",
+      "TOPIC_LABEL": "Melanesian alone or in any combination",
+      "PARENT_TOPIC_STRING": "Detailed_Native_Hawaiian_and_Other_Pacific_Islander_Alone_or_in_Any_Combination",
+      "DESCRIPTION": "Persons reporting Melanesian alone or in combination with other race categories."
+    },
+    {
+      "TOPIC_STRING": "Micronesian_alone",
+      "TOPIC_LABEL": "Micronesian alone",
+      "PARENT_TOPIC_STRING": "Detailed_Native_Hawaiian_and_Other_Pacific_Islander_Alone",
+      "DESCRIPTION": "Persons with origins in Micronesian islands, reporting only Micronesian."
+    },
+    {
+      "TOPIC_STRING": "Micronesian_alone_or_in_any_combination",
+      "TOPIC_LABEL": "Micronesian alone or in any combination",
+      "PARENT_TOPIC_STRING": "Detailed_Native_Hawaiian_and_Other_Pacific_Islander_Alone_or_in_Any_Combination",
+      "DESCRIPTION": "Persons reporting Micronesian alone or in combination with other race categories."
+    },
+    {
+      "TOPIC_STRING": "Middle_Eastern_or_North_African_alone",
+      "TOPIC_LABEL": "Middle Eastern or North African alone",
+      "PARENT_TOPIC_STRING": "Detailed_White_Alone",
+      "DESCRIPTION": "Persons with origins in the Middle East or North Africa, per OMB's 2024 SPD 15 revision adding MENA as a separate minimum reporting category."
+    },
+    {
+      "TOPIC_STRING": "Middle_Eastern_or_North_African_alone_or_in_any_combination",
+      "TOPIC_LABEL": "Middle Eastern or North African alone or in any combination",
+      "PARENT_TOPIC_STRING": "Detailed_White_Alone_or_in_Any_Combination",
+      "DESCRIPTION": "Persons reporting Middle Eastern or North African alone or in combination with other race categories."
+    },
+    {
+      "TOPIC_STRING": "Multiracial_Multiethnic_responses_alone_or_in_any_combination",
+      "TOPIC_LABEL": "Multiracial/Multiethnic responses alone or in any combination",
+      "PARENT_TOPIC_STRING": "Detailed_Some_Other_Race_Alone_or_in_Any_Combination",
+      "DESCRIPTION": "Persons reporting multiracial/multiethnic responses alone or in combination with other race categories."
+    },
+    {
+      "TOPIC_STRING": "Other_Asian_alone",
+      "TOPIC_LABEL": "Other Asian alone",
+      "PARENT_TOPIC_STRING": "Detailed_Asian_Alone",
+      "DESCRIPTION": "Asian persons not classified in specific Asian subregions, reporting only this category."
+    },
+    {
+      "TOPIC_STRING": "Other_Asian_alone_or_in_any_combination",
+      "TOPIC_LABEL": "Other Asian alone or in any combination",
+      "PARENT_TOPIC_STRING": "Detailed_Asian_Alone_or_in_Any_Combination",
+      "DESCRIPTION": "Persons reporting Other Asian alone or in combination with other race categories."
+    },
+    {
+      "TOPIC_STRING": "Other_Black_or_African_American_Alone",
+      "TOPIC_LABEL": "Other Black or African American alone",
+      "PARENT_TOPIC_STRING": "Detailed_Black_or_African_American_Alone",
+      "DESCRIPTION": "Black or African American persons not classified in specific subgroups, reporting only this category."
+    },
+    {
+      "TOPIC_STRING": "Other_Hispanic_Latino_or_Spanish",
+      "TOPIC_LABEL": "Other Hispanic, Latino, or Spanish",
+      "PARENT_TOPIC_STRING": "Detailed_Hispanic_or_Latino",
+      "DESCRIPTION": "Hispanic or Latino persons not classified in specific country or regional categories."
+    },
+    {
+      "TOPIC_STRING": "Other_White_Alone",
+      "TOPIC_LABEL": "Other White Alone",
+      "PARENT_TOPIC_STRING": "Detailed_White_Alone",
+      "DESCRIPTION": "White persons not classified in specific White subgroups, reporting only White."
+    },
+    {
+      "TOPIC_STRING": "Other_White_alone_or_in_any_combination",
+      "TOPIC_LABEL": "Other White alone or in any combination",
+      "PARENT_TOPIC_STRING": "Detailed_White_Alone_or_in_Any_Combination",
+      "DESCRIPTION": "Persons reporting Other White alone or in combination with other race categories."
+    },
+    {
+      "TOPIC_STRING": "Polynesian_alone",
+      "TOPIC_LABEL": "Polynesian alone",
+      "PARENT_TOPIC_STRING": "Detailed_Native_Hawaiian_and_Other_Pacific_Islander_Alone",
+      "DESCRIPTION": "Persons with origins in Polynesian islands including Hawaii, Samoa, and Tonga, reporting only Polynesian."
+    },
+    {
+      "TOPIC_STRING": "Polynesian_alone_or_in_any_combination",
+      "TOPIC_LABEL": "Polynesian alone or in any combination",
+      "PARENT_TOPIC_STRING": "Detailed_Native_Hawaiian_and_Other_Pacific_Islander_Alone_or_in_Any_Combination",
+      "DESCRIPTION": "Persons reporting Polynesian alone or in combination with other race categories."
+    },
+    {
+      "TOPIC_STRING": "South_American",
+      "TOPIC_LABEL": "South American",
+      "PARENT_TOPIC_STRING": "Detailed_Hispanic_or_Latino",
+      "DESCRIPTION": "Persons with origins in South American countries including Colombia, Venezuela, Ecuador, Peru, Brazil, Chile, Argentina, and others."
+    },
+    {
+      "TOPIC_STRING": "South_Asian_alone",
+      "TOPIC_LABEL": "South Asian alone",
+      "PARENT_TOPIC_STRING": "Detailed_Asian_Alone",
+      "DESCRIPTION": "Persons with origins in South Asian countries including India, Pakistan, Bangladesh, Sri Lanka, Nepal, and Bhutan, reporting only South Asian."
+    },
+    {
+      "TOPIC_STRING": "South_Asian_alone_or_in_any_combination",
+      "TOPIC_LABEL": "South Asian alone or in any combination",
+      "PARENT_TOPIC_STRING": "Detailed_Asian_Alone_or_in_Any_Combination",
+      "DESCRIPTION": "Persons reporting South Asian alone or in combination with other race categories."
+    },
+    {
+      "TOPIC_STRING": "Southeast_Asian_alone",
+      "TOPIC_LABEL": "Southeast Asian alone",
+      "PARENT_TOPIC_STRING": "Detailed_Asian_Alone",
+      "DESCRIPTION": "Persons with origins in Southeast Asian countries including Vietnam, Cambodia, Laos, Thailand, Philippines, Indonesia, and Myanmar, reporting only Southeast Asian."
+    },
+    {
+      "TOPIC_STRING": "Southeast_Asian_alone_or_in_any_combination",
+      "TOPIC_LABEL": "Southeast Asian alone or in any combination",
+      "PARENT_TOPIC_STRING": "Detailed_Asian_Alone_or_in_Any_Combination",
+      "DESCRIPTION": "Persons reporting Southeast Asian alone or in combination with other race categories."
+    },
+    {
+      "TOPIC_STRING": "Central_American_Indian_alone",
+      "TOPIC_LABEL": "Central American Indian alone",
+      "PARENT_TOPIC_STRING": "Latin_American_Indian_alone",
+      "DESCRIPTION": "Persons with indigenous origins in Central America, reporting only this category."
+    },
+    {
+      "TOPIC_STRING": "Mexican_Indian_alone",
+      "TOPIC_LABEL": "Mexican Indian alone",
+      "PARENT_TOPIC_STRING": "Latin_American_Indian_alone",
+      "DESCRIPTION": "Persons with indigenous Mexican origins, reporting only Mexican Indian."
+    },
+    {
+      "TOPIC_STRING": "South_American_Indian_alone",
+      "TOPIC_LABEL": "South American Indian alone",
+      "PARENT_TOPIC_STRING": "Latin_American_Indian_alone",
+      "DESCRIPTION": "Persons with indigenous origins in South America, reporting only this category."
+    },
+    {
+      "TOPIC_STRING": "Caribbean_Indian_alone",
+      "TOPIC_LABEL": "Caribbean Indian alone",
+      "PARENT_TOPIC_STRING": "Latin_American_Indian_alone",
+      "DESCRIPTION": "Persons with indigenous origins in the Caribbean, reporting only this category."
+    },
+    {
+      "TOPIC_STRING": "Mesoamerican_Indian_alone",
+      "TOPIC_LABEL": "Mesoamerican Indian alone",
+      "PARENT_TOPIC_STRING": "Latin_American_Indian_alone",
+      "DESCRIPTION": "Persons with origins among Mesoamerican indigenous peoples (Maya, Aztec, and other groups), reporting only this category."
+    },
+    {
+      "TOPIC_STRING": "Spanish_American_Indian_alone",
+      "TOPIC_LABEL": "Spanish American Indian alone",
+      "PARENT_TOPIC_STRING": "Latin_American_Indian_alone",
+      "DESCRIPTION": "Persons with Spanish American Indian origins, reporting only this category."
+    },
+    {
+      "TOPIC_STRING": "Central_American_Indian_alone_or_in_any_combination",
+      "TOPIC_LABEL": "Central American Indian alone or in any combination",
+      "PARENT_TOPIC_STRING": "Latin_American_Indian_alone_or_in_any_combination",
+      "DESCRIPTION": "Persons reporting Central American Indian alone or in combination with other race categories."
+    },
+    {
+      "TOPIC_STRING": "Mexican_Indian_alone_or_in_any_combination",
+      "TOPIC_LABEL": "Mexican Indian alone or in any combination",
+      "PARENT_TOPIC_STRING": "Latin_American_Indian_alone_or_in_any_combination",
+      "DESCRIPTION": "Persons reporting Mexican Indian alone or in combination with other race categories."
+    },
+    {
+      "TOPIC_STRING": "South_American_Indian_alone_or_in_any_combination",
+      "TOPIC_LABEL": "South American Indian alone or in any combination",
+      "PARENT_TOPIC_STRING": "Latin_American_Indian_alone_or_in_any_combination",
+      "DESCRIPTION": "Persons reporting South American Indian alone or in combination with other race categories."
+    },
+    {
+      "TOPIC_STRING": "Caribbean_Indian_alone_or_in_any_combination",
+      "TOPIC_LABEL": "Caribbean Indian alone or in any combination",
+      "PARENT_TOPIC_STRING": "Latin_American_Indian_alone_or_in_any_combination",
+      "DESCRIPTION": "Persons reporting Caribbean Indian alone or in combination with other race categories."
+    },
+    {
+      "TOPIC_STRING": "Mesoamerican_Indian_alone_or_in_any_combination",
+      "TOPIC_LABEL": "Mesoamerican Indian alone or in any combination",
+      "PARENT_TOPIC_STRING": "Latin_American_Indian_alone_or_in_any_combination",
+      "DESCRIPTION": "Persons reporting Mesoamerican Indian alone or in combination with other race categories."
+    },
+    {
+      "TOPIC_STRING": "Spanish_American_Indian_alone_or_in_any_combination",
+      "TOPIC_LABEL": "Spanish American Indian alone or in any combination",
+      "PARENT_TOPIC_STRING": "Latin_American_Indian_alone_or_in_any_combination",
+      "DESCRIPTION": "Persons reporting Spanish American Indian alone or in combination with other race categories."
+    },
+    {
+      "TOPIC_STRING": "Not_Hispanic_or_Latino_by_Race_alone_or_in_combination_with_one_or_more_other_races",
+      "TOPIC_LABEL": "Not Hispanic or Latino by Race alone or in combination with one or more other races",
+      "PARENT_TOPIC_STRING": "Not_Hispanic_or_Latino",
+      "DESCRIPTION": "Non-Hispanic population broken down by single race alone or race in combination with other races."
+    },
+    {
+      "TOPIC_STRING": "Detailed_Asian_Alone",
+      "TOPIC_LABEL": "Detailed Asian Alone",
+      "PARENT_TOPIC_STRING": "Asian",
+      "DESCRIPTION": "Detailed national origin and ethnic data for Asian persons reporting only Asian."
+    },
+    {
+      "TOPIC_STRING": "Detailed_Asian_Alone_or_in_Any_Combination",
+      "TOPIC_LABEL": "Detailed Asian Alone or in Any Combination",
+      "PARENT_TOPIC_STRING": "Asian",
+      "DESCRIPTION": "Detailed national origin and ethnic data for Asian persons alone or in combination with other races."
+    },
+    {
+      "TOPIC_STRING": "Detailed_Native_Hawaiian_and_Other_Pacific_Islander_Alone",
+      "TOPIC_LABEL": "Detailed Native Hawaiian and Other Pacific Islander Alone",
+      "PARENT_TOPIC_STRING": "Native_Hawaiian_and_Other_Pacific_Islander",
+      "DESCRIPTION": "Detailed island or national origin data for Native Hawaiian and Other Pacific Islander persons reporting only this race."
+    },
+    {
+      "TOPIC_STRING": "Detailed_Native_Hawaiian_and_Other_Pacific_Islander_Alone_or_in_Any_Combination",
+      "TOPIC_LABEL": "Detailed Native Hawaiian and Other Pacific Islander Alone or in Any Combination",
+      "PARENT_TOPIC_STRING": "Native_Hawaiian_and_Other_Pacific_Islander",
+      "DESCRIPTION": "Detailed island or national origin data for Native Hawaiian and Pacific Islander persons alone or in combination with other races."
+    },
+    {
+      "TOPIC_STRING": "Two_Races",
+      "TOPIC_LABEL": "Two Races",
+      "PARENT_TOPIC_STRING": "Two_or_More_Races",
+      "DESCRIPTION": "Persons reporting exactly two race categories."
+    },
+    {
+      "TOPIC_STRING": "Three_Races",
+      "TOPIC_LABEL": "Three Races",
+      "PARENT_TOPIC_STRING": "Two_or_More_Races",
+      "DESCRIPTION": "Persons reporting exactly three race categories."
+    },
+    {
+      "TOPIC_STRING": "Four_Races",
+      "TOPIC_LABEL": "Four Races",
+      "PARENT_TOPIC_STRING": "Two_or_More_Races",
+      "DESCRIPTION": "Persons reporting exactly four race categories."
+    },
+    {
+      "TOPIC_STRING": "Five_Races",
+      "TOPIC_LABEL": "Five Races",
+      "PARENT_TOPIC_STRING": "Two_or_More_Races",
+      "DESCRIPTION": "Persons reporting exactly five race categories."
+    },
+    {
+      "TOPIC_STRING": "Six_Races",
+      "TOPIC_LABEL": "Six Races",
+      "PARENT_TOPIC_STRING": "Two_or_More_Races",
+      "DESCRIPTION": "Persons reporting all six race categories."
+    },
+    {
+      "TOPIC_STRING": "Detailed_Hispanic_or_Latino",
+      "TOPIC_LABEL": "Detailed Hispanic or Latino",
+      "PARENT_TOPIC_STRING": "Hispanic_or_Latino",
+      "DESCRIPTION": "Detailed national origin and ancestry data for Hispanic or Latino persons."
+    },
+    {
+      "TOPIC_STRING": "Africa",
+      "TOPIC_LABEL": "Africa",
+      "PARENT_TOPIC_STRING": "Foreign_Born",
+      "DESCRIPTION": "Continent comprising Northern Africa, Eastern Africa, Middle Africa, Western Africa, and Southern Africa."
+    },
+    {
+      "TOPIC_STRING": "Eastern_Africa",
+      "TOPIC_LABEL": "Eastern Africa",
+      "PARENT_TOPIC_STRING": "Africa",
+      "DESCRIPTION": "Subregion including countries such as Kenya, Tanzania, Uganda, Ethiopia, and Somalia."
+    },
+    {
+      "TOPIC_STRING": "Middle_Africa",
+      "TOPIC_LABEL": "Middle Africa",
+      "PARENT_TOPIC_STRING": "Africa",
+      "DESCRIPTION": "Subregion including countries such as Democratic Republic of Congo, Angola, Chad, and Cameroon."
+    },
+    {
+      "TOPIC_STRING": "Northern_Africa",
+      "TOPIC_LABEL": "Northern Africa",
+      "PARENT_TOPIC_STRING": "Africa",
+      "DESCRIPTION": "Subregion including countries such as Egypt, Morocco, Algeria, Tunisia, Libya, and Sudan."
+    },
+    {
+      "TOPIC_STRING": "Southern_Africa",
+      "TOPIC_LABEL": "Southern Africa",
+      "PARENT_TOPIC_STRING": "Africa",
+      "DESCRIPTION": "Subregion including countries such as South Africa, Botswana, Zimbabwe, Namibia, and Mozambique."
+    },
+    {
+      "TOPIC_STRING": "Western_Africa",
+      "TOPIC_LABEL": "Western Africa",
+      "PARENT_TOPIC_STRING": "Africa",
+      "DESCRIPTION": "Subregion including countries such as Nigeria, Ghana, Senegal, Ivory Coast, and Mali."
+    },
+    {
+      "TOPIC_STRING": "Americas",
+      "TOPIC_LABEL": "Americas",
+      "PARENT_TOPIC_STRING": "Foreign_Born",
+      "DESCRIPTION": "Continents comprising North America, Central America, South America, and the Caribbean."
+    },
+    {
+      "TOPIC_STRING": "Latin_America",
+      "TOPIC_LABEL": "Latin America",
+      "PARENT_TOPIC_STRING": "Americas",
+      "DESCRIPTION": "Region comprising Central America, South America, Mexico, and the Caribbean, where Romance languages predominate."
+    },
+    {
+      "TOPIC_STRING": "Central_America",
+      "TOPIC_LABEL": "Central America",
+      "PARENT_TOPIC_STRING": "Latin_America",
+      "DESCRIPTION": "Geographic region between North and South America, including countries from Guatemala to Panama."
+    },
+    {
+      "TOPIC_STRING": "South_America",
+      "TOPIC_LABEL": "South America",
+      "PARENT_TOPIC_STRING": "Latin_America",
+      "DESCRIPTION": "Continent including countries such as Brazil, Argentina, Colombia, Peru, Chile, and Venezuela."
+    },
+    {
+      "TOPIC_STRING": "Northern_America",
+      "TOPIC_LABEL": "Northern America",
+      "PARENT_TOPIC_STRING": "Americas",
+      "DESCRIPTION": "Subregion including Canada, the United States, and other territories."
+    },
+    {
+      "TOPIC_STRING": "Asia",
+      "TOPIC_LABEL": "Asia",
+      "PARENT_TOPIC_STRING": "Foreign_Born",
+      "DESCRIPTION": "Continent comprising Eastern Asia, Southern Asia, South-Eastern Asia, Western Asia, and Central Asia."
+    },
+    {
+      "TOPIC_STRING": "Eastern_Asia",
+      "TOPIC_LABEL": "Eastern Asia",
+      "PARENT_TOPIC_STRING": "Asia",
+      "DESCRIPTION": "Subregion including countries such as China, Japan, South Korea, North Korea, and Mongolia."
+    },
+    {
+      "TOPIC_STRING": "South_Central_Asia",
+      "TOPIC_LABEL": "South Central Asia",
+      "PARENT_TOPIC_STRING": "Asia",
+      "DESCRIPTION": "Subregion including countries such as India, Pakistan, Bangladesh, Afghanistan, and the Central Asian republics."
+    },
+    {
+      "TOPIC_STRING": "South_Eastern_Asia",
+      "TOPIC_LABEL": "South Eastern Asia",
+      "PARENT_TOPIC_STRING": "Asia",
+      "DESCRIPTION": "Subregion including countries such as Vietnam, Thailand, Philippines, Indonesia, Malaysia, and Myanmar."
+    },
+    {
+      "TOPIC_STRING": "Western_Asia",
+      "TOPIC_LABEL": "Western Asia",
+      "PARENT_TOPIC_STRING": "Asia",
+      "DESCRIPTION": "Subregion including countries such as Turkey, Iran, Iraq, Saudi Arabia, Israel, and other Middle Eastern nations."
+    },
+    {
+      "TOPIC_STRING": "Europe",
+      "TOPIC_LABEL": "Europe",
+      "PARENT_TOPIC_STRING": "Foreign_Born",
+      "DESCRIPTION": "Continent comprising Northern Europe, Western Europe, Eastern Europe, and Southern Europe."
+    },
+    {
+      "TOPIC_STRING": "Northern_Europe",
+      "TOPIC_LABEL": "Northern Europe",
+      "PARENT_TOPIC_STRING": "Europe",
+      "DESCRIPTION": "Subregion including countries such as United Kingdom, Ireland, Norway, Sweden, Finland, and Denmark."
+    },
+    {
+      "TOPIC_STRING": "Western_Europe",
+      "TOPIC_LABEL": "Western Europe",
+      "PARENT_TOPIC_STRING": "Europe",
+      "DESCRIPTION": "Subregion including countries such as France, Germany, Netherlands, Belgium, Austria, and Switzerland."
+    },
+    {
+      "TOPIC_STRING": "Southern_Europe",
+      "TOPIC_LABEL": "Southern Europe",
+      "PARENT_TOPIC_STRING": "Europe",
+      "DESCRIPTION": "Subregion including countries such as Italy, Spain, Portugal, Greece, and countries of the Balkans."
+    },
+    {
+      "TOPIC_STRING": "Eastern_Europe",
+      "TOPIC_LABEL": "Eastern Europe",
+      "PARENT_TOPIC_STRING": "Europe",
+      "DESCRIPTION": "Subregion including countries such as Russia, Poland, Ukraine, Czech Republic, Romania, and Hungary."
+    },
+    {
+      "TOPIC_STRING": "Oceania",
+      "TOPIC_LABEL": "Oceania",
+      "PARENT_TOPIC_STRING": "Foreign_Born",
+      "DESCRIPTION": "Region comprising Australia, New Zealand, Melanesia, Micronesia, and Polynesia."
+    },
+    {
+      "TOPIC_STRING": "Counts_Estimates_and_Projections",
+      "TOPIC_LABEL": "Counts, Estimates, and Projections",
+      "PARENT_TOPIC_STRING": "Populations_and_People",
+      "DESCRIPTION": "Population totals, demographic estimates between censuses, and projections of future population."
+    },
+    {
+      "TOPIC_STRING": "Population_Total",
+      "TOPIC_LABEL": "Population Total",
+      "PARENT_TOPIC_STRING": "Counts_Estimates_and_Projections",
+      "DESCRIPTION": "Total count of all persons in a geographic area."
+    },
+    {
+      "TOPIC_STRING": "Household_and_Family",
+      "TOPIC_LABEL": "Household and Family",
+      "PARENT_TOPIC_STRING": "Counts_Estimates_and_Projections",
+      "DESCRIPTION": "Counts and characteristics of households (occupied housing units) and families (related persons living together)."
+    },
+    {
+      "TOPIC_STRING": "Group_Quarters_Population",
+      "TOPIC_LABEL": "Group Quarters Population",
+      "PARENT_TOPIC_STRING": "Counts_Estimates_and_Projections",
+      "DESCRIPTION": "Persons living in institutional facilities (prisons, nursing homes) or non-institutional group quarters (college dorms, military barracks)."
+    },
+    {
+      "TOPIC_STRING": "Resident_Population",
+      "TOPIC_LABEL": "Resident Population",
+      "PARENT_TOPIC_STRING": "Counts_Estimates_and_Projections",
+      "DESCRIPTION": "Total population residing in the 50 states and District of Columbia, excluding overseas military and federal civilian personnel."
+    },
+    {
+      "TOPIC_STRING": "Overseas_Population",
+      "TOPIC_LABEL": "Overseas Population",
+      "PARENT_TOPIC_STRING": "Counts_Estimates_and_Projections",
+      "DESCRIPTION": "U.S. military and federal civilian employees stationed outside the United States and their dependents."
+    },
+    {
+      "TOPIC_STRING": "Civilian_Population",
+      "TOPIC_LABEL": "Civilian Population",
+      "PARENT_TOPIC_STRING": "Counts_Estimates_and_Projections",
+      "DESCRIPTION": "Population excluding active duty military personnel."
+    },
+    {
+      "TOPIC_STRING": "Military_Population",
+      "TOPIC_LABEL": "Military Population",
+      "PARENT_TOPIC_STRING": "Counts_Estimates_and_Projections",
+      "DESCRIPTION": "Active duty members of the Armed Forces."
+    },
+    {
+      "TOPIC_STRING": "International",
+      "TOPIC_LABEL": "International",
+      "PARENT_TOPIC_STRING": "Counts_Estimates_and_Projections",
+      "DESCRIPTION": "International population statistics and comparisons."
+    },
+    {
+      "TOPIC_STRING": "Population_Projections",
+      "TOPIC_LABEL": "Population Projections",
+      "PARENT_TOPIC_STRING": "Counts_Estimates_and_Projections",
+      "DESCRIPTION": "Projected future population by age, sex, race, and Hispanic origin based on assumptions about fertility, mortality, and migration."
+    },
+    {
+      "TOPIC_STRING": "Population_Change_and_Components",
+      "TOPIC_LABEL": "Population Change and Components",
+      "PARENT_TOPIC_STRING": "Populations_and_People",
+      "DESCRIPTION": "Net population change and its components: births, deaths, and migration."
+    },
+    {
+      "TOPIC_STRING": "Births_and_Deaths",
+      "TOPIC_LABEL": "Births and Deaths",
+      "PARENT_TOPIC_STRING": "Population_Change_and_Components",
+      "DESCRIPTION": "Vital statistics on births and deaths that contribute to natural increase or decrease in population."
+    },
+    {
+      "TOPIC_STRING": "International_and_Domestic_Migration",
+      "TOPIC_LABEL": "International and Domestic Migration",
+      "PARENT_TOPIC_STRING": "Population_Change_and_Components",
+      "DESCRIPTION": "Movement of people across international borders and between areas within the United States."
+    },
+    {
+      "TOPIC_STRING": "Age_and_Sex",
+      "TOPIC_LABEL": "Age and Sex",
+      "PARENT_TOPIC_STRING": "Populations_and_People",
+      "DESCRIPTION": "Population distribution by age groups and sex."
+    },
+    {
+      "TOPIC_STRING": "Older_Population",
+      "TOPIC_LABEL": "Older Population",
+      "PARENT_TOPIC_STRING": "Populations_and_People",
+      "DESCRIPTION": "Population aged 65 years and older, including data on aging and the elderly."
+    },
+    {
+      "TOPIC_STRING": "Language_Spoken_at_Home",
+      "TOPIC_LABEL": "Language Spoken at Home",
+      "PARENT_TOPIC_STRING": "Populations_and_People",
+      "DESCRIPTION": "Languages spoken in the home and English-speaking ability."
+    },
+    {
+      "TOPIC_STRING": "Ancestry",
+      "TOPIC_LABEL": "Ancestry",
+      "PARENT_TOPIC_STRING": "Populations_and_People",
+      "DESCRIPTION": "Self-reported ethnic origins, descent, heritage, or place of birth of person or person's ancestors."
+    },
+    {
+      "TOPIC_STRING": "Native_and_Foreign_Born",
+      "TOPIC_LABEL": "Native and Foreign-Born",
+      "PARENT_TOPIC_STRING": "Populations_and_People",
+      "DESCRIPTION": "Persons born in the United States versus persons born outside the United States."
+    },
+    {
+      "TOPIC_STRING": "Foreign_Born",
+      "TOPIC_LABEL": "Foreign-Born",
+      "PARENT_TOPIC_STRING": "Native_and_Foreign_Born",
+      "DESCRIPTION": "Persons born outside the United States who were not U.S. citizens at birth."
+    },
+    {
+      "TOPIC_STRING": "Native_Born",
+      "TOPIC_LABEL": "Native-Born",
+      "PARENT_TOPIC_STRING": "Native_and_Foreign_Born",
+      "DESCRIPTION": "Persons born in the United States, Puerto Rico, or a U.S. Island Area, or born abroad of U.S. citizen parent(s)."
+    },
+    {
+      "TOPIC_STRING": "Place_of_Birth",
+      "TOPIC_LABEL": "Place of Birth",
+      "PARENT_TOPIC_STRING": "Native_and_Foreign_Born",
+      "DESCRIPTION": "State, territory, or country where a person was born."
+    },
+    {
+      "TOPIC_STRING": "Citizenship",
+      "TOPIC_LABEL": "Citizenship",
+      "PARENT_TOPIC_STRING": "Native_and_Foreign_Born",
+      "DESCRIPTION": "Citizenship status including native-born citizens, naturalized citizens, and non-citizens."
+    },
+    {
+      "TOPIC_STRING": "Residential_Mobility",
+      "TOPIC_LABEL": "Residential Mobility",
+      "PARENT_TOPIC_STRING": "Populations_and_People",
+      "DESCRIPTION": "Whether persons have moved residences and the characteristics of movers versus non-movers."
+    },
+    {
+      "TOPIC_STRING": "Veterans",
+      "TOPIC_LABEL": "Veterans",
+      "PARENT_TOPIC_STRING": "Populations_and_People",
+      "DESCRIPTION": "Persons who served on active duty in the U.S. Armed Forces and were discharged under conditions other than dishonorable."
+    },
+    {
+      "TOPIC_STRING": "Computer_and_Internet_Use",
+      "TOPIC_LABEL": "Computer and Internet Use",
+      "PARENT_TOPIC_STRING": "Populations_and_People",
+      "DESCRIPTION": "Household access to computers, tablets, smartphones and internet connectivity."
+    },
+    {
+      "TOPIC_STRING": "Voting_and_Registration",
+      "TOPIC_LABEL": "Voting and Registration",
+      "PARENT_TOPIC_STRING": "Populations_and_People",
+      "DESCRIPTION": "Voter registration status and voting participation in elections."
+    },
+    {
+      "TOPIC_STRING": "White",
+      "TOPIC_LABEL": "White",
+      "PARENT_TOPIC_STRING": "Race_and_Ethnicity",
+      "DESCRIPTION": "Persons having origins in any of the original peoples of Europe, the Middle East, or North Africa."
+    },
+    {
+      "TOPIC_STRING": "Black_or_African_American",
+      "TOPIC_LABEL": "Black or African American",
+      "PARENT_TOPIC_STRING": "Race_and_Ethnicity",
+      "DESCRIPTION": "Persons having origins in any of the Black racial groups of Africa."
+    },
+    {
+      "TOPIC_STRING": "Asian",
+      "TOPIC_LABEL": "Asian",
+      "PARENT_TOPIC_STRING": "Race_and_Ethnicity",
+      "DESCRIPTION": "Persons having origins in any of the original peoples of the Far East, Southeast Asia, or the Indian subcontinent."
+    },
+    {
+      "TOPIC_STRING": "American_Indian_and_Alaska_Native",
+      "TOPIC_LABEL": "American Indian and Alaska Native",
+      "PARENT_TOPIC_STRING": "Race_and_Ethnicity",
+      "DESCRIPTION": "Persons having origins in any of the original peoples of North and South America (including Central America) who maintain cultural identification through tribal affiliation or community attachment."
+    },
+    {
+      "TOPIC_STRING": "Some_Other_Race",
+      "TOPIC_LABEL": "Some Other Race",
+      "PARENT_TOPIC_STRING": "Race_and_Ethnicity",
+      "DESCRIPTION": "Respondents who do not identify with any of the OMB race categories and write in entries such as multiracial, mixed, or a Hispanic/Latino group."
+    },
+    {
+      "TOPIC_STRING": "Two_or_More_Races",
+      "TOPIC_LABEL": "Two or More Races",
+      "PARENT_TOPIC_STRING": "Race_and_Ethnicity",
+      "DESCRIPTION": "Persons who selected two or more of the OMB race categories."
+    },
+    {
+      "TOPIC_STRING": "Hispanic_or_Latino",
+      "TOPIC_LABEL": "Hispanic or Latino",
+      "PARENT_TOPIC_STRING": "Race_and_Ethnicity",
+      "DESCRIPTION": "Persons of Cuban, Mexican, Puerto Rican, South or Central American, or other Spanish culture or origin regardless of race."
+    },
+    {
+      "TOPIC_STRING": "Not_Hispanic_or_Latino",
+      "TOPIC_LABEL": "Not Hispanic or Latino",
+      "PARENT_TOPIC_STRING": "Race_and_Ethnicity",
+      "DESCRIPTION": "Persons who do not identify as Hispanic or Latino."
+    },
+    {
+      "TOPIC_STRING": "Families_and_Household_Characteristics",
+      "TOPIC_LABEL": "Families and Household Characteristics",
+      "PARENT_TOPIC_STRING": "Families_and_Living_Arrangements",
+      "DESCRIPTION": "Composition, size, and types of families and households."
+    },
+    {
+      "TOPIC_STRING": "Household_Size_and_Type",
+      "TOPIC_LABEL": "Household Size and Type",
+      "PARENT_TOPIC_STRING": "Families_and_Household_Characteristics",
+      "DESCRIPTION": "Number of persons per household and household type (family vs. non-family)."
+    },
+    {
+      "TOPIC_STRING": "Family_Size_and_Type",
+      "TOPIC_LABEL": "Family Size and Type",
+      "PARENT_TOPIC_STRING": "Families_and_Household_Characteristics",
+      "DESCRIPTION": "Number of family members and family structure (married couple, single parent, etc.)."
+    },
+    {
+      "TOPIC_STRING": "Relationship",
+      "TOPIC_LABEL": "Relationship",
+      "PARENT_TOPIC_STRING": "Families_and_Household_Characteristics",
+      "DESCRIPTION": "Relationship of household members to the householder (spouse, child, parent, etc.)."
+    },
+    {
+      "TOPIC_STRING": "Grandparents_and_Grandchildren",
+      "TOPIC_LABEL": "Grandparents and Grandchildren",
+      "PARENT_TOPIC_STRING": "Families_and_Household_Characteristics",
+      "DESCRIPTION": "Grandparents living with and responsible for grandchildren."
+    },
+    {
+      "TOPIC_STRING": "Marital_Status_and_Marital_History",
+      "TOPIC_LABEL": "Marital Status and Marital History",
+      "PARENT_TOPIC_STRING": "Families_and_Living_Arrangements",
+      "DESCRIPTION": "Current marital status (married, widowed, divorced, separated, never married) and marital history."
+    },
+    {
+      "TOPIC_STRING": "Children",
+      "TOPIC_LABEL": "Children",
+      "PARENT_TOPIC_STRING": "Families_and_Living_Arrangements",
+      "DESCRIPTION": "Data on children including their characteristics, living arrangements, and well-being."
+    },
+    {
+      "TOPIC_STRING": "Child_Living_Arrangements",
+      "TOPIC_LABEL": "Child Living Arrangements",
+      "PARENT_TOPIC_STRING": "Children",
+      "DESCRIPTION": "Living situations of children including who they live with and family structure."
+    },
+    {
+      "TOPIC_STRING": "Child_Wellbeing",
+      "TOPIC_LABEL": "Child Wellbeing",
+      "PARENT_TOPIC_STRING": "Children",
+      "DESCRIPTION": "Information collected on child wellbeing includes data on school experiences, participation in extracurricular activities and parental involvement."
+    },
+    {
+      "TOPIC_STRING": "Child_Support",
+      "TOPIC_LABEL": "Child Support",
+      "PARENT_TOPIC_STRING": "Children",
+      "DESCRIPTION": "Child support can be an important income source for children and their custodial parents who receive these payments."
+    },
+    {
+      "TOPIC_STRING": "Child_Care",
+      "TOPIC_LABEL": "Child Care",
+      "PARENT_TOPIC_STRING": "Children",
+      "DESCRIPTION": "Information collected on child care has evolved over the years to include comprehensive data on child care use, cost, and receipt of government assistance."
+    },
+    {
+      "TOPIC_STRING": "Same_Sex_Couples",
+      "TOPIC_LABEL": "Same Sex Couples",
+      "PARENT_TOPIC_STRING": "Families_and_Living_Arrangements",
+      "DESCRIPTION": "Same-sex married couples and unmarried partners."
+    },
+    {
+      "TOPIC_STRING": "Health_Insurance",
+      "TOPIC_LABEL": "Health Insurance",
+      "PARENT_TOPIC_STRING": "Health",
+      "DESCRIPTION": "Public and private health insurance coverage including employer-sponsored, Medicaid, Medicare, and uninsured status."
+    },
+    {
+      "TOPIC_STRING": "Expenses",
+      "TOPIC_LABEL": "Expenses",
+      "PARENT_TOPIC_STRING": "Health",
+      "DESCRIPTION": "Health-related expenditures and costs."
+    },
+    {
+      "TOPIC_STRING": "Personal_Out_of_Pocket_Medical_Expenditures",
+      "TOPIC_LABEL": "Personal Out of Pocket/Medical Expenditures",
+      "PARENT_TOPIC_STRING": "Expenses",
+      "DESCRIPTION": "Direct payments by individuals for medical care not covered by insurance."
+    },
+    {
+      "TOPIC_STRING": "Business_Expenses",
+      "TOPIC_LABEL": "Business Expenses",
+      "PARENT_TOPIC_STRING": "Expenses",
+      "DESCRIPTION": "Health insurance and medical costs paid by businesses for employees."
+    },
+    {
+      "TOPIC_STRING": "Public_Sector",
+      "TOPIC_LABEL": "Public Sector",
+      "PARENT_TOPIC_STRING": "Expenses",
+      "DESCRIPTION": "Government health expenditures for public programs and employees."
+    },
+    {
+      "TOPIC_STRING": "Disability",
+      "TOPIC_LABEL": "Disability",
+      "PARENT_TOPIC_STRING": "Health",
+      "DESCRIPTION": "Physical or mental impairments that substantially limit major life activities."
+    },
+    {
+      "TOPIC_STRING": "Care_and_Visits",
+      "TOPIC_LABEL": "Care and Visits",
+      "PARENT_TOPIC_STRING": "Health",
+      "DESCRIPTION": "Healthcare utilization including doctor visits, hospitalizations, and preventive care."
+    },
+    {
+      "TOPIC_STRING": "Fertility",
+      "TOPIC_LABEL": "Fertility",
+      "PARENT_TOPIC_STRING": "Health",
+      "DESCRIPTION": "Childbearing patterns including births per woman and age at first birth."
+    },
+    {
+      "TOPIC_STRING": "International_HIV_AIDS",
+      "TOPIC_LABEL": "International HIV/AIDS",
+      "PARENT_TOPIC_STRING": "Health",
+      "DESCRIPTION": "International statistics on HIV/AIDS prevalence and impact."
+    },
+    {
+      "TOPIC_STRING": "Educational_Attainment",
+      "TOPIC_LABEL": "Educational Attainment",
+      "PARENT_TOPIC_STRING": "Education",
+      "DESCRIPTION": "Educational attainment refers to the highest level of education that an individual has completed."
+    },
+    {
+      "TOPIC_STRING": "School_Enrollment",
+      "TOPIC_LABEL": "School Enrollment",
+      "PARENT_TOPIC_STRING": "Education",
+      "DESCRIPTION": "Census Bureau data on enrollment ask about elementary school, high school, college, or professional school. Public, private & homeschool are all included."
+    },
+    {
+      "TOPIC_STRING": "Grade_Enrolled",
+      "TOPIC_LABEL": "Grade Enrolled",
+      "PARENT_TOPIC_STRING": "School_Enrollment",
+      "DESCRIPTION": "Educational level currently enrolled in, from elementary through graduate school."
+    },
+    {
+      "TOPIC_STRING": "Type_of_School",
+      "TOPIC_LABEL": "Type of School",
+      "PARENT_TOPIC_STRING": "School_Enrollment",
+      "DESCRIPTION": "Public school, private school, or homeschool attendance."
+    },
+    {
+      "TOPIC_STRING": "Vocational_Training",
+      "TOPIC_LABEL": "Vocational Training",
+      "PARENT_TOPIC_STRING": "School_Enrollment",
+      "DESCRIPTION": "Participation in vocational, trade, or technical education programs."
+    },
+    {
+      "TOPIC_STRING": "Small_Business",
+      "TOPIC_LABEL": "Small Business",
+      "PARENT_TOPIC_STRING": "Business_and_Economy",
+      "DESCRIPTION": "Use detailed statistics about U.S. businesses that are essential to help small businesses succeed and grow."
+    },
+    {
+      "TOPIC_STRING": "Business_Counts",
+      "TOPIC_LABEL": "Business Counts",
+      "PARENT_TOPIC_STRING": "Small_Business",
+      "DESCRIPTION": "Businesses are the pulse of our economy and serve as important barometers of the economic health of the economy."
+    },
+    {
+      "TOPIC_STRING": "Concentration_Ratio",
+      "TOPIC_LABEL": "Concentration Ratio",
+      "PARENT_TOPIC_STRING": "Small_Business",
+      "DESCRIPTION": "Measure of market concentration showing the share of industry sales by the largest firms."
+    },
+    {
+      "TOPIC_STRING": "With_Payroll",
+      "TOPIC_LABEL": "With Payroll",
+      "PARENT_TOPIC_STRING": "Small_Business",
+      "DESCRIPTION": "Businesses that have paid employees."
+    },
+    {
+      "TOPIC_STRING": "Without_Payroll",
+      "TOPIC_LABEL": "Without Payroll",
+      "PARENT_TOPIC_STRING": "Small_Business",
+      "DESCRIPTION": "Businesses without paid employees (nonemployer businesses such as sole proprietorships)."
+    },
+    {
+      "TOPIC_STRING": "Establishments",
+      "TOPIC_LABEL": "Establishments",
+      "PARENT_TOPIC_STRING": "Small_Business",
+      "DESCRIPTION": "Physical locations where business is conducted."
+    },
+    {
+      "TOPIC_STRING": "Single_Unit_Multi_Unit_Firms",
+      "TOPIC_LABEL": "Single Unit/Multi-Unit Firms",
+      "PARENT_TOPIC_STRING": "Small_Business",
+      "DESCRIPTION": "Firms operating from one location versus firms with multiple locations."
+    },
+    {
+      "TOPIC_STRING": "Expenses_and_Expenditures",
+      "TOPIC_LABEL": "Expenses and Expenditures",
+      "PARENT_TOPIC_STRING": "Business_and_Economy",
+      "DESCRIPTION": "Capital and Operating expenses provides detailed information on such items as structures, equipment, software, health insurance, R & D, and payroll."
+    },
+    {
+      "TOPIC_STRING": "Detailed_Operating_Expenses",
+      "TOPIC_LABEL": "Detailed Operating Expenses",
+      "PARENT_TOPIC_STRING": "Expenses_and_Expenditures",
+      "DESCRIPTION": "Itemized business costs including supplies, communications, contracted services, and administrative expenses."
+    },
+    {
+      "TOPIC_STRING": "Capital_Expenditures",
+      "TOPIC_LABEL": "Capital Expenditures",
+      "PARENT_TOPIC_STRING": "Expenses_and_Expenditures",
+      "DESCRIPTION": "Business spending on structures, equipment, and software."
+    },
+    {
+      "TOPIC_STRING": "Payroll",
+      "TOPIC_LABEL": "Payroll",
+      "PARENT_TOPIC_STRING": "Expenses_and_Expenditures",
+      "DESCRIPTION": "Total wages and salaries paid to employees."
+    },
+    {
+      "TOPIC_STRING": "First_Quarter_Payroll",
+      "TOPIC_LABEL": "First Quarter Payroll",
+      "PARENT_TOPIC_STRING": "Expenses_and_Expenditures",
+      "DESCRIPTION": "Payroll during the first three months of the year."
+    },
+    {
+      "TOPIC_STRING": "Sales_Shipments_Receipts_and_Production",
+      "TOPIC_LABEL": "Sales, Shipments, Receipts, and Production",
+      "PARENT_TOPIC_STRING": "Business_and_Economy",
+      "DESCRIPTION": "Information on sales and production over a given time period. View data from the monthly Economic Indicator in the Indicator briefing room."
+    },
+    {
+      "TOPIC_STRING": "Value_of_Sales_Receipts_Revenue_or_Shipments",
+      "TOPIC_LABEL": "Value of Sales, Receipts, Revenue, or Shipments",
+      "PARENT_TOPIC_STRING": "Sales_Shipments_Receipts_and_Production",
+      "DESCRIPTION": "Total business income from sales of goods, services, or manufactured products."
+    },
+    {
+      "TOPIC_STRING": "e_Commerce_Sales",
+      "TOPIC_LABEL": "e-Commerce Sales",
+      "PARENT_TOPIC_STRING": "Sales_Shipments_Receipts_and_Production",
+      "DESCRIPTION": "Sales conducted over the internet, extranet, Electronic Data Interchange, or other online systems."
+    },
+    {
+      "TOPIC_STRING": "Exported_Sales_Services",
+      "TOPIC_LABEL": "Exported Sales/Services",
+      "PARENT_TOPIC_STRING": "Sales_Shipments_Receipts_and_Production",
+      "DESCRIPTION": "Sales of goods or services to customers outside the United States."
+    },
+    {
+      "TOPIC_STRING": "Gross_Margin_and_Gross_Profit",
+      "TOPIC_LABEL": "Gross Margin and Gross Profit",
+      "PARENT_TOPIC_STRING": "Sales_Shipments_Receipts_and_Production",
+      "DESCRIPTION": "Sales revenue minus cost of goods sold."
+    },
+    {
+      "TOPIC_STRING": "Capacity_Utilization",
+      "TOPIC_LABEL": "Capacity Utilization",
+      "PARENT_TOPIC_STRING": "Sales_Shipments_Receipts_and_Production",
+      "DESCRIPTION": "Percentage of manufacturing capacity currently in use."
+    },
+    {
+      "TOPIC_STRING": "Movement_of_Commodities",
+      "TOPIC_LABEL": "Movement of Commodities",
+      "PARENT_TOPIC_STRING": "Sales_Shipments_Receipts_and_Production",
+      "DESCRIPTION": "Transportation of goods by mode, origin, and destination."
+    },
+    {
+      "TOPIC_STRING": "Business_and_Owner_Characteristics",
+      "TOPIC_LABEL": "Business and Owner Characteristics",
+      "PARENT_TOPIC_STRING": "Business_and_Economy",
+      "DESCRIPTION": "Businesses and their owners are as diverse as the people of this nation.  Understanding these details are essential to interpreting our national economy"
+    },
+    {
+      "TOPIC_STRING": "Age_of_Business",
+      "TOPIC_LABEL": "Age of Business",
+      "PARENT_TOPIC_STRING": "Business_and_Owner_Characteristics",
+      "DESCRIPTION": "Years since business establishment or incorporation."
+    },
+    {
+      "TOPIC_STRING": "Class_of_Customer",
+      "TOPIC_LABEL": "Class of Customer",
+      "PARENT_TOPIC_STRING": "Business_and_Owner_Characteristics",
+      "DESCRIPTION": "Type of customers served (consumers, other businesses, government)."
+    },
+    {
+      "TOPIC_STRING": "Employment_Size",
+      "TOPIC_LABEL": "Employment Size",
+      "PARENT_TOPIC_STRING": "Business_and_Owner_Characteristics",
+      "DESCRIPTION": "Number of paid employees, used to classify business size."
+    },
+    {
+      "TOPIC_STRING": "Foreign_Operations_Outsourcing",
+      "TOPIC_LABEL": "Foreign Operations/Outsourcing",
+      "PARENT_TOPIC_STRING": "Business_and_Owner_Characteristics",
+      "DESCRIPTION": "Business operations conducted abroad or services outsourced to foreign providers."
+    },
+    {
+      "TOPIC_STRING": "Franchise_Status",
+      "TOPIC_LABEL": "Franchise Status",
+      "PARENT_TOPIC_STRING": "Business_and_Owner_Characteristics",
+      "DESCRIPTION": "Whether a business operates under a franchise agreement."
+    },
+    {
+      "TOPIC_STRING": "Home_Based_Business",
+      "TOPIC_LABEL": "Home-Based Business",
+      "PARENT_TOPIC_STRING": "Business_and_Owner_Characteristics",
+      "DESCRIPTION": "Businesses operated primarily from a residence."
+    },
+    {
+      "TOPIC_STRING": "Legal_Form_of_Organization",
+      "TOPIC_LABEL": "Legal Form of Organization",
+      "PARENT_TOPIC_STRING": "Business_and_Owner_Characteristics",
+      "DESCRIPTION": "Business legal structure such as sole proprietorship, partnership, or corporation."
+    },
+    {
+      "TOPIC_STRING": "Sole_Proprietorship",
+      "TOPIC_LABEL": "Sole Proprietorship",
+      "PARENT_TOPIC_STRING": "Business_and_Owner_Characteristics",
+      "DESCRIPTION": "Unincorporated business owned by one person."
+    },
+    {
+      "TOPIC_STRING": "Tax_Status",
+      "TOPIC_LABEL": "Tax Status",
+      "PARENT_TOPIC_STRING": "Business_and_Owner_Characteristics",
+      "DESCRIPTION": "Tax classification such as C-corporation, S-corporation, or partnership."
+    },
+    {
+      "TOPIC_STRING": "Owner_Race_and_Ethnicity",
+      "TOPIC_LABEL": "Owner Race and Ethnicity",
+      "PARENT_TOPIC_STRING": "Business_and_Owner_Characteristics",
+      "DESCRIPTION": "Race and ethnic origins of business owners."
+    },
+    {
+      "TOPIC_STRING": "Owner_Sex",
+      "TOPIC_LABEL": "Owner Sex",
+      "PARENT_TOPIC_STRING": "Business_and_Owner_Characteristics",
+      "DESCRIPTION": "Sex of business owners (male, female, or equally owned)."
+    },
+    {
+      "TOPIC_STRING": "Owner_Veterans_Status",
+      "TOPIC_LABEL": "Owner Veterans Status",
+      "PARENT_TOPIC_STRING": "Business_and_Owner_Characteristics",
+      "DESCRIPTION": "Whether business owners are military veterans."
+    },
+    {
+      "TOPIC_STRING": "Other_Business_Characteristics",
+      "TOPIC_LABEL": "Other Business Characteristics",
+      "PARENT_TOPIC_STRING": "Business_and_Owner_Characteristics",
+      "DESCRIPTION": "Additional business attributes not covered in other categories."
+    },
+    {
+      "TOPIC_STRING": "Other_Owner_Characteristics",
+      "TOPIC_LABEL": "Other Owner Characteristics",
+      "PARENT_TOPIC_STRING": "Business_and_Owner_Characteristics",
+      "DESCRIPTION": "Additional owner demographics and attributes."
+    },
+    {
+      "TOPIC_STRING": "Receipt_Size",
+      "TOPIC_LABEL": "Receipt Size",
+      "PARENT_TOPIC_STRING": "Business_and_Owner_Characteristics",
+      "DESCRIPTION": "Total business receipts or revenue, used for size classification."
+    },
+    {
+      "TOPIC_STRING": "Business_and_Workforce_Dynamics",
+      "TOPIC_LABEL": "Business and Workforce Dynamics",
+      "PARENT_TOPIC_STRING": "Business_and_Economy",
+      "DESCRIPTION": "Businesses and their workforces are continually expanding and contracting.  Tracking these dynamics provides us with a better understanding of the U.S. economy."
+    },
+    {
+      "TOPIC_STRING": "Business_Starts_and_Closures",
+      "TOPIC_LABEL": "Business Starts and Closures",
+      "PARENT_TOPIC_STRING": "Business_and_Workforce_Dynamics",
+      "DESCRIPTION": "New business formations and business closures or cessations."
+    },
+    {
+      "TOPIC_STRING": "Hires_and_Separations",
+      "TOPIC_LABEL": "Hires and Separations",
+      "PARENT_TOPIC_STRING": "Business_and_Workforce_Dynamics",
+      "DESCRIPTION": "New employee hires and employee separations from businesses."
+    },
+    {
+      "TOPIC_STRING": "Worker_Movement",
+      "TOPIC_LABEL": "Worker Movement",
+      "PARENT_TOPIC_STRING": "Business_and_Workforce_Dynamics",
+      "DESCRIPTION": "Job-to-job transitions and worker flows between employers."
+    },
+    {
+      "TOPIC_STRING": "Finished_Goods_Inventories",
+      "TOPIC_LABEL": "Finished Goods Inventories",
+      "PARENT_TOPIC_STRING": "Inventories",
+      "DESCRIPTION": "Completed products ready for sale held in inventory."
+    },
+    {
+      "TOPIC_STRING": "Work_in_Process_Inventories",
+      "TOPIC_LABEL": "Work-in-Process Inventories",
+      "PARENT_TOPIC_STRING": "Inventories",
+      "DESCRIPTION": "Partially completed goods in various stages of production."
+    },
+    {
+      "TOPIC_STRING": "State_and_Local_Government_Counts",
+      "TOPIC_LABEL": "State and Local Government Counts",
+      "PARENT_TOPIC_STRING": "Government",
+      "DESCRIPTION": "Number of state and local government units including counties, municipalities, townships, school districts, and special districts."
+    },
+    {
+      "TOPIC_STRING": "Caribbean_Hispanic",
+      "TOPIC_LABEL": "Caribbean Hispanic",
+      "PARENT_TOPIC_STRING": "Detailed_Hispanic_or_Latino",
+      "DESCRIPTION": "Hispanic persons with origins in Caribbean countries such as Cuba, Puerto Rico, and the Dominican Republic."
+    },
+    {
+      "TOPIC_STRING": "Mexican",
+      "TOPIC_LABEL": "Mexican",
+      "PARENT_TOPIC_STRING": "Detailed_Hispanic_or_Latino",
+      "DESCRIPTION": "Persons with origins in Mexico."
+    },
+    {
+      "TOPIC_STRING": "Alaska_Native_tribal_groupings_alone",
+      "TOPIC_LABEL": "Alaska Native tribal groupings alone",
+      "PARENT_TOPIC_STRING": "Alaska_Native_tribal_groupings",
+      "DESCRIPTION": "Persons reporting specific Alaska Native tribes as their only race."
+    },
+    {
+      "TOPIC_STRING": "Alaska_Native_tribal_groupings_alone_or_in_any_combination",
+      "TOPIC_LABEL": "Alaska Native tribal groupings alone or in any combination",
+      "PARENT_TOPIC_STRING": "Alaska_Native_tribal_groupings",
+      "DESCRIPTION": "Persons reporting specific Alaska Native tribes alone or in combination with other races."
+    },
+    {
+      "TOPIC_STRING": "Sub_Saharan_African_alone",
+      "TOPIC_LABEL": "Sub-Saharan African alone",
+      "PARENT_TOPIC_STRING": "Detailed_Black_or_African_American_Alone",
+      "DESCRIPTION": "Persons with origins in sub-Saharan Africa, reporting only this ancestry."
+    },
+    {
+      "TOPIC_STRING": "Sub_Saharan_African_alone_or_in_any_combination",
+      "TOPIC_LABEL": "Sub-Saharan African alone or in any combination",
+      "PARENT_TOPIC_STRING": "Detailed_Black_or_African_American_Alone_or_in_Any_Combination",
+      "DESCRIPTION": "Persons reporting sub-Saharan African alone or in combination with other race categories."
+    },
+    {
+      "TOPIC_STRING": "American_Indian_tribal_groupings_alone_or_in_any_combination",
+      "TOPIC_LABEL": "American Indian tribal groupings alone or in any combination",
+      "PARENT_TOPIC_STRING": "American_Indian_tribal_groupings",
+      "DESCRIPTION": "Persons reporting specific American Indian tribes alone or in combination with other races."
+    },
+    {
+      "TOPIC_STRING": "Canadian_Indian_and_French_American_Indian_tribal_groupings",
+      "TOPIC_LABEL": "Canadian Indian and French American Indian tribal groupings",
+      "PARENT_TOPIC_STRING": "American_Indian_and_Alaska_Native_Tribal_Groupings",
+      "DESCRIPTION": "Specific Canadian and French American Indian tribal affiliations."
+    },
+    {
+      "TOPIC_STRING": "Central_American_Indian_tribal_groupings",
+      "TOPIC_LABEL": "Central American Indian tribal groupings",
+      "PARENT_TOPIC_STRING": "Latin_American_Indian_tribal_groupings",
+      "DESCRIPTION": "Indigenous groups from Central America."
+    },
+    {
+      "TOPIC_STRING": "Mexican_Indian_tribal_groupings",
+      "TOPIC_LABEL": "Mexican Indian tribal groupings",
+      "PARENT_TOPIC_STRING": "Latin_American_Indian_tribal_groupings",
+      "DESCRIPTION": "Indigenous groups from Mexico."
+    },
+    {
+      "TOPIC_STRING": "South_American_Indian_tribal_groupings",
+      "TOPIC_LABEL": "South American Indian tribal groupings",
+      "PARENT_TOPIC_STRING": "Latin_American_Indian_tribal_groupings",
+      "DESCRIPTION": "Indigenous groups from South America."
+    },
+    {
+      "TOPIC_STRING": "Alaska_Native_tribal_groupings",
+      "TOPIC_LABEL": "Alaska Native tribal groupings",
+      "PARENT_TOPIC_STRING": "American_Indian_and_Alaska_Native_Tribal_Groupings",
+      "DESCRIPTION": "Specific Alaska Native tribes and village corporations."
+    },
+    {
+      "TOPIC_STRING": "American_Indian_tribal_groupings",
+      "TOPIC_LABEL": "American Indian tribal groupings",
+      "PARENT_TOPIC_STRING": "American_Indian_and_Alaska_Native_Tribal_Groupings",
+      "DESCRIPTION": "Specific American Indian tribes and bands."
+    },
+    {
+      "TOPIC_STRING": "American_Indian_and_Alaska_Native_Tribal_Groupings",
+      "TOPIC_LABEL": "American Indian and Alaska Native Tribal Groupings",
+      "PARENT_TOPIC_STRING": "American_Indian_and_Alaska_Native",
+      "DESCRIPTION": "Detailed tribal affiliations for American Indian and Alaska Native populations."
+    },
+    {
+      "TOPIC_STRING": "Latin_American_Indian_tribal_groupings",
+      "TOPIC_LABEL": "Latin American Indian tribal groupings",
+      "PARENT_TOPIC_STRING": "American_Indian_and_Alaska_Native_Tribal_Groupings",
+      "DESCRIPTION": "Specific indigenous groups from Latin America."
+    },
+    {
+      "TOPIC_STRING": "Spanish_American_Indian_tribal_groupings",
+      "TOPIC_LABEL": "Spanish American Indian tribal groupings",
+      "PARENT_TOPIC_STRING": "Latin_American_Indian_tribal_groupings",
+      "DESCRIPTION": "Indigenous groups with Spanish American heritage."
+    },
+    {
+      "TOPIC_STRING": "American_Indian_tribal_groupings_alone",
+      "TOPIC_LABEL": "American Indian tribal groupings alone",
+      "PARENT_TOPIC_STRING": "American_Indian_tribal_groupings",
+      "DESCRIPTION": "Persons reporting specific American Indian tribes as their only race."
+    },
+    {
+      "TOPIC_STRING": "United_Kingdom_including_England_Scotland_Wales_Northern_Ireland_and_Other_United_Kingdom",
+      "TOPIC_LABEL": "United Kingdom, including England, Scotland, Wales, Northern Ireland, and Other United Kingdom",
+      "PARENT_TOPIC_STRING": "Northern_Europe",
+      "DESCRIPTION": "Persons reporting ancestry from the United Kingdom and its constituent countries."
+    },
+    {
+      "TOPIC_STRING": "Ancestries",
+      "TOPIC_LABEL": "Ancestries",
+      "PARENT_TOPIC_STRING": "Ancestry",
+      "DESCRIPTION": "Detailed ancestry responses representing ethnic origin, descent, heritage, or place of birth of ancestors."
+    },
+    {
+      "TOPIC_STRING": "Hispanic_or_Latino_by_Race_alone",
+      "TOPIC_LABEL": "Hispanic or Latino by Race alone",
+      "PARENT_TOPIC_STRING": "Hispanic_or_Latino_by_Race",
+      "DESCRIPTION": "Hispanic population reporting single race categories."
+    },
+    {
+      "TOPIC_STRING": "Hispanic_or_Latino_by_Race_alone_or_in_combination_with_one_or_more_other_races",
+      "TOPIC_LABEL": "Hispanic or Latino by Race alone or in combination with one or more other races",
+      "PARENT_TOPIC_STRING": "Hispanic_or_Latino_by_Race",
+      "DESCRIPTION": "Hispanic population reporting single races or combinations of races."
+    },
+    {
+      "TOPIC_STRING": "Multiracial_Multiethnic_responses_alone",
+      "TOPIC_LABEL": "Multiracial/Multiethnic responses alone",
+      "PARENT_TOPIC_STRING": "Detailed_Some_Other_Race_Alone",
+      "DESCRIPTION": "Persons reporting multiracial or multiethnic identities without selecting specific race categories, as their only response."
+    },
+    {
+      "TOPIC_STRING": "Hispanic_responses_alone",
+      "TOPIC_LABEL": "Hispanic responses alone",
+      "PARENT_TOPIC_STRING": "Detailed_Some_Other_Race_Alone",
+      "DESCRIPTION": "Persons who identify their race as Hispanic, Latino, or Spanish origin terms, reporting only this category."
+    },
+    {
+      "TOPIC_STRING": "Hispanic_or_Latino_by_Race",
+      "TOPIC_LABEL": "Hispanic or Latino by Race",
+      "PARENT_TOPIC_STRING": "Hispanic_or_Latino",
+      "DESCRIPTION": "Hispanic or Latino population broken down by race categories."
+    },
+    {
+      "TOPIC_STRING": "Six_race_combinations",
+      "TOPIC_LABEL": "Six race combinations",
+      "PARENT_TOPIC_STRING": "Two_or_More_Races",
+      "DESCRIPTION": "Specific combinations of all six race categories."
+    },
+    {
+      "TOPIC_STRING": "Five_race_combinations",
+      "TOPIC_LABEL": "Five race combinations",
+      "PARENT_TOPIC_STRING": "Two_or_More_Races",
+      "DESCRIPTION": "Specific combinations of five race categories."
+    },
+    {
+      "TOPIC_STRING": "Four_race_combinations",
+      "TOPIC_LABEL": "Four race combinations",
+      "PARENT_TOPIC_STRING": "Two_or_More_Races",
+      "DESCRIPTION": "Specific combinations of four race categories."
+    },
+    {
+      "TOPIC_STRING": "Three_race_combinations",
+      "TOPIC_LABEL": "Three race combinations",
+      "PARENT_TOPIC_STRING": "Two_or_More_Races",
+      "DESCRIPTION": "Specific combinations of three race categories."
+    },
+    {
+      "TOPIC_STRING": "Two_race_combinations",
+      "TOPIC_LABEL": "Two race combinations",
+      "PARENT_TOPIC_STRING": "Two_or_More_Races",
+      "DESCRIPTION": "Specific combinations of two race categories."
+    },
+    {
+      "TOPIC_STRING": "Not_Hispanic_or_Latino_by_Race_alone",
+      "TOPIC_LABEL": "Not Hispanic or Latino by Race alone",
+      "PARENT_TOPIC_STRING": "Not_Hispanic_or_Latino",
+      "DESCRIPTION": "Non-Hispanic population broken down by single race categories only."
+    },
+    {
+      "TOPIC_STRING": "Detailed_Some_Other_Race_Alone_or_in_Any_Combination",
+      "TOPIC_LABEL": "Detailed Some Other Race Alone or in Any Combination",
+      "PARENT_TOPIC_STRING": "Some_Other_Race",
+      "DESCRIPTION": "Detailed breakdowns of persons reporting Some Other Race alone or in combination with other races."
+    },
+    {
+      "TOPIC_STRING": "Caribbean_Alone_or_in_Any_Combination",
+      "TOPIC_LABEL": "Caribbean alone or in Any Combination",
+      "PARENT_TOPIC_STRING": "Detailed_Black_or_African_American_Alone_or_in_Any_Combination",
+      "DESCRIPTION": "Persons reporting Caribbean alone or in combination with other race categories."
+    },
+    {
+      "TOPIC_STRING": "Detailed_Black_or_African_American_Alone_or_in_Any_Combination",
+      "TOPIC_LABEL": "Detailed Black or African American Alone or in Any Combination",
+      "PARENT_TOPIC_STRING": "Black_or_African_American",
+      "DESCRIPTION": "Detailed ancestry data for Black or African American persons alone or in combination with other races."
+    },
+    {
+      "TOPIC_STRING": "Detailed_American_Indian_and_Alaska_Native_Alone",
+      "TOPIC_LABEL": "Detailed American Indian and Alaska Native Alone",
+      "PARENT_TOPIC_STRING": "American_Indian_and_Alaska_Native",
+      "DESCRIPTION": "Detailed tribal and indigenous group data for American Indian and Alaska Native persons reporting only this race."
+    },
+    {
+      "TOPIC_STRING": "Detailed_White_Alone_or_in_Any_Combination",
+      "TOPIC_LABEL": "Detailed White Alone or in any combination",
+      "PARENT_TOPIC_STRING": "White",
+      "DESCRIPTION": "Detailed ancestry and origin data for White persons alone or in combination with other races."
+    },
+    {
+      "TOPIC_STRING": "Other_Black_or_African_American_Alone_or_in_Any_Combination",
+      "TOPIC_LABEL": "Other Black or African American alone or in Any Combination",
+      "PARENT_TOPIC_STRING": "Detailed_Black_or_African_American_Alone_or_in_Any_Combination",
+      "DESCRIPTION": "Persons reporting Other Black or African American alone or in combination with other race categories."
+    },
+    {
+      "TOPIC_STRING": "Native_Hawaiian_and_Other_Pacific_Islander",
+      "TOPIC_LABEL": "Native Hawaiian and Other Pacific Islander",
+      "PARENT_TOPIC_STRING": "Race_and_Ethnicity",
+      "DESCRIPTION": "Persons having origins in any of the original peoples of Hawaii, Guam, Samoa, or other Pacific Islands."
+    },
+    {
+      "TOPIC_STRING": "Business_and_Economy",
+      "TOPIC_LABEL": "Business and Economy",
+      "DESCRIPTION": "Economic data across the entire economy on a monthly, quarterly, yearly, and five-year basis."
+    },
+    {
+      "TOPIC_STRING": "Education",
+      "TOPIC_LABEL": "Education",
+      "DESCRIPTION": "Information on a variety of educational topics, from educational attainment and school enrollment to school costs and financing."
+    },
+    {
+      "TOPIC_STRING": "Government",
+      "TOPIC_LABEL": "Government",
+      "DESCRIPTION": "Federal, state and local government data as well as voting, redistricting, apportionment and congressional affairs."
+    },
+    {
+      "TOPIC_STRING": "Housing",
+      "TOPIC_LABEL": "Housing",
+      "DESCRIPTION": "A comprehensive picture of housing in America."
+    },
+    {
+      "TOPIC_STRING": "Health",
+      "TOPIC_LABEL": "Health",
+      "DESCRIPTION": "Data covering people and business relating to health in America."
+    },
+    {
+      "TOPIC_STRING": "Families_and_Living_Arrangements",
+      "TOPIC_LABEL": "Families and Living Arrangements",
+      "DESCRIPTION": "Data about American families for the nation, states and communities, including household and family composition and the number of children, young adults and couples living in the United States."
+    },
+    {
+      "TOPIC_STRING": "Employment",
+      "TOPIC_LABEL": "Employment",
+      "DESCRIPTION": "Data about the nation's workforce, including employment and unemployment levels, as well as weeks and hours worked."
+    },
+    {
+      "TOPIC_STRING": "Income_and_Poverty",
+      "TOPIC_LABEL": "Income and Poverty",
+      "DESCRIPTION": "Income data covering poverty, income, and wealth."
+    },
+    {
+      "TOPIC_STRING": "Populations_and_People",
+      "TOPIC_LABEL": "Populations and People",
+      "DESCRIPTION": "Population statistics come from decennial censuses, which count the entire U.S. population every ten years, along with several other surveys."
+    },
+    {
+      "TOPIC_STRING": "Race_and_Ethnicity",
+      "TOPIC_LABEL": "Race and Ethnicity",
+      "DESCRIPTION": "Racial data collected in accordance with guidelines provided by the U.S. Office of Management and Budget (OMB), and these data are based on self-identification."
+    }
+  ]
+}
