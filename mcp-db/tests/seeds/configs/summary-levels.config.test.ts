@@ -13,7 +13,7 @@ import fs from 'fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { dbConfig } from '../../helpers/database-config'
+import { dbConfig } from '../../test-helpers/database-config'
 import { SummaryLevel } from '../../../src/schema/summary-level.schema'
 import { SeedRunner } from '../../../src/seeds/scripts/seed-runner'
 import { seeds } from '../../../src/seeds/scripts/seed-database'

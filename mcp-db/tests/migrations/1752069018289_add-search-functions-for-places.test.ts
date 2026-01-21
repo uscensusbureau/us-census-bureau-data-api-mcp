@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest'
 import { MigrationBuilder } from 'node-pg-migrate'
 
-import { normalizeSQL } from '../helpers/normalize-sql'
+import { normalizeSQL } from '../test-helpers/normalize-sql'
 import {
   up,
   down,

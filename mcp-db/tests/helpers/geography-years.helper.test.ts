@@ -1,8 +1,8 @@
 import { afterAll, beforeAll, beforeEach, describe, it, expect } from 'vitest'
 import { Client } from 'pg'
 
-import { cleanupWithRetry } from '../helpers/database-cleanup'
-import { dbConfig } from '../helpers/database-config'
+import { cleanupWithRetry } from '../test-helpers/database-cleanup'
+import { dbConfig } from '../test-helpers/database-config'
 import { createGeographyYear } from '../../src/helpers/geography-years.helper'
 
 describe('createGeographyYear', () => {

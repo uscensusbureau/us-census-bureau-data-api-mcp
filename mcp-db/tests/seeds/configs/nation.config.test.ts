@@ -22,8 +22,8 @@ vi.mock('../../../src/helpers/geography-years.helper', async () => ({
   createGeographyYear: vi.fn(),
 }))
 
-import { cleanupWithRetry } from '../../helpers/database-cleanup'
-import { dbConfig } from '../../helpers/database-config'
+import { cleanupWithRetry } from '../../test-helpers/database-cleanup'
+import { dbConfig } from '../../test-helpers/database-config'
 import { NationConfig } from '../../../src/seeds/configs/nation.config'
 import { SeedRunner } from '../../../src/seeds/scripts/seed-runner'
 import { GeographyContext } from '../../../src/schema/seed-config.schema'

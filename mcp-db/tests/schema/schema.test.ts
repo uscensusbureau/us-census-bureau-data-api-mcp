@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import { Client, QueryResult } from 'pg'
 
-import { dbConfig } from '../helpers/database-config'
+import { dbConfig } from '../test-helpers/database-config'
 
-import { MigrationInfo } from '../helpers/types'
+import { MigrationInfo } from '../test-helpers/types'
 
 const client = new Client(dbConfig)
 

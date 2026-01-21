@@ -1,6 +1,7 @@
 import { Client } from 'pg'
 
 import { getOrCreateYear } from '../../helpers/get-or-create-year.helper.js'
+import { createDatasetTopics } from '../../helpers/create-dataset-topics.helper.js'
 import {
   DatasetRecord,
   parseTemporalRange,
@@ -80,5 +81,8 @@ export const DatasetConfig: SeedConfig = {
     )
     rawData.length = 0
     rawData.push(...deduped)
+  },
+  afterSeed: async (client: Client): Promise<void> => {
+    await createDatasetTopics(client)
   },
 }

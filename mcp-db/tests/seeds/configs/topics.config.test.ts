@@ -12,7 +12,7 @@ vi.mock('../../../src/schema/topic.schema', async (importOriginal) => {
 
 import { TopicsConfig } from '../../../src/seeds/configs/topics.config'
 import { transformTopicData } from '../../../src/schema/topic.schema'
-import { normalizeSQL } from '../../helpers/normalize-sql'
+import { normalizeSQL } from '../../test-helpers/normalize-sql'
 
 const rawTopicData = [
   {

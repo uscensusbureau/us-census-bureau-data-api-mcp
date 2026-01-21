@@ -13,7 +13,7 @@ import fs from 'fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { dbConfig } from '../../helpers/database-config'
+import { dbConfig } from '../../test-helpers/database-config'
 import {
   SeedConfig,
   GeographySeedConfig,

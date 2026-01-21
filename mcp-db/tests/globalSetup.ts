@@ -2,7 +2,7 @@ import { spawn, ChildProcess } from 'child_process'
 import { rm } from 'node:fs/promises'
 import { promisify } from 'util'
 
-import { dbConfig } from './helpers/database-config'
+import { dbConfig } from './test-helpers/database-config'
 
 const sleep = promisify(setTimeout)
 

@@ -22,13 +22,13 @@ vi.mock('../../../src/helpers/geography-years.helper', async () => ({
   createGeographyYear: vi.fn(),
 }))
 
-import { dbConfig } from '../../helpers/database-config'
+import { dbConfig } from '../../test-helpers/database-config'
 import {
   CountyConfig,
   parentCountySQL,
 } from '../../../src/seeds/configs/county.config'
-import { cleanupWithRetry } from '../../helpers/database-cleanup'
-import { normalizeSQL } from '../../helpers/normalize-sql'
+import { cleanupWithRetry } from '../../test-helpers/database-cleanup'
+import { normalizeSQL } from '../../test-helpers/normalize-sql'
 import { SeedRunner } from '../../../src/seeds/scripts/seed-runner'
 import { GeographyContext } from '../../../src/schema/seed-config.schema'
 import { transformApiGeographyData } from '../../../src/schema/geography.schema'
