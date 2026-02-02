@@ -67,12 +67,12 @@ export const geoProperties = {
   },
   in: {
     type: 'string',
-    description: 'Parent geography restriction as comma-separated values',
+    description: 'Parent geography restriction as comma-separated values, with different summary levels separated by +.',
     examples: [
       'state:01',
       'state:01,02',
       'county:075',
-      'state:01%20county:001',
+      'state:01+county:001',
     ],
   },
   ucgid: {
@@ -86,7 +86,7 @@ export const geoProperties = {
 //Fields
 const geographyPatternFor: RegExp = /^[a-zA-Z+\s]+:[*\d,]+$/
 const geographyPatternIn: RegExp =
-  /^[a-zA-Z+\s]+:[*\d,]+(?:(?:\s|%20)[a-zA-Z+\s]+:[*\d,]+)*$/
+  /^[a-zA-Z]+:[*\d,]+(?:\+[a-zA-Z]+:[*\d,]+)*$/
 
 export const baseFields = {
   dataset: z.string(),
@@ -127,7 +127,7 @@ export const geoFields = {
     .optional()
     .refine((val) => !val || geographyPatternIn.test(val), {
       message:
-        "Must be in format 'geography-level:value1' or 'geography-level:value1 geography-level:value2', e.g., 'state:01', 'state:01 county:001', or 'state:01%20county:001'.",
+        "Must be in format 'geography-level:value1' or 'geography-level:value1+geography-level:value2', e.g., 'state:01', 'state:01+county:001'.",
     })
     .describe("Geography-level restriction, e.g. 'state:01'"),
   ucgid: z

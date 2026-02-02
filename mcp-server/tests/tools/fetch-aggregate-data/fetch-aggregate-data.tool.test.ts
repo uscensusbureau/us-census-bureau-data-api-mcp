@@ -120,7 +120,7 @@ describe('FetchAggregateDataTool', () => {
           group: 'B01001',
         },
         for: 'tract:*',
-        in: 'state:01 county:001',
+        in: 'state:01+county:001',
       }
 
       expect(() => tool.argsSchema.parse(complexArgs)).not.toThrow()

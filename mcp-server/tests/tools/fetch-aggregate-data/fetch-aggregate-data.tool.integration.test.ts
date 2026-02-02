@@ -38,7 +38,7 @@ describe('FetchAggregateDataTool - Integration Tests', () => {
           group: groupName,
         },
         for: 'tract:*',
-        in: 'state:17 county:031',
+        in: 'state:17+county:031',
       },
       process.env.CENSUS_API_KEY,
     )
