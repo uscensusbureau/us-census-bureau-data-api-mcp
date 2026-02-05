@@ -67,13 +67,9 @@ export const geoProperties = {
   },
   in: {
     type: 'string',
-    description: 'Parent geography restriction as comma-separated values, with different summary levels separated by +.',
-    examples: [
-      'state:01',
-      'state:01,02',
-      'county:075',
-      'state:01+county:001',
-    ],
+    description:
+      'Parent geography restriction as comma-separated values, with different summary levels separated by +.',
+    examples: ['state:01', 'state:01,02', 'county:075', 'state:01+county:001'],
   },
   ucgid: {
     type: 'string',
@@ -85,8 +81,7 @@ export const geoProperties = {
 
 //Fields
 const geographyPatternFor: RegExp = /^[a-zA-Z+\s]+:[*\d,]+$/
-const geographyPatternIn: RegExp =
-  /^[a-zA-Z]+:[*\d,]+(?:\+[a-zA-Z]+:[*\d,]+)*$/
+const geographyPatternIn: RegExp = /^[a-zA-Z]+:[*\d,]+(?:\+[a-zA-Z]+:[*\d,]+)*$/
 
 export const baseFields = {
   dataset: z.string(),

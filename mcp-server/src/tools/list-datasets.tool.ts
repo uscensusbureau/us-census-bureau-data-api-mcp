@@ -14,24 +14,13 @@ import { BaseTool } from './base.tool.js'
 
 import { ToolContent } from '../types/base.types.js'
 
+export const toolDescription = `
+  Returns complete catalog of available U.S. Census Bureau datasets with titles, identifiers, and available years. Use this tool FIRST when users request Census data but don't specify which dataset, or when you're unsure which dataset contains the requested statistics. Essential for mapping user requests about demographics, economics, housing, business, or government data to the correct Census dataset. After receiving results, analyze the catalog to identify the best dataset match based on topic relevance and temporal scope, then explain your reasoning to the user.
+`
+
 export class ListDatasetsTool extends BaseTool<object> {
   name = 'list-datasets'
-  description = `This tool returns a data catalog of available Census datasets from the Census API. 
-  The LLM should analyze this catalog against the user's request and identify the best dataset match(es).
-  The LLM must return at least one dataset name or indicate low confidence if no dataset is a strong match. 
-
-  Dataset selection guidelines:
-    - Always make your best guess as the primary recommendation
-    - Match on subject matter first, then temporal scope
-    - When year is specified, prioritize exact matches
-    - For topic matches, prefer more specific over general datasets
-    - Prefer more comprehensive datasets when scope is unclear
-    - Explain WHY you chose that dataset, focusing on topic relevance and time alignment
-    - Include 2-3 alternatives with clear reasoning
-    - Mention key trade-offs (accuracy vs. timeliness, scope vs. detail, specificity vs. completeness)
-    - If the user request is ambiguous, state your assumptions
-    - Flag when no dataset is a strong match (confidence: 'low')
-    `
+  description = toolDescription
   readonly requiresApiKey = true
 
   inputSchema: Tool['inputSchema'] = {

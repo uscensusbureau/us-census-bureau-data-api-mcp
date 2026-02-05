@@ -21,12 +21,15 @@ import {
   vi,
   Mock,
 } from 'vitest'
-import { FetchDatasetGeographyTool } from '../../../src/tools/fetch-dataset-geography.tool.js'
-import { DatabaseService } from '../../../src/services/database.service.js'
 import {
-  SummaryLevelRow,
-  GeographyMetadata,
-} from '../types/summary-level.types.js'
+  FetchDatasetGeographyTool,
+  toolDescription,
+} from '../../../src/tools/fetch-dataset-geography.tool.js'
+import { DatabaseService } from '../../../src/services/database.service.js'
+import { SummaryLevelRow } from '../../../src/types/summary-level.types.js'
+import { GeographyJson } from '../../../src/schema/dataset-geography.schema.js'
+import { TextContent } from '@modelcontextprotocol/sdk/types.js'
+
 import {
   validateResponseStructure,
   validateToolStructure,
@@ -43,7 +46,7 @@ describe('FetchDatasetGeographyTool', () => {
   }
 
   // Static mock data - created once and reused
-  let mockSummaryLevels: GeographyMetadata<SummaryLevelRow[]>
+  let mockSummaryLevels: SummaryLevelRow[]
   let mockCensusApiResponse: GeographyJson
 
   beforeAll(() => {
@@ -57,8 +60,11 @@ describe('FetchDatasetGeographyTool', () => {
         query_name: 'us',
         on_spine: true,
         code: '010',
+        summary_level: '010',
         parent_summary_level: null,
         parent_geography_level_id: null,
+        created_at: new Date(),
+        updated_at: new Date(),
       },
       {
         id: 2,
@@ -68,8 +74,11 @@ describe('FetchDatasetGeographyTool', () => {
         query_name: 'state',
         on_spine: true,
         code: '040',
+        summary_level: '040',
         parent_summary_level: '010',
         parent_geography_level_id: 1,
+        created_at: new Date(),
+        updated_at: new Date(),
       },
       {
         id: 3,
@@ -79,8 +88,11 @@ describe('FetchDatasetGeographyTool', () => {
         query_name: 'county',
         on_spine: true,
         code: '050',
+        summary_level: '050',
         parent_summary_level: '040',
         parent_geography_level_id: 2,
+        created_at: new Date(),
+        updated_at: new Date(),
       },
     ]
 
@@ -137,9 +149,7 @@ describe('FetchDatasetGeographyTool', () => {
     it('should have correct tool metadata', () => {
       validateToolStructure(tool)
       expect(tool.name).toBe('fetch-dataset-geography')
-      expect(tool.description).toBe(
-        'Fetch available geographies for filtering a dataset.',
-      )
+      expect(tool.description).toBe(toolDescription)
       expect(tool.requiresApiKey).toBe(true)
     })
 
@@ -193,9 +203,9 @@ describe('FetchDatasetGeographyTool', () => {
         year: 2022,
       }
 
-      const response = await tool.toolHandler(args, process.env.CENSUS_API_KEY)
+      const response = await tool.toolHandler(args, process.env.CENSUS_API_KEY!)
       validateResponseStructure(response)
-      expect(response.content[0].text).toContain(
+      expect((response.content[0] as TextContent).text).toContain(
         'Database connection failed - cannot retrieve geography metadata',
       )
     })
@@ -208,7 +218,7 @@ describe('FetchDatasetGeographyTool', () => {
         year: 2022,
       }
 
-      await tool.toolHandler(args, process.env.CENSUS_API_KEY)
+      await tool.toolHandler(args, process.env.CENSUS_API_KEY!)
 
       expect(mockDbService.healthCheck).toHaveBeenCalled()
 
@@ -228,9 +238,11 @@ describe('FetchDatasetGeographyTool', () => {
         year: 2022,
       }
 
-      const response = await tool.toolHandler(args, process.env.CENSUS_API_KEY)
+      const response = await tool.toolHandler(args, process.env.CENSUS_API_KEY!)
       validateResponseStructure(response)
-      expect(response.content[0].text).toContain('Database connection failed')
+      expect((response.content[0] as TextContent).text).toContain(
+        'Database connection failed',
+      )
     })
   })
 
@@ -243,7 +255,7 @@ describe('FetchDatasetGeographyTool', () => {
         year: 2022,
       }
 
-      await tool.toolHandler(args, process.env.CENSUS_API_KEY)
+      await tool.toolHandler(args, process.env.CENSUS_API_KEY!)
       const calls = mockFetch.mock.calls
       expect(calls[0][0]).toContain(
         'https://api.census.gov/data/2022/acs/acs1/geography.json?key=',
@@ -257,7 +269,7 @@ describe('FetchDatasetGeographyTool', () => {
         dataset: 'timeseries/asm/area2012',
       }
 
-      await tool.toolHandler(args, process.env.CENSUS_API_KEY)
+      await tool.toolHandler(args, process.env.CENSUS_API_KEY!)
 
       expect(mockFetch).toHaveBeenCalledWith(
         expect.stringContaining(
@@ -276,11 +288,11 @@ describe('FetchDatasetGeographyTool', () => {
         year: 2022,
       }
 
-      const response = await tool.toolHandler(args, process.env.CENSUS_API_KEY)
+      const response = await tool.toolHandler(args, process.env.CENSUS_API_KEY!)
       validateResponseStructure(response)
 
       expect(response.content[0].type).toBe('text')
-      const responseText = response.content[0].text
+      const responseText = (response.content[0] as TextContent).text
 
       // Parse the JSON response to verify database integration
       const jsonStart = responseText.indexOf('[')
@@ -333,10 +345,10 @@ describe('FetchDatasetGeographyTool', () => {
         year: 2022,
       }
 
-      const response = await tool.toolHandler(args, process.env.CENSUS_API_KEY)
+      const response = await tool.toolHandler(args, process.env.CENSUS_API_KEY!)
       validateResponseStructure(response)
 
-      const responseText = response.content[0].text
+      const responseText = (response.content[0] as TextContent).text
       const jsonStart = responseText.indexOf('[')
       const parsedData = JSON.parse(responseText.substring(jsonStart))
 
@@ -359,9 +371,9 @@ describe('FetchDatasetGeographyTool', () => {
         year: 2022,
       }
 
-      const response = await tool.toolHandler(args, process.env.CENSUS_API_KEY)
+      const response = await tool.toolHandler(args, process.env.CENSUS_API_KEY!)
       validateResponseStructure(response)
-      expect(response.content[0].text).toContain(
+      expect((response.content[0] as TextContent).text).toContain(
         'Geography endpoint returned: 400 Bad Request',
       )
     })
@@ -374,9 +386,9 @@ describe('FetchDatasetGeographyTool', () => {
         year: 2022,
       }
 
-      const response = await tool.toolHandler(args, process.env.CENSUS_API_KEY)
+      const response = await tool.toolHandler(args, process.env.CENSUS_API_KEY!)
       validateResponseStructure(response)
-      expect(response.content[0].text).toContain(
+      expect((response.content[0] as TextContent).text).toContain(
         'Failed to fetch dataset geography levels: Network error',
       )
     })
@@ -392,9 +404,9 @@ describe('FetchDatasetGeographyTool', () => {
         year: 2022,
       }
 
-      const response = await tool.toolHandler(args, process.env.CENSUS_API_KEY)
+      const response = await tool.toolHandler(args, process.env.CENSUS_API_KEY!)
       validateResponseStructure(response)
-      expect(response.content[0].text).toContain(
+      expect((response.content[0] as TextContent).text).toContain(
         'Failed to fetch dataset geography levels: Invalid JSON',
       )
     })
@@ -408,9 +420,11 @@ describe('FetchDatasetGeographyTool', () => {
         year: 2022,
       }
 
-      const response = await tool.toolHandler(args, process.env.CENSUS_API_KEY)
+      const response = await tool.toolHandler(args, process.env.CENSUS_API_KEY!)
       validateResponseStructure(response)
-      expect(response.content[0].text).toContain('Response validation failed')
+      expect((response.content[0] as TextContent).text).toContain(
+        'Response validation failed',
+      )
     })
   })
 
@@ -423,8 +437,8 @@ describe('FetchDatasetGeographyTool', () => {
         year: 2022,
       }
 
-      const response = await tool.toolHandler(args, process.env.CENSUS_API_KEY)
-      const responseText = response.content[0].text
+      const response = await tool.toolHandler(args, process.env.CENSUS_API_KEY!)
+      const responseText = (response.content[0] as TextContent).text
       const jsonStart = responseText.indexOf('[')
       const parsedData = JSON.parse(responseText.substring(jsonStart))
 
@@ -446,13 +460,13 @@ describe('FetchDatasetGeographyTool', () => {
         year: 2022,
       }
 
-      const response = await tool.toolHandler(args, process.env.CENSUS_API_KEY)
-      const responseText = response.content[0].text
+      const response = await tool.toolHandler(args, process.env.CENSUS_API_KEY!)
+      const responseText = (response.content[0] as TextContent).text
       const jsonStart = responseText.indexOf('[')
       const parsedData = JSON.parse(responseText.substring(jsonStart))
 
       // All our mock geography levels have on_spine: true
-      parsedData.forEach((geography) => {
+      parsedData.forEach((geography: { onSpine: boolean }) => {
         expect(geography.onSpine).toBe(true)
       })
     })

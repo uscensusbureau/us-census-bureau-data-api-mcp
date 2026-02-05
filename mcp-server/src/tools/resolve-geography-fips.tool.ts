@@ -13,11 +13,8 @@ import { SummaryLevelRow } from '../types/summary-level.types.js'
 import { ToolContent } from '../types/base.types.js'
 
 export const toolDescription = `
-	Provides potential matches for Census Bureau geographies. Includes Nation, Region, Division, State, Counties, and County Subdivision 
-	geographies. For each result, it returns information about the geography, for and in parameters with the correct
-	FIPS code for constructing fetching data with other tools, and what years (vintages) the geography is available in.
+  Converts geographic place names into Census FIPS codes and query parameters. Use this tool when users reference locations by name (e.g., "Philadelphia", "Cook County", "New York State") rather than codes. Accepts natural language geography names and optional summary level filters (State, County, Place, County Subdivision). Returns FIPS codes, query syntax for fetch-aggregate-data tool, available vintages, and geographic hierarchy. Essential for translating human-readable location references into Census API parameters.
 `
-
 export class ResolveGeographyFipsTool extends BaseTool<ResolveGeographyFipsArgs> {
   name = 'resolve-geography-fips'
   description = toolDescription
