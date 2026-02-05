@@ -128,15 +128,13 @@ describe('Dataset Schema', () => {
     })
 
     describe('when the item argument does not match a valid dataset type', () => {
-      it('throws an error', () => {
+      it('returns undefined', () => {
         const datasetNoType: ApiDataset = {
           title: 'Invalid Dataset',
           identifier: '3456',
           description: 'A dataset with no type flag.',
         }
-        expect(() => determineDatasetType(datasetNoType)).toThrow(
-          'Dataset 3456 has no type flag set',
-        )
+        expect(determineDatasetType(datasetNoType)).toBeUndefined()
       })
     })
   })

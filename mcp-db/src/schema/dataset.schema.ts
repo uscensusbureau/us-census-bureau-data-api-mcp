@@ -19,7 +19,9 @@ export const TransformedDatasetSchema = DatasetRecordSchema.omit({
   temporal_start: true,
   temporal_end: true,
   year_id: true,
+  type: true,
 }).extend({
+  type: z.enum(['aggregate', 'timeseries', 'microdata']).optional(),
   c_vintage: z.union([z.number(), z.string()]).optional(),
   temporal: z.string().optional(),
 })
@@ -105,12 +107,12 @@ export function parseTemporalRange(temporal: string): {
 
 export function determineDatasetType(
   item: ApiDataset,
-): 'aggregate' | 'timeseries' | 'microdata' {
+): 'aggregate' | 'timeseries' | 'microdata' | undefined {
   if (item.c_isAggregate) return 'aggregate'
   if (item.c_isTimeseries) return 'timeseries'
   if (item.c_isMicrodata) return 'microdata'
 
-  throw new Error(`Dataset ${item.identifier} has no type flag set`)
+  return undefined
 }
 
 export const transformApiDatasetsData = (

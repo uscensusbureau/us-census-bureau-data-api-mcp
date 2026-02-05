@@ -669,5 +669,139 @@ describe('Dataset Config', () => {
         consoleWarnSpy.mockRestore()
       })
     })
+
+    describe('datasets without type', () => {
+      it('should exclude datasets without a type and log warning', async () => {
+        const rawApiData = [
+          {
+            c_vintage: 2020,
+            c_dataset: ['acs', 'acs1'],
+            c_isAggregate: true,
+            title: 'Valid Dataset',
+            identifier: 'https://api.census.gov/data/id/VALID',
+            description: 'Has type',
+          },
+          {
+            c_vintage: 2021,
+            c_dataset: ['acs', 'acs5'],
+            title: 'Dataset Without Type',
+            identifier: 'https://api.census.gov/data/id/NOTYPE',
+            description: 'Missing type flag',
+          },
+        ]
+
+        const transformedData: TransformedDataset[] = [
+          {
+            name: 'Valid Dataset',
+            description: 'Has type',
+            c_vintage: 2020,
+            type: 'aggregate',
+            dataset_id: 'VALID',
+            dataset_param: 'acs/acs1',
+          },
+          {
+            name: 'Dataset Without Type',
+            description: 'Missing type flag',
+            c_vintage: 2021,
+            type: undefined as unknown as 'aggregate' | 'timeseries' | 'microdata',
+            dataset_id: 'NOTYPE',
+            dataset_param: 'acs/acs5',
+          },
+        ]
+
+        vi.mocked(transformApiDatasetsData).mockReturnValue(transformedData)
+        vi.mocked(TransformedDatasetsArraySchema.parse).mockReturnValue(
+          transformedData,
+        )
+        vi.mocked(parseTemporalRange).mockReturnValue({
+          temporal_start: null,
+          temporal_end: null,
+        })
+        vi.mocked(getOrCreateYear).mockResolvedValue(1)
+
+        const consoleWarnSpy = vi
+          .spyOn(console, 'warn')
+          .mockImplementation(() => {})
+
+        await DatasetConfig.beforeSeed!(mockClient as Client, rawApiData)
+
+        expect(rawApiData).toHaveLength(1)
+        expect(rawApiData[0]).toEqual({
+          name: 'Valid Dataset',
+          description: 'Has type',
+          type: 'aggregate',
+          dataset_id: 'VALID',
+          dataset_param: 'acs/acs1',
+          temporal_start: null,
+          temporal_end: null,
+          year_id: 1,
+        })
+
+        expect(consoleWarnSpy).toHaveBeenCalledWith(
+          'Excluding dataset NOTYPE - no type flag set',
+        )
+
+        consoleWarnSpy.mockRestore()
+      })
+
+      it('should exclude all datasets without type if none have type', async () => {
+        const rawApiData = [
+          {
+            c_vintage: 2020,
+            c_dataset: ['acs', 'acs1'],
+            title: 'No Type 1',
+            identifier: 'https://api.census.gov/data/id/NOTYPE1',
+            description: 'Missing type',
+          },
+          {
+            c_vintage: 2021,
+            c_dataset: ['acs', 'acs5'],
+            title: 'No Type 2',
+            identifier: 'https://api.census.gov/data/id/NOTYPE2',
+            description: 'Missing type',
+          },
+        ]
+
+        const transformedData: TransformedDataset[] = [
+          {
+            name: 'No Type 1',
+            description: 'Missing type',
+            c_vintage: 2020,
+            type: undefined,
+            dataset_id: 'NOTYPE1',
+            dataset_param: 'acs/acs1',
+          },
+          {
+            name: 'No Type 2',
+            description: 'Missing type',
+            c_vintage: 2021,
+            type: undefined,
+            dataset_id: 'NOTYPE2',
+            dataset_param: 'acs/acs5',
+          },
+        ]
+
+        vi.mocked(transformApiDatasetsData).mockReturnValue(transformedData)
+        vi.mocked(TransformedDatasetsArraySchema.parse).mockReturnValue(
+          transformedData,
+        )
+
+        const consoleWarnSpy = vi
+          .spyOn(console, 'warn')
+          .mockImplementation(() => {})
+
+        await DatasetConfig.beforeSeed!(mockClient as Client, rawApiData)
+
+        expect(rawApiData).toHaveLength(0)
+        expect(consoleWarnSpy).toHaveBeenCalledWith(
+          'Excluding dataset NOTYPE1 - no type flag set',
+        )
+        expect(consoleWarnSpy).toHaveBeenCalledWith(
+          'Excluding dataset NOTYPE2 - no type flag set',
+        )
+
+        consoleWarnSpy.mockRestore()
+      })
+    })
   })
 })
