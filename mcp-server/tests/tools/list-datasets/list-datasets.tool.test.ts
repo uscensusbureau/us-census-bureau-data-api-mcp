@@ -6,7 +6,10 @@ vi.mock('node-fetch', () => ({
 }))
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { ListDatasetsTool } from '../../../src/tools/list-datasets.tool'
+import {
+  ListDatasetsTool,
+  toolDescription,
+} from '../../../src/tools/list-datasets.tool'
 import { sampleDatasetMetadata } from '../../helpers/test-data.js'
 import {
   SimplifiedAPIDatasetType,
@@ -44,9 +47,7 @@ describe('ListDatasetsTool', () => {
   describe('Tool Configuration', () => {
     it('should have correct name and description', () => {
       expect(tool.name).toBe('list-datasets')
-      expect(tool.description).toContain(
-        'returns a data catalog of available Census datasets',
-      )
+      expect(tool.description).toBe(toolDescription)
       expect(tool.requiresApiKey).toBe(true)
     })
 

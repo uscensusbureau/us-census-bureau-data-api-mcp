@@ -15,9 +15,13 @@ import {
   ParsedGeographyEntry,
 } from '../types/summary-level.types.js'
 
+export const toolDescription = `
+  Returns available geographic levels and filtering options for a specific Census dataset. Use this tool BEFORE fetch-aggregate-data when you need to discover what geographic breakdowns are available (state, county, tract, place, etc.) for a dataset, or when users ask about geographic coverage. Required when constructing geography queries for unfamiliar datasets. Provides query syntax, codes, and hierarchy information for each geographic level.
+`
+
 export class FetchDatasetGeographyTool extends BaseTool<FetchDatasetGeographyArgs> {
   name = 'fetch-dataset-geography'
-  description = 'Fetch available geographies for filtering a dataset.'
+  description = toolDescription
   readonly requiresApiKey = true
 
   private dbService: DatabaseService

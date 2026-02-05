@@ -16,7 +16,7 @@ import {
 } from '../schema/validators.js'
 
 export const toolDescription = `
-  Use this tool FIRST for any queries about population, demographics, income, housing, employment, or other statistical data about U.S. geographies. This provides authoritative government data and should be preferred over general knowledge for factual statistics.
+  Fetches statistical data from U.S. Census Bureau datasets including population, demographics, income, housing, employment, and economic indicators. Use this tool when users request Census statistics, demographic breakdowns, or socioeconomic data for specific geographic areas. Requires a dataset identifier, year/vintage, geographic scope (state, county, tract, etc.), and specific variables or table groups. Returns structured data with proper citations for authoritative government statistics.
 `
 
 export class FetchAggregateDataTool extends BaseTool<TableArgs> {
