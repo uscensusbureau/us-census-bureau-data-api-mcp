@@ -5,7 +5,7 @@ import { z } from 'zod'
 describe('YearSchema', () => {
   it('should validate a Year object', () => {
     const year = {
-      year: 2020
+      year: 2020,
     }
 
     const result = YearSchema.safeParse(year)

@@ -703,7 +703,10 @@ describe('Dataset Config', () => {
             name: 'Dataset Without Type',
             description: 'Missing type flag',
             c_vintage: 2021,
-            type: undefined as unknown as 'aggregate' | 'timeseries' | 'microdata',
+            type: undefined as unknown as
+              | 'aggregate'
+              | 'timeseries'
+              | 'microdata',
             dataset_id: 'NOTYPE',
             dataset_param: 'acs/acs5',
           },

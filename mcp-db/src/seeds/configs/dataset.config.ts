@@ -18,16 +18,17 @@ export const DatasetConfig: SeedConfig = {
   alwaysFetch: true,
   beforeSeed: async (client: Client, rawData: unknown[]): Promise<void> => {
     const transformedData = transformApiDatasetsData(rawData)
-    const validatedData = TransformedDatasetsArraySchema.parse(transformedData)
-      .filter((record) => {
-        if (!record.type) {
-          console.warn(
-            `Excluding dataset ${record.dataset_id} - no type flag set`,
-          )
-          return false
-        }
-        return true
-      })
+    const validatedData = TransformedDatasetsArraySchema.parse(
+      transformedData,
+    ).filter((record) => {
+      if (!record.type) {
+        console.warn(
+          `Excluding dataset ${record.dataset_id} - no type flag set`,
+        )
+        return false
+      }
+      return true
+    })
 
     const processedData: Partial<DatasetRecord>[] = await Promise.all(
       validatedData.map(async (record) => {
