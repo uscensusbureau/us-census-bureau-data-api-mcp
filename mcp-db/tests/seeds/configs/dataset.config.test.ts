@@ -24,10 +24,6 @@ vi.mock('../../../src/helpers/get-or-create-year.helper', () => ({
   getOrCreateYear: vi.fn(),
 }))
 
-vi.mock('../../../src/helpers/create-dataset-topics.helper', () => ({
-  createDatasetTopics: vi.fn(),
-}))
-
 import { cleanupWithRetry } from '../../test-helpers/database-cleanup'
 import { dbConfig } from '../../test-helpers/database-config'
 import { DatasetConfig } from '../../../src/seeds/configs/dataset.config'
@@ -40,7 +36,6 @@ import {
   TransformedDatasetsArraySchema,
 } from '../../../src/schema/dataset.schema'
 import { getOrCreateYear } from '../../../src/helpers/get-or-create-year.helper'
-import { createDatasetTopics } from '../../../src/helpers/create-dataset-topics.helper'
 
 describe('Dataset Config', () => {
   let runner: SeedRunner
@@ -63,7 +58,6 @@ describe('Dataset Config', () => {
     vi.mocked(parseTemporalRange).mockClear()
     vi.mocked(getOrCreateYear).mockClear()
     vi.mocked(TransformedDatasetsArraySchema.parse).mockClear()
-    vi.mocked(createDatasetTopics).mockClear()
 
     runner = new SeedRunner(databaseUrl)
     await runner.connect()
@@ -84,41 +78,6 @@ describe('Dataset Config', () => {
     expect(datasetSeed?.dataPath).toBe('dataset')
     expect(datasetSeed?.alwaysFetch).toBe(true)
     expect(datasetSeed?.beforeSeed).toBeDefined()
-    expect(datasetSeed?.afterSeed).toBeDefined()
-  })
-
-  describe('afterSeed', () => {
-    let mockClient: Partial<Client>
-
-    beforeEach(() => {
-      mockClient = {
-        query: vi.fn(),
-      }
-    })
-
-    it('should call createDatasetTopics with the client', async () => {
-      await DatasetConfig.afterSeed!(mockClient as Client)
-
-      expect(createDatasetTopics).toHaveBeenCalledTimes(1)
-      expect(createDatasetTopics).toHaveBeenCalledWith(mockClient)
-    })
-  })
-
-  describe('beforeSeed', () => {
-    let mockClient: Partial<Client>
-
-    beforeEach(() => {
-      mockClient = {
-        query: vi.fn(),
-      }
-    })
-
-    it('should call createDatasetTopics with the client', async () => {
-      await DatasetConfig.afterSeed!(mockClient as Client)
-
-      expect(createDatasetTopics).toHaveBeenCalledTimes(1)
-      expect(createDatasetTopics).toHaveBeenCalledWith(mockClient)
-    })
   })
 
   describe('beforeSeed', () => {
