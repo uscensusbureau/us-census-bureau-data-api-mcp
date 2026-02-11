@@ -2,7 +2,6 @@ import { Client } from 'pg'
 import { z } from 'zod'
 
 import { SeedConfig } from '../../schema/seed-config.schema.js'
-import { SeedRunner } from '../scripts/seed-runner.js'
 import { YearsArraySchema } from '../../schema/year.schema.js'
 
 export const YearsConfig: SeedConfig = {

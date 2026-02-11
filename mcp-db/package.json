@@ -19,9 +19,11 @@
     "test:coverage": "vitest --coverage"
   },
   "dependencies": {
+    "csv-parse": "^6.1.0",
     "dotenv": "^17.1.0",
     "node-pg-migrate": "^8.0.3",
     "pg": "^8.11.3",
+    "title-case": "^4.3.2",
     "tsx": "^4.20.5",
     "typescript": "^5.8.3",
     "zod": "^4.0.5"
