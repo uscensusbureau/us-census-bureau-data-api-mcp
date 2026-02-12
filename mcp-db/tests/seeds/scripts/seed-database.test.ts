@@ -317,11 +317,12 @@ describe('Seed Database', () => {
 
   describe('seeds', () => {
     it('includes all non-geography configs', () => {
-      expect(seeds).toHaveLength(4)
+      expect(seeds).toHaveLength(5)
       expect(seeds).toContain(configs.SummaryLevelsConfig)
       expect(seeds).toContain(configs.YearsConfig)
       expect(seeds).toContain(configs.TopicsConfig)
       expect(seeds).toContain(configs.DatasetConfig)
+      expect(seeds).toContain(configs.DataTablesConfig)
     })
   })
 
@@ -360,14 +361,14 @@ describe('Seed Database', () => {
 
         // Time for Math!
         //
-        // 4 Static Configs (Year, Summary Levels, DatasetConfig, TopicsConfig) ] = 4
+        // 5 Static Configs (Year, Summary Levels, DatasetConfig, TopicsConfig) ] = 5
         // +
         // 2 Years x 7 Std Geo Configs[Nation + Region + Division + State + County + Place + ZCTA ] = 14 Runs
         // +
         // 2 years x 2 Mocked States x 1 MultiStateConfig[CountySubdivisionConfig] = 4 State-specific Runs
         // ------------
-        // EQUALS 22 Total Config Runs
-        expect(mockRunner.seed).toHaveBeenCalledTimes(22)
+        // EQUALS 23 Total Config Runs
+        expect(mockRunner.seed).toHaveBeenCalledTimes(23)
       } finally {
         SeedRunnerSpy.mockRestore()
       }
@@ -422,7 +423,7 @@ describe('Seed Database', () => {
         await runSeedsWithRunner(mockRunnerInstance)
 
         // Non-GEO Configs
-        expect(mockRunner.seed).toHaveBeenCalledTimes(4)
+        expect(mockRunner.seed).toHaveBeenCalledTimes(5)
         expect(mockRunner.seed).toHaveBeenCalledWith(
           expect.objectContaining({
             file: 'summary_levels.json',

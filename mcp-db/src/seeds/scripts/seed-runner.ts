@@ -1,7 +1,8 @@
-import { promises as fs } from 'fs'
-import path from 'path'
 import { Client } from 'pg'
 import { fileURLToPath } from 'url'
+import { parse } from 'csv-parse'
+import { promises as fs } from 'fs'
+import path from 'path'
 
 import { GeographyRecord } from '../../schema/geography.schema'
 
@@ -258,6 +259,7 @@ export class SeedRunner {
     alwaysFetch: boolean = false,
   ): Promise<any[]> {
     let data: unknown
+    let isCSV = false
 
     if (isUrl) {
       // Check if this API endpoint has been called before
@@ -281,11 +283,27 @@ export class SeedRunner {
       // Use the filepath
       const filePath = path.join(this.dataPath, source)
       const content = await fs.readFile(filePath, 'utf8')
-      data = JSON.parse(content)
+
+      // Use the extension to determine how to process file
+      const ext = path.extname(filePath).toLowerCase()
+
+      if (ext === '.csv') {
+        isCSV = true
+        const parser = parse(content, {
+          columns: true,
+          skip_empty_lines: true,
+          relax_column_count: true,
+        })
+
+        data = await parser.toArray()
+      } else if (ext === '.json') {
+        data = JSON.parse(content)
+      } else {
+        throw new Error(`Unsupported file format: ${ext}`)
+      }
     }
 
-    // Extract nested data if needed
-    if (extractPath) {
+    if (extractPath && !isCSV) {
       const keys = extractPath.split('.')
       data = keys.reduce((currentData, key) => {
         if (

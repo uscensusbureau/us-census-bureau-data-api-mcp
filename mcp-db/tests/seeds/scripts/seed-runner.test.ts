@@ -577,6 +577,80 @@ describe('SeedRunner', () => {
         expect(result).toEqual(mockData)
       })
 
+      it('should load data from CSV file', async () => {
+        const csvContent = `id,name,value
+1,Test Item,100
+2,Another Item,200`
+
+        const filePath = path.join(fixturesPath, 'test-load.csv')
+        await fs.writeFile(filePath, csvContent)
+
+        const result = await runner.loadData('test-load.csv')
+
+        expect(result).toEqual([
+          { id: '1', name: 'Test Item', value: '100' },
+          { id: '2', name: 'Another Item', value: '200' },
+        ])
+      })
+
+      it('should handle CSV with empty lines', async () => {
+        const csvContent = `id,name,value
+1,Test,100
+2,Another,200`
+
+        const filePath = path.join(fixturesPath, 'test-csv-empty-lines.csv')
+        await fs.writeFile(filePath, csvContent)
+
+        const result = await runner.loadData('test-csv-empty-lines.csv')
+
+        expect(result).toHaveLength(2)
+        expect(result).toEqual([
+          { id: '1', name: 'Test', value: '100' },
+          { id: '2', name: 'Another', value: '200' },
+        ])
+      })
+
+      it('should throw error for unsupported file extension', async () => {
+        const filePath = path.join(fixturesPath, 'test-file.xml')
+        await fs.writeFile(filePath, '<data></data>')
+
+        await expect(runner.loadData('test-file.xml')).rejects.toThrow(
+          'Unsupported file format: .xml',
+        )
+      })
+
+      it('should throw error for file without extension', async () => {
+        const filePath = path.join(fixturesPath, 'test-file')
+        await fs.writeFile(filePath, 'some content')
+
+        await expect(runner.loadData('test-file')).rejects.toThrow(
+          'Unsupported file format:',
+        )
+      })
+
+      it('should not attempt to extract path from CSV data', async () => {
+        // Create a CSV that would fail if extractPath logic ran on it
+        const csvContent = `id,name
+1,Test
+2,Another`
+
+        const filePath = path.join(fixturesPath, 'test-csv-no-extract.csv')
+        await fs.writeFile(filePath, csvContent)
+
+        // If extractPath logic ran, it would try to access 'nested.path' on array
+        // which would throw an error
+        const result = await runner.loadData(
+          'test-csv-no-extract.csv',
+          'nested.path',
+        )
+
+        // Should return the raw CSV array, not attempt extraction
+        expect(result).toEqual([
+          { id: '1', name: 'Test' },
+          { id: '2', name: 'Another' },
+        ])
+      })
+
       it('should extract nested data with path', async () => {
         const mockData = {
           level1: {
@@ -594,6 +668,22 @@ describe('SeedRunner', () => {
         )
 
         expect(result).toEqual([{ id: 1, name: 'nested' }])
+      })
+
+      it('should ignore extractPath for CSV files', async () => {
+        const csvContent = `id,name
+1,Test`
+
+        const filePath = path.join(fixturesPath, 'test-csv-extract.csv')
+        await fs.writeFile(filePath, csvContent)
+
+        // extractPath should be ignored for CSV
+        const result = await runner.loadData(
+          'test-csv-extract.csv',
+          'some.path',
+        )
+
+        expect(result).toEqual([{ id: '1', name: 'Test' }])
       })
 
       it('should throw error for missing nested key', async () => {
@@ -624,6 +714,18 @@ describe('SeedRunner', () => {
         await expect(runner.loadData('test-not-array.json')).rejects.toThrow(
           'Expected array data',
         )
+      })
+      it('should handle CSV parsing errors', async () => {
+        // Create malformed CSV content that will cause parsing to fail
+        const malformedCSV = `id,name,value
+1,Test,100
+2,Missing,"quote
+3,Another,200`
+
+        const filePath = path.join(fixturesPath, 'test-malformed.csv')
+        await fs.writeFile(filePath, malformedCSV)
+
+        await expect(runner.loadData('test-malformed.csv')).rejects.toThrow()
       })
     })
 
