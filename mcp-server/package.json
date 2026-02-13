@@ -6,6 +6,7 @@
     "build": "tsc && shx chmod +x dist/*.js || true",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "inspect": "npx @modelcontextprotocol/inspector node dist/index.js",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "prepare": "npm run build",
     "test": "vitest --printConsoleTrace=true --silent=false",

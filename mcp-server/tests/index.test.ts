@@ -1,4 +1,12 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  MockInstance,
+  vi,
+} from 'vitest'
 import { MCPServer } from '../src/server'
 
 vi.mock('../src/tools/list-datasets.tool.js', () => ({
@@ -31,19 +39,25 @@ vi.mock('../src/tools/resolve-geography-fips.tool.js', () => ({
     .mockImplementation(() => ({ name: 'resolve-geography-fips' })),
 }))
 
+vi.mock('../src/tools/search-data-tables.tool.js', () => ({
+  SearchDataTablesTool: vi
+    .fn()
+    .mockImplementation(() => ({ name: 'search-data-tables' })),
+}))
+
 vi.mock('@modelcontextprotocol/sdk/server/stdio.js', () => ({
   StdioServerTransport: vi.fn().mockImplementation(() => ({})),
 }))
 
 describe('main', () => {
-  let promptRegistrySpy: ReturnType<typeof vi.spyOn>
-  let toolRegistrySpy: ReturnType<typeof vi.spyOn>
-  let connectSpy: ReturnType<typeof vi.spyOn>
+  let promptRegistrySpy: MockInstance
+  let toolRegistrySpy: MockInstance
+  let connectSpy: MockInstance
 
   beforeEach(() => {
     promptRegistrySpy = vi.spyOn(MCPServer.prototype, 'registerPrompt')
     toolRegistrySpy = vi.spyOn(MCPServer.prototype, 'registerTool')
-    connectSpy = vi.spyOn(MCPServer.prototype, 'connect')
+    connectSpy = vi.spyOn(MCPServer.prototype, 'connect') as MockInstance
   })
 
   afterEach(() => {
@@ -61,7 +75,7 @@ describe('main', () => {
       name: 'population-prompt',
     })
 
-    expect(toolRegistrySpy).toHaveBeenCalledTimes(4)
+    expect(toolRegistrySpy).toHaveBeenCalledTimes(5)
 
     expect(toolRegistrySpy).toHaveBeenCalledWith({
       name: 'fetch-aggregate-data',
@@ -76,6 +90,10 @@ describe('main', () => {
 
     expect(toolRegistrySpy).toHaveBeenCalledWith({
       name: 'resolve-geography-fips',
+    })
+
+    expect(toolRegistrySpy).toHaveBeenCalledWith({
+      name: 'search-data-tables',
     })
 
     expect(connectSpy).toHaveBeenCalledTimes(1)

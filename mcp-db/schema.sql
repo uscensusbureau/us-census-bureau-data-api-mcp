@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict hKrx26OuixRMgMrSQzwLpcPBxZzAtjreCx3tsUKEhinkBcQwQIn4EQMlglkBDGo
+\restrict 6R9FRpT5mA2IbyGlbJYuTlaiMs4I012XMsLI0YrfBEeV66XVQFzLEuTbDjXWzhW
 
 -- Dumped from database version 16.11 (Debian 16.11-1.pgdg13+1)
 -- Dumped by pg_dump version 16.11 (Debian 16.11-1.pgdg13+1)
@@ -144,6 +144,83 @@ CREATE FUNCTION public.optimize_database() RETURNS text
 
 
 --
+-- Name: search_data_tables(text, text, text, integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.search_data_tables(p_data_table_id text DEFAULT NULL::text, p_label_query text DEFAULT NULL::text, p_dataset_id text DEFAULT NULL::text, p_limit integer DEFAULT 20) RETURNS TABLE(data_table_id text, label text, datasets jsonb)
+    LANGUAGE sql STABLE
+    AS $$
+    SELECT
+      dt.data_table_id,
+      dt.label,
+
+      -- Datasets array: include dataset-specific label only when it differs
+      -- from the canonical label (trimmed, case-insensitive comparison)
+      jsonb_agg(
+        CASE
+          WHEN LOWER(TRIM(dtd.label)) <> LOWER(TRIM(dt.label))
+          THEN jsonb_build_object(
+            'dataset_id', d.dataset_id,
+            'year',       y.year,
+            'label',      dtd.label
+          )
+          ELSE jsonb_build_object(
+            'dataset_id', d.dataset_id,
+            'year',       y.year
+          )
+        END
+        ORDER BY y.year
+      ) AS datasets
+
+    FROM data_tables dt
+    JOIN data_table_datasets dtd ON dtd.data_table_id = dt.id
+    JOIN datasets             d   ON d.id = dtd.dataset_id
+    LEFT JOIN years           y   ON y.id = d.year_id
+
+    WHERE
+      -- Exact match or prefix match on data_table_id
+      (
+        p_data_table_id IS NULL
+        OR dt.data_table_id = p_data_table_id
+        OR dt.data_table_id ILIKE (p_data_table_id || '%')
+      )
+
+      -- Filter by dataset string identifier (e.g. 'ACSDTY2009')
+      AND (
+        p_dataset_id IS NULL
+        OR d.dataset_id = p_dataset_id
+      )
+
+      -- Label search: when scoped to a dataset, search the variant label;
+      -- otherwise search the canonical label on data_tables
+      AND (
+        p_label_query IS NULL
+        OR (
+          p_dataset_id IS NULL
+          AND dt.label % p_label_query
+        )
+        OR (
+          p_dataset_id IS NOT NULL
+          AND dtd.label % p_label_query
+        )
+      )
+
+    GROUP BY dt.id, dt.data_table_id, dt.label
+
+    -- When a label query is present, rank by full-text relevance;
+    -- otherwise fall back to alphabetical data_table_id order
+    ORDER BY
+      CASE WHEN p_label_query IS NOT NULL
+        THEN SIMILARITY(dt.label, p_label_query)
+        ELSE 0
+      END DESC,
+      dt.data_table_id ASC
+
+    LIMIT p_limit;
+  $$;
+
+
+--
 -- Name: search_geographies(text, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -179,7 +256,7 @@ $$;
 
 CREATE FUNCTION public.search_geographies_by_summary_level(search_term text, summary_level_code text, result_limit integer DEFAULT 10) RETURNS TABLE(id integer, name text, summary_level_name text, latitude numeric, longitude numeric, for_param text, in_param text, similarity real)
     LANGUAGE sql
-    AS $$
+    AS $_$
 	SELECT 
 	  g.id,
 	  g.name,
@@ -188,21 +265,21 @@ CREATE FUNCTION public.search_geographies_by_summary_level(search_term text, sum
 	  g.longitude,
 	  g.for_param,
 	  g.in_param,
-	  SIMILARITY(g.name, search_term) as similarity
+	  SIMILARITY(g.name, $1) as similarity
 	FROM geographies g
 	LEFT JOIN summary_levels sl ON g.summary_level_code = sl.code
 	WHERE 
-	  g.summary_level_code = summary_level_code
+	  g.summary_level_code = $2
 	  AND (
-	    g.name % search_term  -- Uses trigram similarity operator
-	    OR g.name ILIKE '%' || search_term || '%'  -- Fallback for partial matches
+	    g.name % $1
+	    OR g.name ILIKE '%' || $1 || '%'
 	  )
 	ORDER BY 
-	  SIMILARITY(g.name, search_term) DESC,
-	  LENGTH(g.name) ASC,   -- Prefer shorter names when similarity is equal
+	  SIMILARITY(g.name, $1) DESC,
+	  LENGTH(g.name) ASC,
 	  g.name ASC
-	LIMIT result_limit;
-$$;
+	LIMIT $3;
+$_$;
 
 
 --
@@ -271,6 +348,16 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
+-- Name: api_call_log; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.api_call_log (
+    url text NOT NULL,
+    last_called timestamp without time zone
+);
+
+
+--
 -- Name: census_data_cache; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -306,6 +393,104 @@ CREATE SEQUENCE public.census_data_cache_id_seq
 --
 
 ALTER SEQUENCE public.census_data_cache_id_seq OWNED BY public.census_data_cache.id;
+
+
+--
+-- Name: data_table_datasets; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.data_table_datasets (
+    id bigint NOT NULL,
+    dataset_id bigint NOT NULL,
+    label text NOT NULL,
+    data_table_id bigint NOT NULL,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+--
+-- Name: data_table_datasets_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.data_table_datasets_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: data_table_datasets_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.data_table_datasets_id_seq OWNED BY public.data_table_datasets.id;
+
+
+--
+-- Name: data_tables; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.data_tables (
+    id bigint NOT NULL,
+    data_table_id character varying(40) NOT NULL,
+    label text NOT NULL,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+--
+-- Name: data_tables_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.data_tables_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: data_tables_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.data_tables_id_seq OWNED BY public.data_tables.id;
+
+
+--
+-- Name: dataset_topics; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.dataset_topics (
+    id integer NOT NULL,
+    dataset_id bigint NOT NULL,
+    topic_id bigint NOT NULL,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+--
+-- Name: dataset_topics_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.dataset_topics_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: dataset_topics_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.dataset_topics_id_seq OWNED BY public.dataset_topics.id;
 
 
 --
@@ -510,6 +695,41 @@ ALTER SEQUENCE public.places_id_seq OWNED BY public.geographies.id;
 
 
 --
+-- Name: topics; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.topics (
+    id bigint NOT NULL,
+    name character varying(255) NOT NULL,
+    topic_string character varying(255) NOT NULL,
+    parent_topic_string character varying(255),
+    description text NOT NULL,
+    parent_topic_id bigint,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+--
+-- Name: topics_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.topics_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: topics_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.topics_id_seq OWNED BY public.topics.id;
+
+
+--
 -- Name: years; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -549,6 +769,27 @@ ALTER TABLE ONLY public.census_data_cache ALTER COLUMN id SET DEFAULT nextval('p
 
 
 --
+-- Name: data_table_datasets id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.data_table_datasets ALTER COLUMN id SET DEFAULT nextval('public.data_table_datasets_id_seq'::regclass);
+
+
+--
+-- Name: data_tables id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.data_tables ALTER COLUMN id SET DEFAULT nextval('public.data_tables_id_seq'::regclass);
+
+
+--
+-- Name: dataset_topics id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.dataset_topics ALTER COLUMN id SET DEFAULT nextval('public.dataset_topics_id_seq'::regclass);
+
+
+--
 -- Name: datasets id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -584,10 +825,25 @@ ALTER TABLE ONLY public.summary_levels ALTER COLUMN id SET DEFAULT nextval('publ
 
 
 --
+-- Name: topics id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.topics ALTER COLUMN id SET DEFAULT nextval('public.topics_id_seq'::regclass);
+
+
+--
 -- Name: years id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.years ALTER COLUMN id SET DEFAULT nextval('public.years_id_seq'::regclass);
+
+
+--
+-- Name: api_call_log api_call_log_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.api_call_log
+    ADD CONSTRAINT api_call_log_pkey PRIMARY KEY (url);
 
 
 --
@@ -604,6 +860,54 @@ ALTER TABLE ONLY public.census_data_cache
 
 ALTER TABLE ONLY public.census_data_cache
     ADD CONSTRAINT census_data_cache_request_hash_key UNIQUE (request_hash);
+
+
+--
+-- Name: data_table_datasets data_table_datasets_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.data_table_datasets
+    ADD CONSTRAINT data_table_datasets_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: data_table_datasets data_table_datasets_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.data_table_datasets
+    ADD CONSTRAINT data_table_datasets_unique UNIQUE (dataset_id, data_table_id);
+
+
+--
+-- Name: data_tables data_tables_data_table_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.data_tables
+    ADD CONSTRAINT data_tables_data_table_id_key UNIQUE (data_table_id);
+
+
+--
+-- Name: data_tables data_tables_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.data_tables
+    ADD CONSTRAINT data_tables_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: dataset_topics dataset_topics_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.dataset_topics
+    ADD CONSTRAINT dataset_topics_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: dataset_topics dataset_topics_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.dataset_topics
+    ADD CONSTRAINT dataset_topics_unique UNIQUE (dataset_id, topic_id);
 
 
 --
@@ -711,6 +1015,22 @@ ALTER TABLE ONLY public.geographies
 
 
 --
+-- Name: topics topics_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.topics
+    ADD CONSTRAINT topics_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: topics topics_topic_string_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.topics
+    ADD CONSTRAINT topics_topic_string_key UNIQUE (topic_string);
+
+
+--
 -- Name: years years_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -752,6 +1072,27 @@ CREATE INDEX census_data_cache_last_accessed_index ON public.census_data_cache U
 --
 
 CREATE INDEX census_data_cache_request_hash_index ON public.census_data_cache USING btree (request_hash);
+
+
+--
+-- Name: data_table_datasets_data_table_id_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX data_table_datasets_data_table_id_index ON public.data_table_datasets USING btree (data_table_id);
+
+
+--
+-- Name: dataset_topics_dataset_id_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX dataset_topics_dataset_id_index ON public.dataset_topics USING btree (dataset_id);
+
+
+--
+-- Name: dataset_topics_topic_id_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX dataset_topics_topic_id_index ON public.dataset_topics USING btree (topic_id);
 
 
 --
@@ -874,6 +1215,27 @@ CREATE INDEX idx_census_data_cache_geography ON public.census_data_cache USING g
 
 
 --
+-- Name: idx_data_tables_label_trgm; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_data_tables_label_trgm ON public.data_tables USING gin (label public.gin_trgm_ops);
+
+
+--
+-- Name: idx_dtd_dataset_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_dtd_dataset_id ON public.data_table_datasets USING btree (dataset_id);
+
+
+--
+-- Name: idx_dtd_label_trgm; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_dtd_label_trgm ON public.data_table_datasets USING gin (label public.gin_trgm_ops);
+
+
+--
 -- Name: idx_geographies_active; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -937,6 +1299,20 @@ CREATE INDEX summary_levels_parent_summary_level_id_index ON public.summary_leve
 
 
 --
+-- Name: topics_parent_topic_id_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX topics_parent_topic_id_index ON public.topics USING btree (parent_topic_id);
+
+
+--
+-- Name: topics_topic_string_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX topics_topic_string_index ON public.topics USING btree (topic_string);
+
+
+--
 -- Name: census_data_cache update_census_data_cache_accessed; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -948,6 +1324,38 @@ CREATE TRIGGER update_census_data_cache_accessed BEFORE UPDATE OF response_data 
 --
 
 CREATE TRIGGER update_geographies_updated_at BEFORE UPDATE ON public.geographies FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+
+
+--
+-- Name: data_table_datasets data_table_datasets_data_table_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.data_table_datasets
+    ADD CONSTRAINT data_table_datasets_data_table_id_fkey FOREIGN KEY (data_table_id) REFERENCES public.data_tables(id) ON DELETE CASCADE;
+
+
+--
+-- Name: data_table_datasets data_table_datasets_dataset_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.data_table_datasets
+    ADD CONSTRAINT data_table_datasets_dataset_id_fkey FOREIGN KEY (dataset_id) REFERENCES public.datasets(id) ON DELETE CASCADE;
+
+
+--
+-- Name: dataset_topics dataset_topics_dataset_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.dataset_topics
+    ADD CONSTRAINT dataset_topics_dataset_id_fkey FOREIGN KEY (dataset_id) REFERENCES public.datasets(id) ON DELETE CASCADE;
+
+
+--
+-- Name: dataset_topics dataset_topics_topic_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.dataset_topics
+    ADD CONSTRAINT dataset_topics_topic_id_fkey FOREIGN KEY (topic_id) REFERENCES public.topics(id) ON DELETE CASCADE;
 
 
 --
@@ -999,8 +1407,16 @@ ALTER TABLE ONLY public.geographies
 
 
 --
+-- Name: topics topics_parent_topic_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.topics
+    ADD CONSTRAINT topics_parent_topic_id_fkey FOREIGN KEY (parent_topic_id) REFERENCES public.topics(id) ON DELETE CASCADE;
+
+
+--
 -- PostgreSQL database dump complete
 --
 
-\unrestrict hKrx26OuixRMgMrSQzwLpcPBxZzAtjreCx3tsUKEhinkBcQwQIn4EQMlglkBDGo
+\unrestrict 6R9FRpT5mA2IbyGlbJYuTlaiMs4I012XMsLI0YrfBEeV66XVQFzLEuTbDjXWzhW
 

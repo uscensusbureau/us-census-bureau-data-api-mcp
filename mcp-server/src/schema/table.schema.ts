@@ -38,13 +38,14 @@ export const getProperties = {
         type: 'array',
         items: { type: 'string' },
         description:
-          'The variables (or rows) that should be fetched from a given table. A max of 50 variables can be passed.',
+          'The variables (or rows) that should be fetched from a given dataset. A max of 50 variables can be passed.',
         examples: [['B24022_060E', 'B19001B_014E', 'C02014_002E']],
       },
       group: {
         type: 'string',
-        description: 'The group label that is used to fetch the entire table.',
-        examples: ['S0101'],
+        description:
+          'The table ID to fetch. Use search-data-tables to find the correct ID. Overrides variables.',
+        examples: ['S0101', 'B24022'],
       },
     },
   },
