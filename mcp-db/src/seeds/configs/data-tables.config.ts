@@ -31,36 +31,47 @@ export const DataTablesConfig: SeedConfig = {
     }
 
     // Build ID maps (your existing code)
-    const dataTableIds = [...new Set(state.capturedRelationships.map(r => r.data_table_id))]
+    const dataTableIds = [
+      ...new Set(state.capturedRelationships.map((r) => r.data_table_id)),
+    ]
     const dataTableQuery = await client.query(
       `SELECT id, data_table_id FROM data_tables WHERE data_table_id = ANY($1)`,
-      [dataTableIds]
+      [dataTableIds],
     )
     const dataTableIdMap = new Map<string, number>(
-      dataTableQuery.rows.map(row => [row.data_table_id, parseInt(row.id, 10)])
+      dataTableQuery.rows.map((row) => [
+        row.data_table_id,
+        parseInt(row.id, 10),
+      ]),
     )
 
-    const datasetIds = [...new Set(state.capturedRelationships.map(r => r.dataset_id))]
+    const datasetIds = [
+      ...new Set(state.capturedRelationships.map((r) => r.dataset_id)),
+    ]
     const datasetQuery = await client.query(
       `SELECT id, dataset_id FROM datasets WHERE dataset_id = ANY($1)`,
-      [datasetIds]
+      [datasetIds],
     )
     const datasetIdMap = new Map<string, number>(
-      datasetQuery.rows.map(row => [row.dataset_id, parseInt(row.id, 10)])
+      datasetQuery.rows.map((row) => [row.dataset_id, parseInt(row.id, 10)]),
     )
 
     // Map string IDs to numeric IDs (your existing code)
     const joinRecords = state.capturedRelationships
-      .map(rel => {
+      .map((rel) => {
         const dataTableNumericId = dataTableIdMap.get(rel.data_table_id)
         const datasetNumericId = datasetIdMap.get(rel.dataset_id)
 
         if (!dataTableNumericId) {
-          console.warn(`Could not find numeric ID for data_table_id: ${rel.data_table_id}`)
+          console.warn(
+            `Could not find numeric ID for data_table_id: ${rel.data_table_id}`,
+          )
           return null
         }
         if (!datasetNumericId) {
-          console.warn(`Could not find numeric ID for dataset_id: ${rel.dataset_id}`)
+          console.warn(
+            `Could not find numeric ID for dataset_id: ${rel.dataset_id}`,
+          )
           return null
         }
 
@@ -81,8 +92,10 @@ export const DataTablesConfig: SeedConfig = {
     // Manual batching - no SeedRunner needed
     const BATCH_SIZE = 5000
     const totalBatches = Math.ceil(joinRecords.length / BATCH_SIZE)
-    
-    console.log(`Processing ${joinRecords.length} records in batches of ${BATCH_SIZE}`)
+
+    console.log(
+      `Processing ${joinRecords.length} records in batches of ${BATCH_SIZE}`,
+    )
 
     for (let i = 0; i < joinRecords.length; i += BATCH_SIZE) {
       const batch = joinRecords.slice(i, i + BATCH_SIZE)
@@ -92,13 +105,13 @@ export const DataTablesConfig: SeedConfig = {
 
       const columns = Object.keys(batch[0])
       const values = batch.map((record) =>
-        columns.map((col) => record[col as keyof typeof record])
+        columns.map((col) => record[col as keyof typeof record]),
       )
 
       const placeholders = values
         .map(
           (_, idx) =>
-            `(${columns.map((_, j) => `$${idx * columns.length + j + 1}`).join(', ')})`
+            `(${columns.map((_, j) => `$${idx * columns.length + j + 1}`).join(', ')})`,
         )
         .join(', ')
 
@@ -109,14 +122,16 @@ export const DataTablesConfig: SeedConfig = {
       `
 
       await client.query(query, values.flat())
-      
+
       // Small delay between batches
       if (i + BATCH_SIZE < joinRecords.length) {
         await new Promise((resolve) => setTimeout(resolve, 100))
       }
     }
 
-    console.log(`Inserted ${joinRecords.length} data_table <-> dataset relationships`)
+    console.log(
+      `Inserted ${joinRecords.length} data_table <-> dataset relationships`,
+    )
     state.capturedRelationships = []
-  }
+  },
 }

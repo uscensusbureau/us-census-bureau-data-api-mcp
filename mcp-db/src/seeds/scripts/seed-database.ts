@@ -23,7 +23,7 @@ export const seeds: SeedConfig[] = [
   configs.YearsConfig,
   configs.TopicsConfig,
   configs.DatasetConfig,
-  configs.DataTablesConfig
+  configs.DataTablesConfig,
 ]
 
 // Geographic Seed Configs

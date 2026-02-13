@@ -313,15 +313,25 @@ describe('DataTables Config', () => {
       const mockQuery = mockClient.query as ReturnType<typeof vi.fn>
 
       // Mock lookup queries - return mock IDs for all unique tables/datasets
-      const uniqueTableIds = [...new Set(manyRelationships.map(r => r.data_table_id))]
-      const uniqueDatasetIds = [...new Set(manyRelationships.map(r => r.dataset_id))]
+      const uniqueTableIds = [
+        ...new Set(manyRelationships.map((r) => r.data_table_id)),
+      ]
+      const uniqueDatasetIds = [
+        ...new Set(manyRelationships.map((r) => r.dataset_id)),
+      ]
 
       mockQuery
         .mockResolvedValueOnce({
-          rows: uniqueTableIds.map((id, idx) => ({ id: idx + 1, data_table_id: id })),
+          rows: uniqueTableIds.map((id, idx) => ({
+            id: idx + 1,
+            data_table_id: id,
+          })),
         }) // data_tables lookup
         .mockResolvedValueOnce({
-          rows: uniqueDatasetIds.map((id, idx) => ({ id: idx + 1, dataset_id: id })),
+          rows: uniqueDatasetIds.map((id, idx) => ({
+            id: idx + 1,
+            dataset_id: id,
+          })),
         }) // datasets lookup
 
       // Mock insert queries for each batch
