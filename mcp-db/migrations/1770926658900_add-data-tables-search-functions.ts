@@ -35,11 +35,13 @@ export const searchDataTablesSQL = `
           WHEN LOWER(TRIM(dtd.label)) <> LOWER(TRIM(dt.label))
           THEN jsonb_build_object(
             'dataset_id', d.dataset_id,
+            'dataset_param', d.dataset_param,
             'year',       y.year,
             'label',      dtd.label
           )
           ELSE jsonb_build_object(
             'dataset_id', d.dataset_id,
+            'dataset_param', d.dataset_param,
             'year',       y.year
           )
         END

@@ -1,6 +1,7 @@
 export interface DataTableDatasetEntry {
   dataset_id: string
-  year: number
+  dataset_param: string
+  year: number | null
   label?: string
 }
 
