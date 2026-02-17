@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict 6R9FRpT5mA2IbyGlbJYuTlaiMs4I012XMsLI0YrfBEeV66XVQFzLEuTbDjXWzhW
+\restrict 4yGGvIpUWbDgQ99otuzTZc11cNO4xjrqo8VVDQFYTEYTDBJF6uxmc6BkIf1iOC7
 
 -- Dumped from database version 16.11 (Debian 16.11-1.pgdg13+1)
 -- Dumped by pg_dump version 16.11 (Debian 16.11-1.pgdg13+1)
@@ -161,11 +161,13 @@ CREATE FUNCTION public.search_data_tables(p_data_table_id text DEFAULT NULL::tex
           WHEN LOWER(TRIM(dtd.label)) <> LOWER(TRIM(dt.label))
           THEN jsonb_build_object(
             'dataset_id', d.dataset_id,
+            'dataset_param', d.dataset_param,
             'year',       y.year,
             'label',      dtd.label
           )
           ELSE jsonb_build_object(
             'dataset_id', d.dataset_id,
+            'dataset_param', d.dataset_param,
             'year',       y.year
           )
         END
@@ -207,11 +209,14 @@ CREATE FUNCTION public.search_data_tables(p_data_table_id text DEFAULT NULL::tex
 
     GROUP BY dt.id, dt.data_table_id, dt.label
 
-    -- When a label query is present, rank by full-text relevance;
+    -- When a label query is present and dataset scope is not specified, rank by full-text relevance;
     -- otherwise fall back to alphabetical data_table_id order
     ORDER BY
-      CASE WHEN p_label_query IS NOT NULL
-        THEN SIMILARITY(dt.label, p_label_query)
+      CASE
+        WHEN p_label_query IS NOT NULL AND p_dataset_id IS NULL
+          THEN SIMILARITY(dt.label, p_label_query)
+        WHEN p_label_query IS NOT NULL AND p_dataset_id IS NOT NULL
+          THEN MAX(SIMILARITY(dtd.label, p_label_query))
         ELSE 0
       END DESC,
       dt.data_table_id ASC
@@ -1418,5 +1423,5 @@ ALTER TABLE ONLY public.topics
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 6R9FRpT5mA2IbyGlbJYuTlaiMs4I012XMsLI0YrfBEeV66XVQFzLEuTbDjXWzhW
+\unrestrict 4yGGvIpUWbDgQ99otuzTZc11cNO4xjrqo8VVDQFYTEYTDBJF6uxmc6BkIf1iOC7
 

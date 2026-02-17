@@ -31,11 +31,11 @@ import { DataTableSearchResultRow } from '../../../src/types/data-table.types'
 
 const byIdArgs = { data_table_id: 'B16005' }
 const byLabelArgs = { label_query: 'language spoken at home' }
-const byDatasetArgs = { dataset_id: 'ACSDTY2009' }
+const byDatasetArgs = { dataset_id: 'ACSDT1Y2009' }
 const allParamsArgs = {
   data_table_id: 'B16005',
   label_query: 'language spoken at home',
-  dataset_id: 'ACSDTY2009',
+  dataset_id: 'ACSDT1Y2009',
   limit: 10,
 }
 
@@ -44,8 +44,8 @@ const mockDataTables: DataTableSearchResultRow[] = [
     data_table_id: 'B16005',
     label: 'Nativity By Language Spoken At Home By Ability To Speak English',
     datasets: [
-      { dataset_id: 'ACSDTY2009', year: 2009 },
-      { dataset_id: 'ACSDTY2010', year: 2010 },
+      { dataset_id: 'ACSDT1Y2009', year: 2009, dataset_param: 'acs/acs1' },
+      { dataset_id: 'ACSDTY2010', year: 2010, dataset_param: 'acs/acs1' },
     ],
   },
   {
@@ -53,14 +53,16 @@ const mockDataTables: DataTableSearchResultRow[] = [
     label: 'Nativity By Language Spoken At Home By Ability To Speak English',
     datasets: [
       {
-        dataset_id: 'ACSDTY2009',
+        dataset_id: 'ACSDT1Y2009',
         year: 2009,
         label: 'Nativity By Language Spoken At Home (Asian Alone)',
+        dataset_param: 'acs/acs1'
       },
       {
         dataset_id: 'ACSDTY2010',
         year: 2010,
         label: 'Nativity By Language Spoken At Home (Asian Alone)',
+        dataset_param: 'acs/acs1'
       },
     ],
   },
@@ -194,7 +196,7 @@ describe('SearchDataTablesTool', () => {
       expect(params).toEqual([
         'B16005',
         'language spoken at home',
-        'ACSDTY2009',
+        'ACSDT1Y2009',
         10,
       ])
     })
