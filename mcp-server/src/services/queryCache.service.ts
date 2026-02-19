@@ -103,7 +103,7 @@ export class QueryCacheService {
            $5,
            $6,
            $7,
-           NOW() + INTERVAL '${duration.toString()}'
+           NOW() + $8::interval
          )
          ON CONFLICT (request_hash) DO UPDATE SET
            response_data = EXCLUDED.response_data,
@@ -118,6 +118,7 @@ export class QueryCacheService {
         params.geographySpec,
         JSON.stringify(data),
         data.length,
+        duration.toString(),
       ],
     )
   }

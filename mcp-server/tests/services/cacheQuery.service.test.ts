@@ -102,11 +102,8 @@ describe('QueryCacheService', () => {
           params.geographySpec,
           JSON.stringify(data),
           data.length,
+          '1 year',
         ],
-      )
-      // Check that the SQL query contains the duration string
-      expect(mockDbService.query.mock.calls[0][0]).toContain(
-        "NOW() + INTERVAL '1 year'",
       )
     })
   })

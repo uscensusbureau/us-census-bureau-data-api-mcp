@@ -156,7 +156,11 @@ export class FetchAggregateDataTool extends BaseTool<TableArgs> {
           console.error('Cache write failed:', error)
         })
 
-      const responseText = this.createSuccessResponseText(data, args.dataset, url)
+      const responseText = this.createSuccessResponseText(
+        data,
+        args.dataset,
+        url,
+      )
       return this.createSuccessResponse(responseText)
     } catch (err) {
       return this.createErrorResponse(`Fetch failed: ${(err as Error).message}`)
