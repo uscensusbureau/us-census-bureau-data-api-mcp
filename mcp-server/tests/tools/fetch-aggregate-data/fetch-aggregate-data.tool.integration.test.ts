@@ -29,12 +29,11 @@ describe('FetchAggregateDataTool - Integration Tests', () => {
   let apiKey: string
 
   beforeAll(async () => {
-    if (!process.env.CENSUS_API_KEY) {
+    if (process.env.CENSUS_API_KEY === undefined) {
       throw new Error('CENSUS_API_KEY environment variable not set.')
     }
     apiKey = process.env.CENSUS_API_KEY
-
-    // Reset the singleton instances to ensure the correct DATABASE_URL is used
+    // Reset the DatabaseService singleton instances
     ;(
       DatabaseService as typeof DatabaseService & { instance: unknown }
     ).instance = undefined
