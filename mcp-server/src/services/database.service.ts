@@ -1,7 +1,7 @@
 import 'dotenv/config'
 import { Client, Pool, PoolClient } from 'pg'
 
-type QueryParam = string | number | boolean | null | Date | Buffer
+type QueryParam = string | number | boolean | null | Date | Buffer | string[]
 
 export class DatabaseService {
   private static instance: DatabaseService
