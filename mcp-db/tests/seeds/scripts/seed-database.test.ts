@@ -24,6 +24,7 @@ import {
 import { SeedRunner } from '../../../src/seeds/scripts/seed-runner'
 import * as configs from '../../../src/seeds/configs/index'
 import {
+  baseGeographySeeds,
   geographySeeds,
   runSeedsWithRunner,
   runSeeds,
@@ -64,6 +65,13 @@ type MockSeedRunner = {
     MockedSeedRunnerMethods[K]
 }
 
+const MOCK_YEARS = [
+  { year: 2020, id: 1 },
+  { year: 2023, id: 2 },
+]
+const MOCK_STATE_CODES = ['01', '42']
+const LOCAL_STATE_CODES = ['06', '48', '36']
+
 function createMockRunner(
   overrides: Partial<MockSeedRunner> = {},
 ): MockSeedRunner {
@@ -71,13 +79,22 @@ function createMockRunner(
     connect: vi.fn().mockResolvedValue(void 0),
     disconnect: vi.fn().mockResolvedValue(void 0),
     seed: vi.fn().mockResolvedValue(void 0),
-    getAvailableYears: vi.fn().mockResolvedValue([
-      { year: 2020, id: 1 },
-      { year: 2023, id: 2 },
-    ]),
-    getStateCodesForYear: vi.fn().mockResolvedValue(['01', '42']),
+    getAvailableYears: vi.fn().mockResolvedValue(MOCK_YEARS),
+    getStateCodesForYear: vi.fn().mockResolvedValue(MOCK_STATE_CODES),
     ...overrides,
   }
+}
+
+function expectedSeedCallCount(
+  years: number = MOCK_YEARS.length,
+  states: number = MOCK_STATE_CODES.length,
+  geographyConfigs: EnhancedGeographySeedConfig[] = baseGeographySeeds,
+): number {
+  const multiStateCount = geographyConfigs.filter(
+    (c) => 'requiresStateIteration' in c && c.requiresStateIteration,
+  ).length
+  const standardGeoCount = geographyConfigs.length - multiStateCount
+  return standardGeoCount * years + multiStateCount * years * states
 }
 
 async function setupMockSeedRunner(
@@ -317,10 +334,11 @@ describe('Seed Database', () => {
 
   describe('seeds', () => {
     it('includes all non-geography configs', () => {
-      expect(seeds).toHaveLength(5)
       expect(seeds).toContain(configs.SummaryLevelsConfig)
       expect(seeds).toContain(configs.YearsConfig)
       expect(seeds).toContain(configs.TopicsConfig)
+      expect(seeds).toContain(configs.ProgramsConfig)
+      expect(seeds).toContain(configs.ComponentsConfig)
       expect(seeds).toContain(configs.DatasetConfig)
       expect(seeds).toContain(configs.DataTablesConfig)
     })
@@ -328,7 +346,7 @@ describe('Seed Database', () => {
 
   describe('geographySeeds', () => {
     it('includes geography configs', () => {
-      expect(geographySeeds()).toHaveLength(8)
+      expect(geographySeeds()).toHaveLength(baseGeographySeeds.length)
       expect(geographySeeds()).toContain(configs.NationConfig)
       expect(geographySeeds()).toContain(configs.RegionConfig)
       expect(geographySeeds()).toContain(configs.DivisionConfig)
@@ -341,9 +359,11 @@ describe('Seed Database', () => {
 
     it('does not include time intensive configs when set to slim', () => {
       process.env.SEED_MODE = 'slim'
-      expect(geographySeeds).not.toContain(configs.CountySubdivisionConfig)
-      expect(geographySeeds).not.toContain(configs.PlaceConfig)
-      expect(geographySeeds).not.toContain(configs.ZipCodeTabulationAreaConfig)
+      expect(geographySeeds()).not.toContain(configs.CountySubdivisionConfig)
+      expect(geographySeeds()).not.toContain(configs.PlaceConfig)
+      expect(geographySeeds()).not.toContain(
+        configs.ZipCodeTabulationAreaConfig,
+      )
       delete process.env.SEED_MODE
     })
   })
@@ -358,17 +378,9 @@ describe('Seed Database', () => {
         expect(SeedRunnerSpy).toHaveBeenCalledWith(databaseUrl)
         expect(mockRunner.connect).toHaveBeenCalledOnce()
         expect(mockRunner.disconnect).toHaveBeenCalledOnce()
-
-        // Time for Math!
-        //
-        // 5 Static Configs (Year, Summary Levels, DatasetConfig, TopicsConfig) ] = 5
-        // +
-        // 2 Years x 7 Std Geo Configs[Nation + Region + Division + State + County + Place + ZCTA ] = 14 Runs
-        // +
-        // 2 years x 2 Mocked States x 1 MultiStateConfig[CountySubdivisionConfig] = 4 State-specific Runs
-        // ------------
-        // EQUALS 23 Total Config Runs
-        expect(mockRunner.seed).toHaveBeenCalledTimes(23)
+        expect(mockRunner.seed).toHaveBeenCalledTimes(
+          seeds.length + expectedSeedCallCount(),
+        )
       } finally {
         SeedRunnerSpy.mockRestore()
       }
@@ -404,9 +416,7 @@ describe('Seed Database', () => {
       try {
         await runSeeds(databaseUrl, 'summary_levels.json')
 
-        // Should only call seed once for the targeted file
         expect(mockRunner.seed).toHaveBeenCalledTimes(1)
-        // Should not call getAvailableYears for geography seeding
         expect(mockRunner.getAvailableYears).not.toHaveBeenCalled()
       } finally {
         SeedRunnerSpy.mockRestore()
@@ -422,8 +432,7 @@ describe('Seed Database', () => {
       try {
         await runSeedsWithRunner(mockRunnerInstance)
 
-        // Non-GEO Configs
-        expect(mockRunner.seed).toHaveBeenCalledTimes(5)
+        expect(mockRunner.seed).toHaveBeenCalledTimes(seeds.length)
         expect(mockRunner.seed).toHaveBeenCalledWith(
           expect.objectContaining({
             file: 'summary_levels.json',
@@ -434,7 +443,6 @@ describe('Seed Database', () => {
             file: 'years.json',
           }),
         )
-
         expect(mockRunner.seed).toHaveBeenCalledWith(
           expect.objectContaining({
             url: 'https://api.census.gov/data/',
@@ -541,18 +549,16 @@ describe('Seed Database', () => {
       beforeEach(async () => {
         mockRunnerManager = await new MockRunnerManager().setup()
 
-        // Mock getStateCodesForYear to return test state codes
         mockRunnerManager.mockRunner.getStateCodesForYear = vi
           .fn()
-          .mockReturnValue(['06', '48', '36'])
+          .mockReturnValue(LOCAL_STATE_CODES)
 
-        // Mock the validation function to allow our test configs
         validateGeographySeedConfigSpy = vi
           .spyOn(
             await import('../../../src/seeds/scripts/seed-database'),
             'validateGeographySeedConfig',
           )
-          .mockImplementation(() => {}) // No-op, allows any config
+          .mockImplementation(() => {})
       })
 
       afterEach(() => {
@@ -571,7 +577,6 @@ describe('Seed Database', () => {
           afterSeed: vi.fn(),
         }
 
-        // Mock isMultiStateConfig to return true for our test config
         const isMultiStateConfigSpy = vi
           .spyOn(
             await import('../../../src/schema/seed-config.schema'),
@@ -584,21 +589,26 @@ describe('Seed Database', () => {
             multiStateConfig,
           ])
 
-          // Verify getStateCodesForYear was called for each year
           expect(
             mockRunnerManager.mockRunner.getStateCodesForYear,
-          ).toHaveBeenCalledTimes(2) // 2 years
+          ).toHaveBeenCalledTimes(MOCK_YEARS.length)
           expect(
             mockRunnerManager.mockRunner.getStateCodesForYear,
           ).toHaveBeenCalledWith(
-            expect.objectContaining({ year: 2020, year_id: 1 }),
-            2020,
+            expect.objectContaining({
+              year: MOCK_YEARS[0].year,
+              year_id: MOCK_YEARS[0].id,
+            }),
+            MOCK_YEARS[0].year,
           )
           expect(
             mockRunnerManager.mockRunner.getStateCodesForYear,
           ).toHaveBeenCalledWith(
-            expect.objectContaining({ year: 2023, year_id: 2 }),
-            2023,
+            expect.objectContaining({
+              year: MOCK_YEARS[1].year,
+              year_id: MOCK_YEARS[1].id,
+            }),
+            MOCK_YEARS[1].year,
           )
         } finally {
           isMultiStateConfigSpy.mockRestore()
@@ -616,7 +626,6 @@ describe('Seed Database', () => {
           afterSeed: vi.fn(),
         }
 
-        // Mock isMultiStateConfig to return true for our test config
         const isMultiStateConfigSpy = vi
           .spyOn(
             await import('../../../src/schema/seed-config.schema'),
@@ -629,49 +638,46 @@ describe('Seed Database', () => {
             multiStateConfig,
           ])
 
-          // Should call seed for each year * each state
-          // 2 years * 3 states = 6 total calls
-          expect(mockRunnerManager.mockRunner.seed).toHaveBeenCalledTimes(6)
+          expect(mockRunnerManager.mockRunner.seed).toHaveBeenCalledTimes(
+            MOCK_YEARS.length * LOCAL_STATE_CODES.length,
+          )
 
-          // Verify each call has the correct structure
           const seedCalls = mockRunnerManager.mockRunner.seed.mock.calls
 
-          // First year (2020) calls
+          // First call: first year, first state
           expect(seedCalls[0]).toEqual([
             expect.objectContaining({
               table: 'geographies',
               conflictColumn: 'ucgid_code',
               url: expect.any(Function),
             }),
-            expect.objectContaining({ year: 2020, year_id: 1 }),
+            expect.objectContaining({
+              year: MOCK_YEARS[0].year,
+              year_id: MOCK_YEARS[0].id,
+            }),
           ])
 
-          // Verify the URL function works correctly
-          const firstCallConfig = seedCalls[0][0] as GeographySeedConfig
-          const firstCallContext = seedCalls[0][1] as GeographyContext
-          const generatedUrl = firstCallConfig.url!(firstCallContext)
-          expect(generatedUrl).toBe(
-            'https://api.census.gov/data/2020/acs/acs5?get=NAME,GEO_ID&for=county:*&in=state:06',
-          )
+          // Verify URL generation for each state in year 0
+          LOCAL_STATE_CODES.forEach((stateCode, i) => {
+            const callConfig = seedCalls[i][0] as GeographySeedConfig
+            const callContext = seedCalls[i][1] as GeographyContext
+            expect(callConfig.url!(callContext)).toBe(
+              `https://api.census.gov/data/${MOCK_YEARS[0].year}/acs/acs5?get=NAME,GEO_ID&for=county:*&in=state:${stateCode}`,
+            )
+          })
 
-          // Check a few more calls to ensure state codes are being used correctly
-          const secondCallConfig = seedCalls[1][0] as GeographySeedConfig
-          const secondCallContext = seedCalls[1][1] as GeographyContext
-          expect(secondCallConfig.url!(secondCallContext)).toBe(
-            'https://api.census.gov/data/2020/acs/acs5?get=NAME,GEO_ID&for=county:*&in=state:48',
-          )
-
-          const thirdCallConfig = seedCalls[2][0] as GeographySeedConfig
-          const thirdCallContext = seedCalls[2][1] as GeographyContext
-          expect(thirdCallConfig.url!(thirdCallContext)).toBe(
-            'https://api.census.gov/data/2020/acs/acs5?get=NAME,GEO_ID&for=county:*&in=state:36',
-          )
-
-          // Second year (2023) calls should start at index 3
-          const fourthCallConfig = seedCalls[3][0] as GeographySeedConfig
-          const fourthCallContext = seedCalls[3][1] as GeographyContext
-          expect(fourthCallConfig.url!(fourthCallContext)).toBe(
-            'https://api.census.gov/data/2023/acs/acs5?get=NAME,GEO_ID&for=county:*&in=state:06',
+          // Verify year 1 starts at the correct index and uses the first state code
+          const secondYearStartIndex = LOCAL_STATE_CODES.length
+          const secondYearFirstCallConfig = seedCalls[
+            secondYearStartIndex
+          ][0] as GeographySeedConfig
+          const secondYearFirstCallContext = seedCalls[
+            secondYearStartIndex
+          ][1] as GeographyContext
+          expect(
+            secondYearFirstCallConfig.url!(secondYearFirstCallContext),
+          ).toBe(
+            `https://api.census.gov/data/${MOCK_YEARS[1].year}/acs/acs5?get=NAME,GEO_ID&for=county:*&in=state:${LOCAL_STATE_CODES[0]}`,
           )
         } finally {
           isMultiStateConfigSpy.mockRestore()
@@ -689,7 +695,6 @@ describe('Seed Database', () => {
           afterSeed: vi.fn(),
         }
 
-        // Mock getStateCodesForYear to throw an error
         mockRunnerManager.mockRunner.getStateCodesForYear = vi
           .fn()
           .mockRejectedValue(
@@ -710,7 +715,6 @@ describe('Seed Database', () => {
             ]),
           ).rejects.toThrow('No states found in context of year 2020')
 
-          // Should have attempted to get state codes but failed
           expect(
             mockRunnerManager.mockRunner.getStateCodesForYear,
           ).toHaveBeenCalledTimes(1)
@@ -731,7 +735,6 @@ describe('Seed Database', () => {
           afterSeed: vi.fn(),
         }
 
-        // Mock getStateCodesForYear to return empty array
         mockRunnerManager.mockRunner.getStateCodesForYear = vi
           .fn()
           .mockResolvedValue([])
@@ -748,10 +751,9 @@ describe('Seed Database', () => {
             multiStateConfig,
           ])
 
-          // Should have called getStateCodesForYear but not seed
           expect(
             mockRunnerManager.mockRunner.getStateCodesForYear,
-          ).toHaveBeenCalledTimes(2) // 2 years
+          ).toHaveBeenCalledTimes(MOCK_YEARS.length)
           expect(mockRunnerManager.mockRunner.seed).not.toHaveBeenCalled()
         } finally {
           isMultiStateConfigSpy.mockRestore()
@@ -796,31 +798,30 @@ describe('Seed Database', () => {
             regularConfig,
           ])
 
-          // Multi-state config: 2 years * 3 states = 6 calls
-          // Regular config: 2 years * 1 config = 2 calls
-          // Total: 8 calls
-          expect(mockRunnerManager.mockRunner.seed).toHaveBeenCalledTimes(8)
+          const multiStateCalls = MOCK_YEARS.length * LOCAL_STATE_CODES.length
+          const regularCalls = MOCK_YEARS.length
+          expect(mockRunnerManager.mockRunner.seed).toHaveBeenCalledTimes(
+            multiStateCalls + regularCalls,
+          )
 
-          // Verify getStateCodesForYear was only called for multi-state configs
           expect(
             mockRunnerManager.mockRunner.getStateCodesForYear,
-          ).toHaveBeenCalledTimes(2) // 2 years
+          ).toHaveBeenCalledTimes(MOCK_YEARS.length)
 
-          // Check that regular config calls use the original url function
           const seedCalls = mockRunnerManager.mockRunner.seed.mock.calls
           const regularConfigCalls = seedCalls.filter((call) => {
             const config = call[0] as GeographySeedConfig
             return !('urlGenerator' in config)
           })
 
-          expect(regularConfigCalls).toHaveLength(2) // 2 years
+          expect(regularConfigCalls).toHaveLength(MOCK_YEARS.length)
 
           const regularCallConfig =
             regularConfigCalls[0][0] as GeographySeedConfig
           const regularCallContext =
             regularConfigCalls[0][1] as GeographyContext
           expect(regularCallConfig.url!(regularCallContext)).toBe(
-            'https://api.census.gov/data/2020/states',
+            `https://api.census.gov/data/${MOCK_YEARS[0].year}/states`,
           )
         } finally {
           isMultiStateConfigSpy.mockRestore()
@@ -853,7 +854,6 @@ describe('Seed Database', () => {
             multiStateConfig,
           ])
 
-          // Verify that each generated config preserves the hooks
           const seedCalls = mockRunnerManager.mockRunner.seed.mock.calls
           seedCalls.forEach((call) => {
             const config = call[0] as GeographySeedConfig
@@ -872,22 +872,27 @@ describe('Seed Database', () => {
       expect(
         mockRunnerManager.mockRunner.getAvailableYears,
       ).toHaveBeenCalledOnce()
-      // 2 Years x 7 Std Geo Configs = 14
-      // +
-      // 2 Years x 2 Mocked States x 1 MultiState Geo Configs = 4
-      // = 18 Config Runs
-      expect(mockRunnerManager.mockRunner.seed).toHaveBeenCalledTimes(18)
+      expect(mockRunnerManager.mockRunner.seed).toHaveBeenCalledTimes(
+        expectedSeedCallCount(),
+      )
 
       const seedCalls = mockRunnerManager.mockRunner.seed.mock.calls
 
       expect(seedCalls[0]).toEqual([
         expect.objectContaining({ table: 'geographies' }),
-        expect.objectContaining({ year: 2020, year_id: 1 }),
+        expect.objectContaining({
+          year: MOCK_YEARS[0].year,
+          year_id: MOCK_YEARS[0].id,
+        }),
       ])
 
-      expect(seedCalls[10]).toEqual([
+      const firstYearCallCount = expectedSeedCallCount(1)
+      expect(seedCalls[firstYearCallCount]).toEqual([
         expect.objectContaining({ table: 'geographies' }),
-        expect.objectContaining({ year: 2023, year_id: 2 }),
+        expect.objectContaining({
+          year: MOCK_YEARS[1].year,
+          year_id: MOCK_YEARS[1].id,
+        }),
       ])
     })
 
@@ -966,14 +971,13 @@ describe('Seed Database', () => {
 
     describe('validateGeographySeedConfig', () => {
       it('should handle validation errors in runGeographySeeds', async () => {
-        // Create configs that will definitely fail Zod validation
         const invalidConfigs = [
           {
             table: 'geographies',
             conflictColumn: 'ucgid_code',
-            url: 'not-a-function', // Wrong type - should be function for geography
-            beforeSeed: 'not-a-function', // Wrong type
-            afterSeed: 'not-a-function', // Wrong type
+            url: 'not-a-function',
+            beforeSeed: 'not-a-function',
+            afterSeed: 'not-a-function',
             extraField: 'should-fail-strict-validation',
           },
         ] as unknown[]
@@ -993,11 +997,9 @@ describe('Seed Database', () => {
       })
 
       it('should handle Zod validation errors with detailed output', async () => {
-        // Create config that will fail Zod schema validation
         const invalidConfig = {
-          // Missing required fields and wrong types
-          table: 123, // Wrong type - should be string
-          conflictColumn: null, // Wrong type - should be string
+          table: 123,
+          conflictColumn: null,
           extraField: 'should-fail-validation',
         } as unknown
 
@@ -1009,20 +1011,17 @@ describe('Seed Database', () => {
           ] as EnhancedGeographySeedConfig[]),
         ).rejects.toThrow('GeographySeedConfig validation failed')
 
-        // Verify error logging occurred
         expect(consoleSpy).toHaveBeenCalledWith(
           'GeographySeedConfig validation failed:',
         )
       })
 
       it('should handle constraint validation errors for regular configs', async () => {
-        // Create config that passes Zod but fails constraint validation
         const invalidConfig = {
           table: 'test_table',
           conflictColumn: 'id',
           beforeSeed: vi.fn(),
           afterSeed: vi.fn(),
-          // Missing both file and url - should fail validateSeedConfigConstraints
         } as unknown
 
         const { mockRunnerInstance } = await setupMockSeedRunner()
@@ -1035,14 +1034,12 @@ describe('Seed Database', () => {
       })
 
       it('should handle constraint validation errors for multi-state configs', async () => {
-        // Create multi-state config that passes Zod but fails constraint validation
         const invalidConfig = {
           table: 'test_table',
           conflictColumn: 'id',
           requiresStateIteration: true,
           beforeSeed: vi.fn(),
           afterSeed: vi.fn(),
-          // Missing urlGenerator - should fail validateEnhancedGeographySeedConfigConstraints
         } as unknown
 
         const { mockRunnerInstance } = await setupMockSeedRunner()
@@ -1057,7 +1054,6 @@ describe('Seed Database', () => {
       })
 
       it('should handle non-Zod errors', async () => {
-        // Spy on constraint validation to throw a custom error
         const validateSpy = vi
           .spyOn(
             await import('../../../src/schema/seed-config.schema'),
@@ -1093,13 +1089,11 @@ describe('Seed Database', () => {
 
     describe('validateSeedConfig', () => {
       it('should handle Zod validation errors with detailed output', async () => {
-        // Create config that will fail Zod schema validation
         const invalidConfig = {
-          // Missing required table and conflictColumn
           file: 'test.json',
           extraField: 'should-fail-validation',
-          table: 123, // Wrong type - should be string
-          conflictColumn: null, // Wrong type - should be string
+          table: 123,
+          conflictColumn: null,
         }
 
         const { mockRunnerInstance } = await setupMockSeedRunner()
@@ -1110,7 +1104,6 @@ describe('Seed Database', () => {
           ] as unknown as SeedConfig[]),
         ).rejects.toThrow('SeedConfig validation failed')
 
-        // Verify error logging occurred
         expect(consoleSpy).toHaveBeenCalledWith('SeedConfig validation failed:')
         expect(consoleSpy).toHaveBeenCalledWith(
           expect.stringContaining('table'),
@@ -1121,11 +1114,9 @@ describe('Seed Database', () => {
       })
 
       it('should handle constraint validation errors (no file or url)', async () => {
-        // Create config that passes Zod but fails constraint validation
         const invalidConfig: SeedConfig = {
           table: 'test_table',
           conflictColumn: 'id',
-          // Missing both file and url - should fail validateSeedConfigConstraints
         }
 
         const { mockRunnerInstance } = await setupMockSeedRunner()
@@ -1136,13 +1127,11 @@ describe('Seed Database', () => {
       })
 
       it('should handle constraint validation errors (both file and url)', async () => {
-        // Create config that passes Zod but fails constraint validation
         const invalidConfig: SeedConfig = {
           file: 'test.json',
           url: 'https://api.example.com/data',
           table: 'test_table',
           conflictColumn: 'id',
-          // Both file and url present - should fail validateSeedConfigConstraints
         }
 
         const { mockRunnerInstance } = await setupMockSeedRunner()
@@ -1153,7 +1142,6 @@ describe('Seed Database', () => {
       })
 
       it('should handle non-Zod errors', async () => {
-        // Spy on the constraint validation function to throw a custom error
         const validateSpy = vi
           .spyOn(
             await import('../../../src/schema/seed-config.schema'),
@@ -1186,9 +1174,9 @@ describe('Seed Database', () => {
     describe('validateGeographyContext', () => {
       it('should handle Zod validation errors', () => {
         const invalidContext = {
-          year: 'not-a-number', // Should be number
-          year_id: 'not-a-number', // Should be number
-          parentGeographies: 'not-an-object', // Should be object
+          year: 'not-a-number',
+          year_id: 'not-a-number',
+          parentGeographies: 'not-an-object',
         } as unknown
 
         expect(() => {
@@ -1216,7 +1204,7 @@ describe('Seed Database', () => {
 
       it('should handle minimum year validation', () => {
         const invalidContext = {
-          year: 1775, // Below minimum of 1776
+          year: 1775,
           year_id: 1,
           parentGeographies: {},
         } as unknown
@@ -1239,7 +1227,6 @@ describe('Seed Database', () => {
           zodErrorHandling(regularError, 'Test validation failed')
         }).toThrow('Test validation failed: Some error message')
 
-        // Should not log for non-Zod errors
         expect(consoleSpy).not.toHaveBeenCalled()
       })
 

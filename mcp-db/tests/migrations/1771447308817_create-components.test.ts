@@ -1,6 +1,5 @@
 import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest'
 import { MigrationBuilder } from 'node-pg-migrate'
-
 import {
   programsArgs,
   componentsArgs,

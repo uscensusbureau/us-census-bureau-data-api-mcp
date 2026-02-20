@@ -17,10 +17,8 @@ export const DataTablesConfig: SeedConfig = {
   beforeSeed: (client: Client, rawData: unknown[]): void => {
     const { dataTables, relationships } = transformDataTableData(rawData)
 
-    // Store relationships for afterSeed
     state.capturedRelationships = relationships
 
-    // Replace rawData with deduplicated data tables
     rawData.length = 0
     rawData.push(...dataTables)
   },
@@ -30,7 +28,6 @@ export const DataTablesConfig: SeedConfig = {
       return
     }
 
-    // Build ID maps (your existing code)
     const dataTableIds = [
       ...new Set(state.capturedRelationships.map((r) => r.data_table_id)),
     ]
@@ -56,7 +53,6 @@ export const DataTablesConfig: SeedConfig = {
       datasetQuery.rows.map((row) => [row.dataset_id, parseInt(row.id, 10)]),
     )
 
-    // Map string IDs to numeric IDs (your existing code)
     const joinRecords = state.capturedRelationships
       .map((rel) => {
         const dataTableNumericId = dataTableIdMap.get(rel.data_table_id)
@@ -89,7 +85,6 @@ export const DataTablesConfig: SeedConfig = {
       return
     }
 
-    // Manual batching - no SeedRunner needed
     const BATCH_SIZE = 5000
     const totalBatches = Math.ceil(joinRecords.length / BATCH_SIZE)
 
