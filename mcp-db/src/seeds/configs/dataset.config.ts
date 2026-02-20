@@ -1,5 +1,6 @@
 import { Client } from 'pg'
 
+import { findComponentIdHelper } from '../../helpers/find-component-id.helper.js'
 import { getOrCreateYear } from '../../helpers/get-or-create-year.helper.js'
 import {
   DatasetRecord,
@@ -31,7 +32,7 @@ export const DatasetConfig: SeedConfig = {
 
     const processedData: Partial<DatasetRecord>[] = await Promise.all(
       validatedData.map(async (record) => {
-        const { c_vintage, temporal, ...datasetFields } = record
+        const { c_vintage, temporal, dataset_param, ...datasetFields } = record
 
         let temporal_start = null
         let temporal_end = null
@@ -42,6 +43,8 @@ export const DatasetConfig: SeedConfig = {
           temporal_end = parsed.temporal_end
         }
 
+        const component_id = await findComponentIdHelper(client, dataset_param)
+
         if (c_vintage) {
           const yearId = await getOrCreateYear(client, c_vintage)
           return {
@@ -49,6 +52,7 @@ export const DatasetConfig: SeedConfig = {
             temporal_start,
             temporal_end,
             year_id: yearId,
+            component_id,
           }
         } else {
           console.warn(`No year found for dataset: ${record.dataset_id}`)
@@ -58,6 +62,7 @@ export const DatasetConfig: SeedConfig = {
           ...datasetFields,
           temporal_start,
           temporal_end,
+          component_id,
         }
       }),
     )

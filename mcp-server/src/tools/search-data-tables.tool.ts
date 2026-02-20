@@ -12,15 +12,14 @@ import { DataTableSearchResultRow } from '../types/data-table.types.js'
 import { ToolContent } from '../types/base.types.js'
 
 export const toolDescription = `
-  Search for Census Bureau data tables by ID, label, or dataset. Use this tool when users reference a topic or variable category (e.g., "language spoken at home", "income by race") and need to identify the correct table ID before fetching data. Accepts a table ID prefix (e.g., "B16005"), a natural language label query, and an optional dataset scope. Returns a ranked list of matching tables with their canonical labels and an array of datasets in which they appear. 
+  Search for Census Bureau data tables by ID, label, or data API endpoint (e.g. acs/acs1). Use this tool when users reference a topic or variable category (e.g., "language spoken at home", "income by race") and need to identify the correct table ID before fetching data. Accepts a table ID prefix (e.g., "B16005"), a natural language label query, and an optional API endpoint scope. Returns a ranked list of matching tables with their canonical labels, component, and available years.
   
   Each result object includes:
-  - data_table_id: maps to the get.group parameter in fetch-aggregate-data (this is a top-level field on the result, not on each dataset entry)
-  - datasets: an array of dataset entries, where each entry contains:
-      - dataset_param: maps to the dataset parameter in fetch-aggregate-data (e.g., "acs/acs1", "acs/acs5")
-      - year: use this to select the appropriate vintage year in fetch-aggregate-data
-      - label: dataset-specific variant label, present only when it differs from the canonical data label
-`
+  - data_table_id: maps to the get.group parameter in fetch-aggregate-data
+  - label: canonical label for the data table
+  - component: the program and component this table belongs to (e.g., "American Community Survey - ACS 1-Year Estimates")
+  - years: an array of years in which this table is available
+  `
 
 export class SearchDataTablesTool extends BaseTool<SearchDataTablesArgs> {
   name = 'search-data-tables'
@@ -48,13 +47,13 @@ export class SearchDataTablesTool extends BaseTool<SearchDataTablesArgs> {
     const {
       data_table_id = null,
       label_query = null,
-      dataset_id = null,
+      api_endpoint = null,
       limit = 20,
     } = args
 
     const result = await this.dbService.query<DataTableSearchResultRow>(
       `SELECT * FROM search_data_tables($1, $2, $3, $4)`,
-      [data_table_id, label_query, dataset_id, limit],
+      [data_table_id, label_query, api_endpoint, limit],
     )
 
     return result.rows
@@ -87,7 +86,7 @@ export class SearchDataTablesTool extends BaseTool<SearchDataTablesArgs> {
         const searchTerms = [
           args.data_table_id && `table ID "${args.data_table_id}"`,
           args.label_query && `label "${args.label_query}"`,
-          args.dataset_id && `dataset "${args.dataset_id}"`,
+          args.api_endpoint && `api endpoint "${args.api_endpoint}"`,
         ]
           .filter(Boolean)
           .join(', ')
