@@ -24,6 +24,10 @@ vi.mock('../../../src/helpers/get-or-create-year.helper', () => ({
   getOrCreateYear: vi.fn(),
 }))
 
+vi.mock('../../../src/helpers/find-component-id.helper', () => ({
+  findComponentIdHelper: vi.fn(),
+}))
+
 import { cleanupWithRetry } from '../../test-helpers/database-cleanup'
 import { dbConfig } from '../../test-helpers/database-config'
 import { DatasetConfig } from '../../../src/seeds/configs/dataset.config'
@@ -35,6 +39,7 @@ import {
   TransformedDataset,
   TransformedDatasetsArraySchema,
 } from '../../../src/schema/dataset.schema'
+import { findComponentIdHelper } from '../../../src/helpers/find-component-id.helper'
 import { getOrCreateYear } from '../../../src/helpers/get-or-create-year.helper'
 
 describe('Dataset Config', () => {
@@ -58,6 +63,7 @@ describe('Dataset Config', () => {
     vi.mocked(parseTemporalRange).mockClear()
     vi.mocked(getOrCreateYear).mockClear()
     vi.mocked(TransformedDatasetsArraySchema.parse).mockClear()
+    vi.mocked(findComponentIdHelper).mockClear()
 
     runner = new SeedRunner(databaseUrl)
     await runner.connect()
@@ -86,6 +92,8 @@ describe('Dataset Config', () => {
       mockClient = {
         query: vi.fn(),
       }
+
+      vi.mocked(findComponentIdHelper).mockResolvedValue(5)
     })
 
     it('should call transformApiDatasetsData and validate with schema', async () => {
@@ -221,6 +229,41 @@ describe('Dataset Config', () => {
       expect(getOrCreateYear).toHaveBeenNthCalledWith(2, mockClient, 2020)
     })
 
+    it('should call findComponentIdHelper with the correct dataset_param', async () => {
+      const rawApiData = [
+        {
+          c_vintage: 1994,
+          c_dataset: ['cps', 'basic', 'jun'],
+          c_isAggregate: true,
+          title: 'Dataset 1',
+          identifier: 'https://api.census.gov/data/id/DATA1',
+          description: 'Description 1',
+        },
+      ]
+
+      await DatasetConfig.beforeSeed!(mockClient as Client, rawApiData)
+
+      expect(findComponentIdHelper).toHaveBeenCalledWith(mockClient, 'acs/acs1')
+    })
+
+    it('should assign the returned component_id to the processed record', async () => {
+      const rawApiData = [
+        {
+          c_vintage: 1994,
+          c_dataset: ['cps', 'basic', 'jun'],
+          c_isAggregate: true,
+          title: 'Dataset 1',
+          identifier: 'https://api.census.gov/data/id/DATA1',
+          description: 'Description 1',
+        },
+      ]
+
+      await DatasetConfig.beforeSeed!(mockClient as Client, rawApiData)
+
+      const processedDataset = rawApiData[0] as Partial<DatasetRecord>
+      expect(processedDataset.component_id).toBe(5)
+    })
+
     it('should remove c_vintage and add year_id to final data', async () => {
       const rawApiData = [
         {
@@ -265,12 +308,13 @@ describe('Dataset Config', () => {
         description: 'Description 1',
         type: 'aggregate',
         dataset_id: 'DATA1',
-        dataset_param: 'cps/basic/jun',
         temporal_start: null,
         temporal_end: null,
         year_id: 42,
+        component_id: 5,
       })
       expect(processedDataset).not.toHaveProperty('c_vintage')
+      expect(processedDataset).not.toHaveProperty('dataset_param')
     })
 
     it('should handle datasets without c_vintage', async () => {
@@ -310,6 +354,8 @@ describe('Dataset Config', () => {
       const processedDataset = rawApiData[0]
       expect(processedDataset).not.toHaveProperty('year_id')
       expect(processedDataset).not.toHaveProperty('c_vintage')
+      expect(processedDataset).not.toHaveProperty('dataset_param')
+      expect(processedDataset.component_id).toBe(5)
     })
 
     describe('temporal data handling', () => {
@@ -693,10 +739,10 @@ describe('Dataset Config', () => {
           description: 'Has type',
           type: 'aggregate',
           dataset_id: 'VALID',
-          dataset_param: 'acs/acs1',
           temporal_start: null,
           temporal_end: null,
           year_id: 1,
+          component_id: 5,
         })
 
         expect(consoleWarnSpy).toHaveBeenCalledWith(

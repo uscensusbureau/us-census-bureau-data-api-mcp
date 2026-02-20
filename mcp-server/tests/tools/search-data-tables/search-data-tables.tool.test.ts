@@ -10,7 +10,6 @@ import {
 } from 'vitest'
 import { TextContent } from '@modelcontextprotocol/sdk/types.js'
 
-// Mock DatabaseService
 vi.mock('../../../src/services/database.service.js', () => ({
   DatabaseService: {
     getInstance: vi.fn(),
@@ -31,11 +30,11 @@ import { DataTableSearchResultRow } from '../../../src/types/data-table.types'
 
 const byIdArgs = { data_table_id: 'B16005' }
 const byLabelArgs = { label_query: 'language spoken at home' }
-const byDatasetArgs = { dataset_id: 'ACSDT1Y2009' }
+const byApiEndpointArgs = { api_endpoint: 'acs/acs1' }
 const allParamsArgs = {
   data_table_id: 'B16005',
   label_query: 'language spoken at home',
-  dataset_id: 'ACSDT1Y2009',
+  api_endpoint: 'acs/acs1',
   limit: 10,
 }
 
@@ -43,28 +42,14 @@ const mockDataTables: DataTableSearchResultRow[] = [
   {
     data_table_id: 'B16005',
     label: 'Nativity By Language Spoken At Home By Ability To Speak English',
-    datasets: [
-      { dataset_id: 'ACSDT1Y2009', year: 2009, dataset_param: 'acs/acs1' },
-      { dataset_id: 'ACSDTY2010', year: 2010, dataset_param: 'acs/acs1' },
-    ],
+    component: 'American Community Survey - ACS 1-Year Estimates',
+    years: [2009, 2010],
   },
   {
     data_table_id: 'B16005D',
     label: 'Nativity By Language Spoken At Home By Ability To Speak English',
-    datasets: [
-      {
-        dataset_id: 'ACSDT1Y2009',
-        year: 2009,
-        label: 'Nativity By Language Spoken At Home (Asian Alone)',
-        dataset_param: 'acs/acs1'
-      },
-      {
-        dataset_id: 'ACSDTY2010',
-        year: 2010,
-        label: 'Nativity By Language Spoken At Home (Asian Alone)',
-        dataset_param: 'acs/acs1'
-      },
-    ],
+    component: 'American Community Survey - ACS 1-Year Estimates',
+    years: [2009, 2010],
   },
 ]
 
@@ -120,7 +105,7 @@ describe('SearchDataTablesTool', () => {
     expect(schema.type).toBe('object')
     expect(schema.properties).toHaveProperty('data_table_id')
     expect(schema.properties).toHaveProperty('label_query')
-    expect(schema.properties).toHaveProperty('dataset_id')
+    expect(schema.properties).toHaveProperty('api_endpoint')
     expect(schema.properties).toHaveProperty('limit')
     expect(schema.required).toEqual([])
   })
@@ -134,8 +119,8 @@ describe('SearchDataTablesTool', () => {
       expect(() => tool.argsSchema.parse(byLabelArgs)).not.toThrow()
     })
 
-    it('should accept dataset_id alone', () => {
-      expect(() => tool.argsSchema.parse(byDatasetArgs)).not.toThrow()
+    it('should accept api_endpoint alone', () => {
+      expect(() => tool.argsSchema.parse(byApiEndpointArgs)).not.toThrow()
     })
 
     it('should accept all params together', () => {
@@ -144,7 +129,7 @@ describe('SearchDataTablesTool', () => {
 
     it('should reject when no search params are provided', () => {
       expect(() => tool.argsSchema.parse({})).toThrow(
-        'At least one search parameter must be provided',
+        'At least one search parameter must be provided: data_table_id, label_query, or api_endpoint.',
       )
     })
 
@@ -196,7 +181,7 @@ describe('SearchDataTablesTool', () => {
       expect(params).toEqual([
         'B16005',
         'language spoken at home',
-        'ACSDT1Y2009',
+        'acs/acs1',
         10,
       ])
     })
@@ -207,7 +192,7 @@ describe('SearchDataTablesTool', () => {
       const [, params] = mockDbService.query.mock.calls[0]
       expect(params[0]).toBeNull() // data_table_id
       expect(params[1]).toBe('language spoken at home')
-      expect(params[2]).toBeNull() // dataset_id
+      expect(params[2]).toBeNull() // api_endpoint
       expect(params[3]).toBe(20) // default limit
     })
 
@@ -244,26 +229,17 @@ describe('SearchDataTablesTool', () => {
         expect(getTextContent(result).text).not.toContain('Data Tables:')
       })
 
-      it('serialises datasets including variant labels', async () => {
+      it('serialises component and years for each result', async () => {
         const result = await tool.handler(byIdArgs)
         const parsed = JSON.parse(getTextContent(result).text.split('\n\n')[1])
 
-        const tableD = parsed.find(
-          (t: DataTableSearchResultRow) => t.data_table_id === 'B16005D',
-        )
-        expect(tableD.datasets[0].label).toBe(
-          'Nativity By Language Spoken At Home (Asian Alone)',
-        )
-      })
-
-      it('omits label from dataset entries that match the canonical label', async () => {
-        const result = await tool.handler(byIdArgs)
-        const parsed = JSON.parse(getTextContent(result).text.split('\n\n')[1])
-
-        const baseTable = parsed.find(
+        const table = parsed.find(
           (t: DataTableSearchResultRow) => t.data_table_id === 'B16005',
         )
-        expect(baseTable.datasets[0].label).toBeUndefined()
+        expect(table.component).toBe(
+          'American Community Survey - ACS 1-Year Estimates',
+        )
+        expect(table.years).toEqual([2009, 2010])
       })
     })
 
@@ -288,11 +264,11 @@ describe('SearchDataTablesTool', () => {
         )
       })
 
-      it('returns a no-results message for a dataset_id search', async () => {
-        const result = await tool.handler({ dataset_id: 'UNKNOWN2099' })
+      it('returns a no-results message for an api_endpoint search', async () => {
+        const result = await tool.handler({ api_endpoint: 'unknown/endpoint' })
 
         expect(getTextContent(result).text).toBe(
-          'No data tables found matching dataset "UNKNOWN2099".',
+          'No data tables found matching api endpoint "unknown/endpoint".',
         )
       })
 
@@ -300,12 +276,14 @@ describe('SearchDataTablesTool', () => {
         const result = await tool.handler({
           data_table_id: 'B99999',
           label_query: 'obscure topic',
-          dataset_id: 'UNKNOWN2099',
+          api_endpoint: 'unknown/endpoint',
         })
 
         expect(getTextContent(result).text).toContain('table ID "B99999"')
         expect(getTextContent(result).text).toContain('label "obscure topic"')
-        expect(getTextContent(result).text).toContain('dataset "UNKNOWN2099"')
+        expect(getTextContent(result).text).toContain(
+          'api endpoint "unknown/endpoint"',
+        )
       })
     })
   })

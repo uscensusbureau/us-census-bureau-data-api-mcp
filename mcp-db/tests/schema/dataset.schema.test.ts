@@ -15,7 +15,6 @@ describe('Dataset Schema', () => {
         name: 'Dataset',
         description: 'A great dataset.',
         dataset_id: 'ACSY123456',
-        dataset_param: 'acs/acs1',
         type: 'aggregate',
         year_id: 1,
       }
@@ -28,7 +27,6 @@ describe('Dataset Schema', () => {
       const datasetRecord = {
         description: 'A great dataset.',
         dataset_id: 'ACSY123456',
-        dataset_param: 'acs/acs1',
         type: 'aggregate',
         year_id: 1,
       }
