@@ -19,8 +19,8 @@ export const programsArgs = (pgm: MigrationBuilder): ColumnDefinitions => ({
 
 export const componentsArgs = (pgm: MigrationBuilder): ColumnDefinitions => ({
   id: { type: 'bigserial', primaryKey: true },
-  label: { type: 'text', notNull: true },
   component_id: { type: 'varchar(60)', notNull: true, unique: true },
+  label: { type: 'text', notNull: true },
   api_endpoint: { type: 'varchar(60)', notNull: true, unique: true },
   description: { type: 'text', notNull: true },
   program_id: {

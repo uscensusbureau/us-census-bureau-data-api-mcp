@@ -13,10 +13,10 @@ export const SearchDataTablesArgsSchema = {
       description:
         'Natural language search phrase for the table label (e.g., "language spoken at home", "income by age"). Uses fuzzy similarity matching.',
     },
-    dataset_id: {
+    api_endpoint: {
       type: 'string',
       description:
-        'Scope results to a specific dataset identifier (e.g., "ACSDTY2009"). When provided, label search is applied against dataset-specific variant labels.',
+        'Scope results to a specific data API endpoint (e.g., "acs/acs1"). When provided, only tables belonging to that endpoint are returned.',
     },
     limit: {
       type: 'number',
@@ -44,13 +44,13 @@ export const SearchDataTablesInputSchema = z
       .describe(
         'Natural language search phrase for the table label (e.g., "language spoken at home", "income by age"). Uses fuzzy similarity matching.',
       ),
-    dataset_id: z
+    api_endpoint: z
       .string()
       .trim()
       .min(1)
       .optional()
       .describe(
-        'Scope results to a specific dataset identifier (e.g., "ACSDTY2009"). When provided, label search is applied against dataset-specific variant labels.',
+        'Scope results to a specific component API endpoint (e.g., "acs/acs1"). When provided, only tables available under that component are returned.',
       ),
     limit: z
       .number()
@@ -64,10 +64,10 @@ export const SearchDataTablesInputSchema = z
     (args) =>
       args.data_table_id !== undefined ||
       args.label_query !== undefined ||
-      args.dataset_id !== undefined,
+      args.api_endpoint !== undefined,
     {
       message:
-        'At least one search parameter must be provided: data_table_id, label_query, or dataset_id.',
+        'At least one search parameter must be provided: data_table_id, label_query, or api_endpoint.',
     },
   )
 
