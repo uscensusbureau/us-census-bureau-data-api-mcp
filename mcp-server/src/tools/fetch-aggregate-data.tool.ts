@@ -64,7 +64,7 @@ export class FetchAggregateDataTool extends BaseTool<TableArgs> {
 
   async toolHandler(
     args: TableArgs,
-    apiKey: string,
+    apiKey?: string,
   ): Promise<{ content: ToolContent[] }> {
     const baseUrl = `https://api.census.gov/data/${args.year}/${args.dataset}`
 
@@ -114,7 +114,9 @@ export class FetchAggregateDataTool extends BaseTool<TableArgs> {
       in: args.in || null,
     })
 
-    query.append('key', apiKey)
+    if (apiKey) {
+      query.append('key', apiKey)
+    }
     const url = `${baseUrl}?${query.toString()}`
 
     const cacheParams = {

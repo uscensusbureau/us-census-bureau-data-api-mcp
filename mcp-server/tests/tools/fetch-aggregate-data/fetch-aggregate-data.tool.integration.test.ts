@@ -26,12 +26,9 @@ vi.mock('node-fetch', async () => {
 
 describe('FetchAggregateDataTool - Integration Tests', () => {
   let databaseService: DatabaseService
-  let apiKey: string
+  let apiKey: string | undefined
 
   beforeAll(async () => {
-    if (process.env.CENSUS_API_KEY === undefined) {
-      throw new Error('CENSUS_API_KEY environment variable not set.')
-    }
     apiKey = process.env.CENSUS_API_KEY
     // Reset the DatabaseService singleton instances
     ;(
