@@ -1,11 +1,33 @@
-const mockFetch = vi.fn()
+import { describe, it, expect, beforeEach, afterEach, vi, Mock } from 'vitest'
+
+// Ensure the `mockFetch` mock function is created early enough for
+// `vi.mock('node-fetch', ...)` to use it.
+const { mockFetch } = vi.hoisted(() => ({
+  mockFetch: vi.fn(),
+}))
 
 vi.mock('node-fetch', () => ({
   default: mockFetch,
 }))
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { buildCitation } from '../../../src/helpers/citation'
+// Mock QueryCacheService
+vi.mock('../../../src/services/queryCache.service.js', async () => {
+  const actual = await vi.importActual<
+    typeof import('../../../src/services/queryCache.service.js')
+  >('../../../src/services/queryCache.service.js')
+  return {
+    ...actual,
+    // Mock CacheDuration.toString() such that it returns '1 year'
+    CacheDuration: vi.fn().mockImplementation(() => ({
+      toString: () => '1 year',
+    })),
+    QueryCacheService: {
+      getInstance: vi.fn(),
+    },
+  }
+})
+
+import { QueryCacheService } from '../../../src/services/queryCache.service.js'
 import {
   FetchAggregateDataTool,
   toolDescription,
@@ -27,8 +49,18 @@ vi.mock('../../../src/helpers/citation', () => ({
 
 describe('FetchAggregateDataTool', () => {
   let tool: FetchAggregateDataTool
+  let mockCacheService: {
+    get: Mock
+    set: Mock
+  }
 
   beforeEach(() => {
+    mockCacheService = {
+      get: vi.fn().mockResolvedValue(null),
+      set: vi.fn().mockResolvedValue(undefined),
+    }
+    ;(QueryCacheService.getInstance as Mock).mockReturnValue(mockCacheService)
+
     tool = new FetchAggregateDataTool()
     mockFetch.mockClear()
 
@@ -45,8 +77,7 @@ describe('FetchAggregateDataTool', () => {
       vi.clearAllMocks()
     })
 
-    it('invokes buildCitation', async () => {
-      const mockBuildCitation = buildCitation as ReturnType<typeof vi.fn>
+    it('returns Census web API response given a valid query', async () => {
       const testData = [
         ['NAME', 'B01001_001E', 'state'],
         ['Test State', '1000000', '01'],
@@ -62,14 +93,63 @@ describe('FetchAggregateDataTool', () => {
         for: 'state:01',
       }
 
-      const response = await tool.toolHandler(args, process.env.CENSUS_API_KEY)
+      const expectedCacheParams = {
+        dataset: args.dataset,
+        group: args.get.group,
+        year: args.year,
+        variables: [],
+        geographySpec: JSON.stringify({ for: args.for, in: null }),
+      }
 
-      expect(mockBuildCitation).toHaveBeenCalledWith(
-        `https://api.census.gov/data/2022/acs/acs1?get=group%28B01001%29&for=state%3A01&descriptive=false&key=${process.env.CENSUS_API_KEY}`,
+      const response = await tool.toolHandler(args, process.env.CENSUS_API_KEY)
+      expect(mockCacheService.get).toHaveBeenCalledWith(expectedCacheParams)
+      expect(mockCacheService.set).toHaveBeenCalledWith(
+        expectedCacheParams,
+        testData,
+        expect.anything(),
       )
       expect(response.content[0].text).to.include(
         'Source: U.S. Census Bureau Data API',
       )
+      expect(response.content[0].text).to.include(
+        'NAME: Test State, B01001_001E: 1000000, state: 01',
+      )
+    })
+
+    it('returns data from cache on cache hit', async () => {
+      const cachedData = [
+        ['NAME', 'B01001_001E', 'state'],
+        ['Cached State', '500000', '02'],
+      ]
+      mockCacheService.get.mockResolvedValueOnce(cachedData)
+
+      const args = {
+        dataset: 'acs/acs1',
+        year: 2022,
+        get: {
+          group: 'B01001',
+        },
+        for: 'state:02',
+      }
+
+      const expectedCacheParams = {
+        dataset: args.dataset,
+        group: args.get.group,
+        year: args.year,
+        variables: [],
+        geographySpec: JSON.stringify({ for: args.for, in: null }),
+      }
+
+      const response = await tool.toolHandler(args, process.env.CENSUS_API_KEY)
+
+      expect(mockCacheService.get).toHaveBeenCalledWith(expectedCacheParams)
+      expect(response.content[0].text).to.include(
+        'NAME: Cached State, B01001_001E: 500000, state: 02',
+      )
+      expect(response.content[0].text).to.include(
+        'Source: U.S. Census Bureau Data API',
+      )
+      expect(mockFetch).not.toHaveBeenCalled()
     })
   })
 

@@ -33,7 +33,6 @@ export default defineConfig({
               singleThread: false,
             },
           },
-          globalSetup: ['./tests/globalSetup.ts'],
           setupFiles: ['./tests/setup.ts'],
         },
       },
