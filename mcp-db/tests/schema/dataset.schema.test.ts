@@ -63,7 +63,7 @@ describe('Dataset Schema', () => {
       expect(transformedData[0].name).toEqual(rawApiData[0].title)
       expect(transformedData[0].description).toEqual(rawApiData[0].description)
       expect(transformedData[0].c_vintage).toEqual(rawApiData[0].c_vintage)
-      expect(transformedData[0].dataset_param).toEqual('cps/basic/jun')
+      expect(transformedData[0].api_endpoint).toEqual('cps/basic/jun')
       expect(transformedData[0].dataset_id).toEqual('DATA1')
       expect(transformedData[0].type).toEqual('microdata')
     })

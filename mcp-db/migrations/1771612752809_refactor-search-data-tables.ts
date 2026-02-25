@@ -104,11 +104,14 @@ export async function down(pgm: MigrationBuilder): Promise<void> {
   pgm.addColumns('datasets', {
     dataset_param: {
       type: 'varchar(100)',
-      notNull: true,
     },
   })
 
   pgm.sql(datasetParamAssignmentSQL)
+
+  pgm.alterColumn('datasets', 'dataset_param', {
+    notNull: true,
+  })
   pgm.dropColumn('datasets', 'component_id')
 
   pgm.sql(

@@ -41,7 +41,7 @@ describe('findComponentIdHelper', () => {
 
     expect(result).toBeNull()
     expect(consoleWarnSpy).toHaveBeenCalledWith(
-      'No component found for dataset_param: unknown/path',
+      'No component found for api_endpoint: unknown/path',
     )
 
     consoleWarnSpy.mockRestore()

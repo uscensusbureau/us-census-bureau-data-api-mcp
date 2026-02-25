@@ -32,7 +32,7 @@ export const DatasetConfig: SeedConfig = {
 
     const processedData: Partial<DatasetRecord>[] = await Promise.all(
       validatedData.map(async (record) => {
-        const { c_vintage, temporal, dataset_param, ...datasetFields } = record
+        const { c_vintage, temporal, api_endpoint, ...datasetFields } = record
 
         let temporal_start = null
         let temporal_end = null
@@ -43,7 +43,7 @@ export const DatasetConfig: SeedConfig = {
           temporal_end = parsed.temporal_end
         }
 
-        const component_id = await findComponentIdHelper(client, dataset_param)
+        const component_id = await findComponentIdHelper(client, api_endpoint)
 
         if (c_vintage) {
           const yearId = await getOrCreateYear(client, c_vintage)

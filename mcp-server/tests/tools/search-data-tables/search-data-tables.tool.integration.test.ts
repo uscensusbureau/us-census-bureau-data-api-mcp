@@ -73,17 +73,18 @@ describe('SearchDataTablesTool - Integration Tests', () => {
 
     // Seed programs
     await testClient.query(`
-      INSERT INTO programs (name, label)
+      INSERT INTO programs (acronym, label)
       VALUES ('ACS', 'American Community Survey')
     `)
 
     // Seed components
     await testClient.query(`
-      INSERT INTO components (name, api_endpoint, program_id)
+      INSERT INTO components (label, api_endpoint, description, program_id)
       VALUES (
         'ACS 1-Year Estimates',
         'acs/acs1',
-        (SELECT id FROM programs WHERE name = 'ACS')
+        'ACS 1-Year Estimates',
+        (SELECT id FROM programs WHERE acronym = 'ACS')
       )
     `)
 
@@ -264,7 +265,9 @@ describe('SearchDataTablesTool - Integration Tests', () => {
     const parsed = JSON.parse(text.split('\n\n')[1])
 
     const table = parsed[0]
-    expect(table.component).toBe('American Community Survey - ACS 1-Year Estimates')
+    expect(table.component).toBe(
+      'American Community Survey - ACS 1-Year Estimates',
+    )
     expect(Array.isArray(table.years)).toBe(true)
     expect(table.years).toContain(2019)
   })

@@ -117,13 +117,18 @@ describe('Migration - Assign Component IDs to Datasets', () => {
       expect(addColumnsSpy).toHaveBeenCalledWith('datasets', {
         dataset_param: {
           type: 'varchar(100)',
-          notNull: true,
         },
       })
     })
 
     it('runs the dataset_param assignment SQL', () => {
       expect(sqlSpy).toHaveBeenCalledWith(datasetParamAssignmentSQL)
+    })
+
+    it('constrains dataset_param to not null after population', () => {
+      expect(alterColumnSpy).toHaveBeenCalledWith('datasets', 'dataset_param', {
+        notNull: true,
+      })
     })
 
     it('populates dataset_param before dropping component_id', () => {
