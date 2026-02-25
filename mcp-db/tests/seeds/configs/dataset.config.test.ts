@@ -24,17 +24,23 @@ vi.mock('../../../src/helpers/get-or-create-year.helper', () => ({
   getOrCreateYear: vi.fn(),
 }))
 
+vi.mock('../../../src/helpers/find-component-id.helper', () => ({
+  findComponentIdHelper: vi.fn(),
+}))
+
 import { cleanupWithRetry } from '../../test-helpers/database-cleanup'
 import { dbConfig } from '../../test-helpers/database-config'
 import { DatasetConfig } from '../../../src/seeds/configs/dataset.config'
 import { SeedRunner } from '../../../src/seeds/scripts/seed-runner'
 import {
+  ApiDataset,
   DatasetRecord,
   parseTemporalRange,
   transformApiDatasetsData,
   TransformedDataset,
   TransformedDatasetsArraySchema,
 } from '../../../src/schema/dataset.schema'
+import { findComponentIdHelper } from '../../../src/helpers/find-component-id.helper'
 import { getOrCreateYear } from '../../../src/helpers/get-or-create-year.helper'
 
 describe('Dataset Config', () => {
@@ -58,6 +64,7 @@ describe('Dataset Config', () => {
     vi.mocked(parseTemporalRange).mockClear()
     vi.mocked(getOrCreateYear).mockClear()
     vi.mocked(TransformedDatasetsArraySchema.parse).mockClear()
+    vi.mocked(findComponentIdHelper).mockClear()
 
     runner = new SeedRunner(databaseUrl)
     await runner.connect()
@@ -86,6 +93,8 @@ describe('Dataset Config', () => {
       mockClient = {
         query: vi.fn(),
       }
+
+      vi.mocked(findComponentIdHelper).mockResolvedValue(5)
     })
 
     it('should call transformApiDatasetsData and validate with schema', async () => {
@@ -107,7 +116,7 @@ describe('Dataset Config', () => {
           c_vintage: 1994,
           type: 'aggregate',
           dataset_id: 'CPSBASIC199406',
-          dataset_param: 'cps/basic/jun',
+          api_endpoint: 'cps/basic/jun',
         },
       ]
 
@@ -147,18 +156,18 @@ describe('Dataset Config', () => {
           c_vintage: 1994,
           type: 'aggregate',
           dataset_id: 'DATA1',
-          dataset_param: 'cps/basic/jun',
+          api_endpoint: 'cps/basic/jun',
         },
       ]
 
       vi.mocked(transformApiDatasetsData).mockReturnValue(transformedData)
       vi.mocked(TransformedDatasetsArraySchema.parse).mockImplementation(() => {
-        throw new Error('Validation failed: invalid dataset_param')
+        throw new Error('Validation failed: invalid api_endpoint')
       })
 
       await expect(
         DatasetConfig.beforeSeed!(mockClient as Client, rawApiData),
-      ).rejects.toThrow('Validation failed: invalid dataset_param')
+      ).rejects.toThrow('Validation failed: invalid api_endpoint')
 
       expect(getOrCreateYear).not.toHaveBeenCalled()
     })
@@ -190,7 +199,7 @@ describe('Dataset Config', () => {
           c_vintage: 1994,
           type: 'aggregate',
           dataset_id: 'DATA1',
-          dataset_param: 'cps/basic/jun',
+          api_endpoint: 'cps/basic/jun',
         },
         {
           name: 'Dataset 2',
@@ -198,7 +207,7 @@ describe('Dataset Config', () => {
           c_vintage: 2020,
           type: 'timeseries',
           dataset_id: 'DATA2',
-          dataset_param: 'acs/acs1',
+          api_endpoint: 'acs/acs1',
         },
       ]
 
@@ -221,6 +230,60 @@ describe('Dataset Config', () => {
       expect(getOrCreateYear).toHaveBeenNthCalledWith(2, mockClient, 2020)
     })
 
+    describe('findComponentIdHelper behavior', () => {
+      let rawApiData: ApiDataset[]
+
+      const transformedData: TransformedDataset[] = [
+        {
+          name: 'Dataset 1',
+          description: 'Description 1',
+          c_vintage: 1994,
+          type: 'aggregate',
+          dataset_id: 'DATA1',
+          api_endpoint: 'cps/basic/jun',
+        },
+      ]
+
+      beforeEach(() => {
+        rawApiData = [
+          {
+            c_vintage: 1994,
+            c_dataset: ['cps', 'basic', 'jun'],
+            c_isAggregate: true,
+            title: 'Dataset 1',
+            identifier: 'https://api.census.gov/data/id/DATA1',
+            description: 'Description 1',
+          },
+        ]
+
+        vi.mocked(transformApiDatasetsData).mockReturnValue(transformedData)
+        vi.mocked(TransformedDatasetsArraySchema.parse).mockReturnValue(
+          transformedData,
+        )
+        vi.mocked(parseTemporalRange).mockReturnValue({
+          temporal_start: null,
+          temporal_end: null,
+        })
+        vi.mocked(getOrCreateYear).mockResolvedValue(1)
+      })
+
+      it('should call findComponentIdHelper with the correct api_endpoint', async () => {
+        await DatasetConfig.beforeSeed!(mockClient as Client, rawApiData)
+
+        expect(findComponentIdHelper).toHaveBeenCalledWith(
+          mockClient,
+          'cps/basic/jun',
+        )
+      })
+
+      it('should assign the returned component_id to the processed record', async () => {
+        await DatasetConfig.beforeSeed!(mockClient as Client, rawApiData)
+
+        const processedDataset = rawApiData[0] as Partial<DatasetRecord>
+        expect(processedDataset.component_id).toBe(5)
+      })
+    })
+
     it('should remove c_vintage and add year_id to final data', async () => {
       const rawApiData = [
         {
@@ -240,7 +303,7 @@ describe('Dataset Config', () => {
           c_vintage: 1994,
           type: 'aggregate',
           dataset_id: 'DATA1',
-          dataset_param: 'cps/basic/jun',
+          api_endpoint: 'cps/basic/jun',
         },
       ]
 
@@ -265,12 +328,13 @@ describe('Dataset Config', () => {
         description: 'Description 1',
         type: 'aggregate',
         dataset_id: 'DATA1',
-        dataset_param: 'cps/basic/jun',
         temporal_start: null,
         temporal_end: null,
         year_id: 42,
+        component_id: 5,
       })
       expect(processedDataset).not.toHaveProperty('c_vintage')
+      expect(processedDataset).not.toHaveProperty('api_endpoint')
     })
 
     it('should handle datasets without c_vintage', async () => {
@@ -290,7 +354,7 @@ describe('Dataset Config', () => {
           description: 'No vintage',
           type: 'microdata',
           dataset_id: 'DATANOVINTAGE',
-          dataset_param: 'acs/acs1',
+          api_endpoint: 'acs/acs1',
         },
       ]
 
@@ -307,9 +371,11 @@ describe('Dataset Config', () => {
 
       expect(getOrCreateYear).not.toHaveBeenCalled()
 
-      const processedDataset = rawApiData[0]
+      const processedDataset = rawApiData[0] as Partial<DatasetRecord>
       expect(processedDataset).not.toHaveProperty('year_id')
       expect(processedDataset).not.toHaveProperty('c_vintage')
+      expect(processedDataset).not.toHaveProperty('api_endpoint')
+      expect(processedDataset.component_id).toBe(5)
     })
 
     describe('temporal data handling', () => {
@@ -333,7 +399,7 @@ describe('Dataset Config', () => {
             c_vintage: 2020,
             type: 'aggregate',
             dataset_id: 'TEMPORAL1',
-            dataset_param: 'acs/acs1',
+            api_endpoint: 'acs/acs1',
             temporal: '2020/2023',
           },
         ]
@@ -374,7 +440,7 @@ describe('Dataset Config', () => {
             c_vintage: 2020,
             type: 'aggregate',
             dataset_id: 'TEMPORAL1',
-            dataset_param: 'acs/acs1',
+            api_endpoint: 'acs/acs1',
             temporal: '2020-01/2020-12',
           },
         ]
@@ -419,7 +485,7 @@ describe('Dataset Config', () => {
             c_vintage: 2020,
             type: 'aggregate',
             dataset_id: 'NOTEMPORAL',
-            dataset_param: 'acs/acs1',
+            api_endpoint: 'acs/acs1',
           },
         ]
 
@@ -467,7 +533,7 @@ describe('Dataset Config', () => {
             c_vintage: 2020,
             type: 'aggregate',
             dataset_id: 'DUPLICATE',
-            dataset_param: 'acs/acs1',
+            api_endpoint: 'acs/acs1',
           },
           {
             name: 'Dataset 2',
@@ -475,7 +541,7 @@ describe('Dataset Config', () => {
             c_vintage: 2021,
             type: 'timeseries',
             dataset_id: 'DUPLICATE',
-            dataset_param: 'acs/acs5',
+            api_endpoint: 'acs/acs5',
           },
         ]
 
@@ -535,7 +601,7 @@ describe('Dataset Config', () => {
             c_vintage: 2020,
             type: 'aggregate',
             dataset_id: 'VALID',
-            dataset_param: 'acs/acs1',
+            api_endpoint: 'acs/acs1',
           },
           {
             name: 'Invalid Dataset',
@@ -543,7 +609,7 @@ describe('Dataset Config', () => {
             c_vintage: 2021,
             type: 'timeseries',
             dataset_id: '',
-            dataset_param: 'acs/acs5',
+            api_endpoint: 'acs/acs5',
           },
         ]
 
@@ -591,7 +657,7 @@ describe('Dataset Config', () => {
             c_vintage: 2020,
             type: 'aggregate',
             dataset_id: 'DATA1',
-            dataset_param: 'acs/acs1',
+            api_endpoint: 'acs/acs1',
           },
           {
             name: 'Dataset 2',
@@ -599,7 +665,7 @@ describe('Dataset Config', () => {
             c_vintage: 2021,
             type: 'timeseries',
             dataset_id: 'DATA2',
-            dataset_param: 'acs/acs5',
+            api_endpoint: 'acs/acs5',
           },
         ]
 
@@ -656,7 +722,7 @@ describe('Dataset Config', () => {
             c_vintage: 2020,
             type: 'aggregate',
             dataset_id: 'VALID',
-            dataset_param: 'acs/acs1',
+            api_endpoint: 'acs/acs1',
           },
           {
             name: 'Dataset Without Type',
@@ -667,7 +733,7 @@ describe('Dataset Config', () => {
               | 'timeseries'
               | 'microdata',
             dataset_id: 'NOTYPE',
-            dataset_param: 'acs/acs5',
+            api_endpoint: 'acs/acs5',
           },
         ]
 
@@ -693,10 +759,10 @@ describe('Dataset Config', () => {
           description: 'Has type',
           type: 'aggregate',
           dataset_id: 'VALID',
-          dataset_param: 'acs/acs1',
           temporal_start: null,
           temporal_end: null,
           year_id: 1,
+          component_id: 5,
         })
 
         expect(consoleWarnSpy).toHaveBeenCalledWith(
@@ -731,7 +797,7 @@ describe('Dataset Config', () => {
             c_vintage: 2020,
             type: undefined,
             dataset_id: 'NOTYPE1',
-            dataset_param: 'acs/acs1',
+            api_endpoint: 'acs/acs1',
           },
           {
             name: 'No Type 2',
@@ -739,7 +805,7 @@ describe('Dataset Config', () => {
             c_vintage: 2021,
             type: undefined,
             dataset_id: 'NOTYPE2',
-            dataset_param: 'acs/acs5',
+            api_endpoint: 'acs/acs5',
           },
         ]
 

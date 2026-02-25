@@ -4,9 +4,9 @@ export const DatasetRecordSchema = z.object({
   name: z.string(),
   description: z.string(),
   dataset_id: z.string(),
-  dataset_param: z.string(),
   type: z.enum(['aggregate', 'timeseries', 'microdata']),
   year_id: z.number().int().nullable().optional(),
+  component_id: z.number().int().nullable().optional(),
   temporal_start: z.date().nullable().optional(),
   temporal_end: z.date().nullable().optional(),
   created_at: z.string().optional(),
@@ -24,6 +24,7 @@ export const TransformedDatasetSchema = DatasetRecordSchema.omit({
   type: z.enum(['aggregate', 'timeseries', 'microdata']).optional(),
   c_vintage: z.union([z.number(), z.string()]).optional(),
   temporal: z.string().optional(),
+  api_endpoint: z.string(),
 })
 
 export type TransformedDataset = z.infer<typeof TransformedDatasetSchema>
@@ -138,7 +139,7 @@ export const transformApiDatasetsData = (
       return {
         name: item.title,
         dataset_id: datasetId,
-        dataset_param: datasetParam,
+        api_endpoint: datasetParam,
         description: item.description,
         type: determineDatasetType(item),
         c_vintage: item.c_vintage,
