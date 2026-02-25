@@ -102,7 +102,7 @@ describe('Migration - Assign Component IDs to Datasets', () => {
 
     it('runs search function update after column changes', () => {
       const dropOrder = dropColumnSpy.mock.invocationCallOrder[0]
-      const searchFnOrder = sqlSpy.mock.invocationCallOrder[1]
+      const searchFnOrder = sqlSpy.mock.invocationCallOrder[2]
 
       expect(dropOrder).toBeLessThan(searchFnOrder)
     })

@@ -37,7 +37,10 @@ export const updatesSearchDataTablesSQL = `
       dt.data_table_id,
       dt.label,
       p.label || ' - ' || c.label AS component,
-      jsonb_agg(y.year ORDER BY y.year) AS years
+      COALESCE(
+        jsonb_agg(y.year ORDER BY y.year) FILTER (WHERE y.year IS NOT NULL),
+        '[]'::jsonb
+      ) AS years
 
     FROM data_tables dt
     JOIN data_table_datasets dtd ON dtd.data_table_id = dt.id
@@ -88,6 +91,20 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
   })
 
   pgm.sql(componentAssignmentSQL)
+
+  // Ensure all datasets were matched to a component before enforcing NOT NULL.
+  // If any rows remain with component_id IS NULL, fail with a clear error
+  // instead of relying on the generic ALTER COLUMN error.
+  pgm.sql(`
+    DO $$
+    BEGIN
+      IF EXISTS (SELECT 1 FROM datasets WHERE component_id IS NULL) THEN
+        RAISE EXCEPTION
+          'Migration 1771612752809_refactor-search-data-tables: some datasets still have NULL component_id after assignment. Check dataset_param vs components.api_endpoint.';
+      END IF;
+    END
+    $$;
+  `)
 
   pgm.alterColumn('datasets', 'component_id', {
     notNull: true,

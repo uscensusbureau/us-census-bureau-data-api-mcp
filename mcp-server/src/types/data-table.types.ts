@@ -8,5 +8,6 @@ export interface DataTableDatasetEntry {
 export interface DataTableSearchResultRow {
   data_table_id: string
   label: string
-  datasets: DataTableDatasetEntry[]
+  component: string
+  years: number[]
 }
