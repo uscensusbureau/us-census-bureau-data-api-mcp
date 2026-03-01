@@ -26,6 +26,7 @@ import {
   ResolveGeographyFipsTool,
   toolDescription,
 } from '../../../src/tools/resolve-geography-fips.tool'
+import { GeographySearchResultRow } from '../../../src/types/geography.types'
 
 const defaultArgs = {
   geography_name: 'Philadelphia, Pennsylvania',
@@ -40,61 +41,62 @@ describe('ResolveGeographyFipsTool', () => {
   let tool: ResolveGeographyFipsTool
   let mockDbService: {
     healthCheck: Mock
-    query: Mock
+    searchGeographies: Mock
+    searchGeographiesBySummaryLevel: Mock
+    searchSummaryLevels: Mock
   }
 
-  let mockSummaryLevels: SummaryLevelRow[]
+  let mockSummaryLevels: { code: string; name: string }[]
   let mockGeographies: GeographySearchResultRow[]
 
   beforeAll(() => {
     mockSummaryLevels = [
+      { code: '010', name: 'United States' },
+      { code: '040', name: 'State' },
+      { code: '050', name: 'County' },
+    ]
+
+    mockGeographies = [
       {
         id: 1,
-        name: 'United States',
-        description: 'United States total',
-        get_variable: 'NATION',
-        query_name: 'us',
-        on_spine: true,
-        code: '010',
-        parent_summary_level: null,
-        parent_geography_level_id: null,
+        name: 'Los Angeles',
+        summary_level_name: 'Place',
+        latitude: 34.0522,
+        longitude: -118.2437,
+        for_param: 'place:44000',
+        in_param: 'state:06',
+        weighted_score: 0.3,
       },
       {
         id: 2,
-        name: 'State',
-        description: 'States and State equivalents',
-        get_variable: 'STATE',
-        query_name: 'state',
-        on_spine: true,
-        code: '040',
-        parent_summary_level: '010',
-        parent_geography_level_id: 1,
-      },
-      {
-        id: 3,
-        name: 'County',
-        description: 'Counties and county equivalents',
-        get_variable: 'COUNTY',
-        query_name: 'county',
-        on_spine: true,
-        code: '050',
-        parent_summary_level: '040',
-        parent_geography_level_id: 2,
+        name: 'Los Angeles County',
+        summary_level_name: 'County',
+        latitude: 34.0522,
+        longitude: -118.2437,
+        for_param: 'county:037',
+        in_param: 'state:06',
+        weighted_score: 0.4,
       },
     ]
 
     mockDbService = {
       healthCheck: vi.fn(),
-      query: vi.fn(),
+      searchGeographies: vi.fn(),
+      searchGeographiesBySummaryLevel: vi.fn(),
+      searchSummaryLevels: vi.fn(),
     }
     ;(DatabaseService.getInstance as Mock).mockReturnValue(mockDbService)
   })
 
   beforeEach(() => {
-    mockDbService.healthCheck.mockReset().mockResolvedValue(true)
-    mockDbService.query
+    mockDbService.healthCheck.mockReset().mockReturnValue(true)
+    mockDbService.searchGeographies.mockReset().mockReturnValue(mockGeographies)
+    mockDbService.searchGeographiesBySummaryLevel
       .mockReset()
-      .mockResolvedValue({ rows: mockSummaryLevels })
+      .mockReturnValue(mockGeographies)
+    mockDbService.searchSummaryLevels
+      .mockReset()
+      .mockReturnValue(mockSummaryLevels)
 
     tool = new ResolveGeographyFipsTool()
   })
@@ -131,7 +133,7 @@ describe('ResolveGeographyFipsTool', () => {
     })
 
     it('should return error when database is unhealthy', async () => {
-      mockDbService.healthCheck.mockResolvedValue(false)
+      mockDbService.healthCheck.mockReturnValue(false)
 
       const response = await tool.handler(defaultArgs)
       validateResponseStructure(response)
@@ -141,9 +143,9 @@ describe('ResolveGeographyFipsTool', () => {
     })
 
     it('should handle database query errors', async () => {
-      mockDbService.query.mockRejectedValue(
-        new Error('Database connection failed'),
-      )
+      mockDbService.searchGeographies.mockImplementation(() => {
+        throw new Error('Database connection failed')
+      })
 
       const response = await tool.handler(defaultArgs)
       validateResponseStructure(response)
@@ -151,25 +153,27 @@ describe('ResolveGeographyFipsTool', () => {
     })
 
     describe('when only the geography_name is provided', () => {
-      it('should call search_geographies', async () => {
+      it('should call searchGeographies', async () => {
         await tool.handler(defaultArgs)
 
-        // Verify the SQL query structure
-        const queryCall = mockDbService.query.mock.calls[0][0]
-        expect(queryCall).toContain('SELECT * FROM search_geographies($1)')
+        expect(mockDbService.searchGeographies).toHaveBeenCalledWith(
+          defaultArgs.geography_name,
+        )
       })
     })
 
-    describe('when the geography_name and summary_level_code are provided', () => {
-      it('should call search_geographies_by_summary_level', async () => {
+    describe('when the geography_name and summary_level are provided', () => {
+      it('should call searchSummaryLevels then searchGeographiesBySummaryLevel', async () => {
         await tool.handler(summaryLevelArgs)
 
-        // Verify the SQL query structure
-        const queryCall1 = mockDbService.query.mock.calls[0][0]
-        const queryCall2 = mockDbService.query.mock.calls[1][0]
-        expect(queryCall1).toContain('SELECT * FROM search_summary_levels($1)')
-        expect(queryCall2).toContain(
-          'SELECT * FROM search_geographies_by_summary_level($1, $2)',
+        expect(mockDbService.searchSummaryLevels).toHaveBeenCalledWith(
+          summaryLevelArgs.summary_level,
+        )
+        expect(
+          mockDbService.searchGeographiesBySummaryLevel,
+        ).toHaveBeenCalledWith(
+          summaryLevelArgs.geography_name,
+          mockSummaryLevels[0].code,
         )
       })
     })
@@ -177,45 +181,22 @@ describe('ResolveGeographyFipsTool', () => {
 
   describe('Database Response Handling', () => {
     describe('when the summary_levels search returns no summary_levels', () => {
-      it('calls search_geographies instead', async () => {
-        mockDbService.query.mockResolvedValue({ rows: [] })
+      it('calls searchGeographies instead', async () => {
+        mockDbService.searchSummaryLevels.mockReturnValue([])
         await tool.handler(summaryLevelArgs)
 
-        const queryCall1 = mockDbService.query.mock.calls[0][0]
-        const queryCall2 = mockDbService.query.mock.calls[1][0]
-
-        expect(queryCall1).toContain('SELECT * FROM search_summary_levels($1)')
-        expect(queryCall2).toContain('SELECT * FROM search_geographies($1)')
+        expect(mockDbService.searchSummaryLevels).toHaveBeenCalled()
+        expect(mockDbService.searchGeographies).toHaveBeenCalledWith(
+          summaryLevelArgs.geography_name,
+        )
+        expect(
+          mockDbService.searchGeographiesBySummaryLevel,
+        ).not.toHaveBeenCalled()
       })
     })
 
     describe('when there are geography results', () => {
       it('returns the found geographies', async () => {
-        mockGeographies = [
-          {
-            id: 1,
-            name: 'Los Angeles',
-            summary_level_name: 'Place',
-            latitude: 34.0522,
-            longitude: -118.2437,
-            for_param: 'place:44000',
-            in_param: 'state:06',
-            weighted_score: 0.3,
-          },
-          {
-            id: 2,
-            name: 'Los Angeles County',
-            summary_level_name: 'County',
-            latitude: 34.0522,
-            longitude: -118.2437,
-            for_param: 'county:037',
-            in_param: 'state:06',
-            weighted_score: 0.4,
-          },
-        ]
-
-        mockDbService.query.mockResolvedValue({ rows: mockGeographies })
-
         const result = await tool.handler({ geography_name: 'Los Angeles' })
 
         expect(result.content).toHaveLength(1)
@@ -230,7 +211,7 @@ describe('ResolveGeographyFipsTool', () => {
 
     describe('when there are no geography results', () => {
       it('returns a message indicating no results', async () => {
-        mockDbService.query.mockResolvedValue({ rows: [] })
+        mockDbService.searchGeographies.mockReturnValue([])
 
         const result = await tool.handler({
           geography_name: 'NonexistentPlace',
@@ -244,9 +225,10 @@ describe('ResolveGeographyFipsTool', () => {
       })
 
       it('includes summary level context when specified', async () => {
-        mockDbService.query
-          .mockResolvedValueOnce({ rows: [{ code: '050', name: 'County' }] }) // summary level found
-          .mockResolvedValueOnce({ rows: [] }) // no geographies found
+        mockDbService.searchSummaryLevels.mockReturnValue([
+          { code: '050', name: 'County' },
+        ])
+        mockDbService.searchGeographiesBySummaryLevel.mockReturnValue([])
 
         const result = await tool.handler({
           geography_name: 'NonexistentPlace',

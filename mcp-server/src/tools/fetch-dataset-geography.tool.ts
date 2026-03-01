@@ -39,23 +39,8 @@ export class FetchDatasetGeographyTool extends BaseTool<FetchDatasetGeographyArg
     this.dbService = DatabaseService.getInstance()
   }
 
-  private async getSummaryLevels(): Promise<SummaryLevelRow[]> {
-    const result = await this.dbService.query<SummaryLevelRow>(`
-      SELECT 
-        id,
-        name,
-        description,
-        get_variable,
-        query_name,
-        on_spine,
-        code,
-        parent_summary_level,
-        parent_summary_level_id
-      FROM summary_levels
-      ORDER BY code
-    `)
-
-    return result.rows
+  private getSummaryLevels(): SummaryLevelRow[] {
+    return this.dbService.getSummaryLevels()
   }
 
   private buildGeographyMetadata(levels: SummaryLevelRow[]): GeographyMetadata {
@@ -183,16 +168,13 @@ export class FetchDatasetGeographyTool extends BaseTool<FetchDatasetGeographyArg
     apiKey: string,
   ): Promise<{ content: ToolContent[] }> {
     try {
-      // Check database health first
-      const isDbHealthy = await this.dbService.healthCheck()
-      if (!isDbHealthy) {
+      if (!this.dbService.healthCheck()) {
         return this.createErrorResponse(
           'Database connection failed - cannot retrieve geography metadata.',
         )
       }
 
-      // Get geography levels from database
-      const geographyLevels = await this.getSummaryLevels()
+      const geographyLevels = this.getSummaryLevels()
 
       const fetch = (await import('node-fetch')).default
       let year = ''

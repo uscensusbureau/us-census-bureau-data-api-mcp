@@ -8,12 +8,11 @@ import {
   SearchDataTablesInputSchema,
 } from '../schema/search-data-tables.schema.js'
 
-import { DataTableSearchResultRow } from '../types/data-table.types.js'
 import { ToolContent } from '../types/base.types.js'
 
 export const toolDescription = `
-  Search for Census Bureau data tables by ID, label, or dataset. Use this tool when users reference a topic or variable category (e.g., "language spoken at home", "income by race") and need to identify the correct table ID before fetching data. Accepts a table ID prefix (e.g., "B16005"), a natural language label query, and an optional dataset scope. Returns a ranked list of matching tables with their canonical labels and an array of datasets in which they appear. 
-  
+  Search for Census Bureau data tables by ID, label, or dataset. Use this tool when users reference a topic or variable category (e.g., "language spoken at home", "income by race") and need to identify the correct table ID before fetching data. Accepts a table ID prefix (e.g., "B16005"), a natural language label query, and an optional dataset scope. Returns a ranked list of matching tables with their canonical labels and an array of datasets in which they appear.
+
   Each result object includes:
   - data_table_id: maps to the get.group parameter in fetch-aggregate-data (this is a top-level field on the result, not on each dataset entry)
   - datasets: an array of dataset entries, where each entry contains:
@@ -42,39 +41,19 @@ export class SearchDataTablesTool extends BaseTool<SearchDataTablesArgs> {
     this.dbService = DatabaseService.getInstance()
   }
 
-  private async searchDataTables(
-    args: SearchDataTablesArgs,
-  ): Promise<DataTableSearchResultRow[]> {
-    const {
-      data_table_id = null,
-      label_query = null,
-      dataset_id = null,
-      limit = 20,
-    } = args
-
-    const result = await this.dbService.query<DataTableSearchResultRow>(
-      `SELECT * FROM search_data_tables($1, $2, $3, $4)`,
-      [data_table_id, label_query, dataset_id, limit],
-    )
-
-    return result.rows
-  }
-
   async toolHandler(
     args: SearchDataTablesArgs,
   ): Promise<{ content: ToolContent[] }> {
     try {
-      // Check database health first
-      const isDbHealthy = await this.dbService.healthCheck()
-      if (!isDbHealthy) {
+      if (!this.dbService.healthCheck()) {
         return this.createErrorResponse(
           'Database connection failed - cannot search data tables.',
         )
       }
 
-      const results = await this.searchDataTables(args)
+      const results = this.dbService.searchDataTables(args)
 
-      if (results && results.length > 0) {
+      if (results.length > 0) {
         return {
           content: [
             {

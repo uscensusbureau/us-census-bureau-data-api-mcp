@@ -42,7 +42,7 @@ describe('FetchDatasetGeographyTool', () => {
   let tool: FetchDatasetGeographyTool
   let mockDbService: {
     healthCheck: Mock
-    query: Mock
+    getSummaryLevels: Mock
   }
 
   // Static mock data - created once and reused
@@ -123,17 +123,17 @@ describe('FetchDatasetGeographyTool', () => {
     // Setup database service mock once
     mockDbService = {
       healthCheck: vi.fn(),
-      query: vi.fn(),
+      getSummaryLevels: vi.fn(),
     }
     ;(DatabaseService.getInstance as Mock).mockReturnValue(mockDbService)
   })
 
   beforeEach(() => {
     // Reset mock implementations and call history, but reuse the mock objects
-    mockDbService.healthCheck.mockReset().mockResolvedValue(true)
-    mockDbService.query
+    mockDbService.healthCheck.mockReset().mockReturnValue(true)
+    mockDbService.getSummaryLevels
       .mockReset()
-      .mockResolvedValue({ rows: mockSummaryLevels })
+      .mockReturnValue(mockSummaryLevels)
     mockFetch.mockReset()
 
     // Create fresh tool instance for each test
@@ -196,7 +196,7 @@ describe('FetchDatasetGeographyTool', () => {
 
   describe('Database Integration', () => {
     it('should return error when database is unhealthy', async () => {
-      mockDbService.healthCheck.mockResolvedValue(false)
+      mockDbService.healthCheck.mockReturnValue(false)
 
       const args = {
         dataset: 'acs/acs1',
@@ -221,17 +221,13 @@ describe('FetchDatasetGeographyTool', () => {
       await tool.toolHandler(args, process.env.CENSUS_API_KEY!)
 
       expect(mockDbService.healthCheck).toHaveBeenCalled()
-
-      // Verify the SQL query structure
-      const queryCall = mockDbService.query.mock.calls[0][0]
-      expect(queryCall).toContain('FROM summary_levels')
-      expect(queryCall).toContain('ORDER BY code')
+      expect(mockDbService.getSummaryLevels).toHaveBeenCalled()
     })
 
     it('should handle database query errors', async () => {
-      mockDbService.query.mockRejectedValue(
-        new Error('Database connection failed'),
-      )
+      mockDbService.getSummaryLevels.mockImplementation(() => {
+        throw new Error('Database connection failed')
+      })
 
       const args = {
         dataset: 'acs/acs1',

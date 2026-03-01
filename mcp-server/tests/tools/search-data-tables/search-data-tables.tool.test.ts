@@ -56,13 +56,13 @@ const mockDataTables: DataTableSearchResultRow[] = [
         dataset_id: 'ACSDT1Y2009',
         year: 2009,
         label: 'Nativity By Language Spoken At Home (Asian Alone)',
-        dataset_param: 'acs/acs1'
+        dataset_param: 'acs/acs1',
       },
       {
         dataset_id: 'ACSDTY2010',
         year: 2010,
         label: 'Nativity By Language Spoken At Home (Asian Alone)',
-        dataset_param: 'acs/acs1'
+        dataset_param: 'acs/acs1',
       },
     ],
   },
@@ -85,20 +85,20 @@ describe('SearchDataTablesTool', () => {
   let tool: SearchDataTablesTool
   let mockDbService: {
     healthCheck: Mock
-    query: Mock
+    searchDataTables: Mock
   }
 
   beforeAll(() => {
     mockDbService = {
       healthCheck: vi.fn(),
-      query: vi.fn(),
+      searchDataTables: vi.fn(),
     }
     ;(DatabaseService.getInstance as Mock).mockReturnValue(mockDbService)
   })
 
   beforeEach(() => {
-    mockDbService.healthCheck.mockReset().mockResolvedValue(true)
-    mockDbService.query.mockReset().mockResolvedValue({ rows: mockDataTables })
+    mockDbService.healthCheck.mockReset().mockReturnValue(true)
+    mockDbService.searchDataTables.mockReset().mockReturnValue(mockDataTables)
 
     tool = new SearchDataTablesTool()
   })
@@ -169,7 +169,7 @@ describe('SearchDataTablesTool', () => {
     })
 
     it('should return error when database is unhealthy', async () => {
-      mockDbService.healthCheck.mockResolvedValue(false)
+      mockDbService.healthCheck.mockReturnValue(false)
 
       const response = await tool.handler(byIdArgs)
       validateResponseStructure(response)
@@ -179,7 +179,9 @@ describe('SearchDataTablesTool', () => {
     })
 
     it('should handle database query errors gracefully', async () => {
-      mockDbService.query.mockRejectedValue(new Error('Connection timeout'))
+      mockDbService.searchDataTables.mockImplementation(() => {
+        throw new Error('Connection timeout')
+      })
 
       const response = await tool.handler(byIdArgs)
       validateResponseStructure(response)
@@ -188,34 +190,26 @@ describe('SearchDataTablesTool', () => {
       )
     })
 
-    it('should call search_data_tables with correct positional params', async () => {
+    it('should call searchDataTables with correct args', async () => {
       await tool.handler(allParamsArgs)
 
-      const [sql, params] = mockDbService.query.mock.calls[0]
-      expect(sql).toContain('SELECT * FROM search_data_tables($1, $2, $3, $4)')
-      expect(params).toEqual([
-        'B16005',
-        'language spoken at home',
-        'ACSDT1Y2009',
-        10,
-      ])
+      expect(mockDbService.searchDataTables).toHaveBeenCalledWith(allParamsArgs)
     })
 
     it('should pass null for omitted optional params', async () => {
       await tool.handler(byLabelArgs)
 
-      const [, params] = mockDbService.query.mock.calls[0]
-      expect(params[0]).toBeNull() // data_table_id
-      expect(params[1]).toBe('language spoken at home')
-      expect(params[2]).toBeNull() // dataset_id
-      expect(params[3]).toBe(20) // default limit
+      const callArgs = mockDbService.searchDataTables.mock.calls[0][0]
+      expect(callArgs.data_table_id).toBeUndefined()
+      expect(callArgs.label_query).toBe('language spoken at home')
+      expect(callArgs.dataset_id).toBeUndefined()
     })
 
     it('should use default limit of 20 when limit is not provided', async () => {
       await tool.handler(byIdArgs)
 
-      const [, params] = mockDbService.query.mock.calls[0]
-      expect(params[3]).toBe(20)
+      const callArgs = mockDbService.searchDataTables.mock.calls[0][0]
+      expect(callArgs.limit).toBeUndefined()
     })
   })
 
@@ -234,7 +228,7 @@ describe('SearchDataTablesTool', () => {
       })
 
       it('uses singular form when exactly one result is returned', async () => {
-        mockDbService.query.mockResolvedValue({ rows: [mockDataTables[0]] })
+        mockDbService.searchDataTables.mockReturnValue([mockDataTables[0]])
 
         const result = await tool.handler(byIdArgs)
 
@@ -269,7 +263,7 @@ describe('SearchDataTablesTool', () => {
 
     describe('when no results are found', () => {
       beforeEach(() => {
-        mockDbService.query.mockResolvedValue({ rows: [] })
+        mockDbService.searchDataTables.mockReturnValue([])
       })
 
       it('returns a no-results message for a data_table_id search', async () => {

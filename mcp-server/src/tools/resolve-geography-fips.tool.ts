@@ -9,7 +9,6 @@ import {
 } from '../schema/resolve-geography-fips.schema.js'
 
 import { GeographySearchResultRow } from '../types/geography.types.js'
-import { SummaryLevelRow } from '../types/summary-level.types.js'
 import { ToolContent } from '../types/base.types.js'
 
 export const toolDescription = `
@@ -35,70 +34,34 @@ export class ResolveGeographyFipsTool extends BaseTool<ResolveGeographyFipsArgs>
     this.dbService = DatabaseService.getInstance()
   }
 
-  private async searchGeographiesBySummaryLevel(
-    query: string,
-    summary_level_code: string,
-  ): Promise<GeographySearchResultRow[]> {
-    const result = await this.dbService.query<GeographySearchResultRow>(
-      `SELECT * FROM search_geographies_by_summary_level($1, $2)`,
-      [query, summary_level_code],
-    )
-
-    return result.rows
-  }
-
-  private async searchGeographies(
-    query: string,
-  ): Promise<GeographySearchResultRow[]> {
-    const result = await this.dbService.query<GeographySearchResultRow>(
-      `SELECT * FROM search_geographies($1)`,
-      [query],
-    )
-
-    return result.rows
-  }
-
-  private async searchSummaryLevels(query: string): Promise<SummaryLevelRow[]> {
-    const result = await this.dbService.query<SummaryLevelRow>(
-      `SELECT * FROM search_summary_levels($1)`,
-      [query],
-    )
-
-    return result.rows
-  }
-
   async toolHandler(
     args: ResolveGeographyFipsArgs,
   ): Promise<{ content: ToolContent[] }> {
     try {
-      // Check database health first
-      const isDbHealthy = await this.dbService.healthCheck()
-      if (!isDbHealthy) {
+      if (!this.dbService.healthCheck()) {
         return this.createErrorResponse(
           'Database connection failed - cannot retrieve geography metadata.',
         )
       }
 
-      let result
+      let result: GeographySearchResultRow[]
 
       if (args.summary_level) {
-        const summary_levels = await this.searchSummaryLevels(
-          args.summary_level,
-        )
+        const summaryLevels = this.dbService.searchSummaryLevels(args.summary_level)
 
-        if (summary_levels.length > 0) {
-          result = await this.searchGeographiesBySummaryLevel(
+        if (summaryLevels.length > 0) {
+          result = this.dbService.searchGeographiesBySummaryLevel(
             args.geography_name,
-            summary_levels[0].code,
+            summaryLevels[0].code,
           )
         } else {
-          result = await this.searchGeographies(args.geography_name)
+          result = this.dbService.searchGeographies(args.geography_name)
         }
       } else {
-        result = await this.searchGeographies(args.geography_name)
+        result = this.dbService.searchGeographies(args.geography_name)
       }
 
-      if (result && result.length > 0) {
+      if (result.length > 0) {
         return {
           content: [
             {
