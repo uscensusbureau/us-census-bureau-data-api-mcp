@@ -22,12 +22,14 @@ export const seeds: SeedConfig[] = [
   configs.SummaryLevelsConfig,
   configs.YearsConfig,
   configs.TopicsConfig,
+  configs.ProgramsConfig,
+  configs.ComponentsConfig,
   configs.DatasetConfig,
   configs.DataTablesConfig,
 ]
 
 // Geographic Seed Configs
-let baseGeographySeeds: EnhancedGeographySeedConfig[] = [
+export let baseGeographySeeds: EnhancedGeographySeedConfig[] = [
   configs.NationConfig,
   configs.RegionConfig,
   configs.DivisionConfig,
@@ -40,8 +42,7 @@ let baseGeographySeeds: EnhancedGeographySeedConfig[] = [
 
 export function geographySeeds(): EnhancedGeographySeedConfig[] {
   if (process.env.SEED_MODE === 'slim') {
-    // Remove Configs That Take Forever to Run if SEED_MODE Set to Slim (For Testing Builds)
-    baseGeographySeeds = baseGeographySeeds.filter(
+    return baseGeographySeeds.filter(
       (config) =>
         config !== configs.CountySubdivisionConfig &&
         config !== configs.PlaceConfig &&

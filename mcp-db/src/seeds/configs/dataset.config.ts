@@ -1,5 +1,4 @@
 import { Client } from 'pg'
-
 import { getOrCreateYear } from '../../helpers/get-or-create-year.helper.js'
 import {
   DatasetRecord,
@@ -8,6 +7,23 @@ import {
   TransformedDatasetsArraySchema,
 } from '../../schema/dataset.schema.js'
 import { SeedConfig } from '../../schema/seed-config.schema.js'
+
+export const componentAssignmentSQL = `
+  UPDATE datasets d
+  SET component_id = match.component_id
+  FROM (
+    SELECT DISTINCT ON (d2.id)
+      d2.id AS dataset_id,
+      c2.id AS component_id
+    FROM datasets d2
+    JOIN components c2
+      ON d2.api_endpoint = c2.api_endpoint
+      OR d2.api_endpoint LIKE (c2.api_endpoint || '/%')
+    ORDER BY d2.id, LENGTH(c2.api_endpoint) DESC
+  ) match
+  WHERE d.id = match.dataset_id
+  AND d.component_id IS NULL;
+`
 
 export const DatasetConfig: SeedConfig = {
   url: 'https://api.census.gov/data/',
@@ -31,7 +47,7 @@ export const DatasetConfig: SeedConfig = {
 
     const processedData: Partial<DatasetRecord>[] = await Promise.all(
       validatedData.map(async (record) => {
-        const { c_vintage, temporal, ...datasetFields } = record
+        const { c_vintage, temporal, api_endpoint, ...datasetFields } = record
 
         let temporal_start = null
         let temporal_end = null
@@ -46,6 +62,7 @@ export const DatasetConfig: SeedConfig = {
           const yearId = await getOrCreateYear(client, c_vintage)
           return {
             ...datasetFields,
+            api_endpoint,
             temporal_start,
             temporal_end,
             year_id: yearId,
@@ -56,6 +73,7 @@ export const DatasetConfig: SeedConfig = {
 
         return {
           ...datasetFields,
+          api_endpoint,
           temporal_start,
           temporal_end,
         }
@@ -90,5 +108,25 @@ export const DatasetConfig: SeedConfig = {
     )
     rawData.length = 0
     rawData.push(...deduped)
+  },
+  afterSeed: async (client: Client) => {
+    console.log('Assigning component IDs to datasets...')
+    await client.query(componentAssignmentSQL)
+
+    const orphans = await client.query(`
+      SELECT dataset_id, api_endpoint 
+      FROM datasets 
+      WHERE component_id IS NULL
+    `)
+
+    if (orphans.rowCount && orphans.rowCount > 0) {
+      orphans.rows.forEach((row) => {
+        console.warn(
+          `Dataset ${row.dataset_id} is an orphan: no matching component found for endpoint "${row.api_endpoint}".`,
+        )
+      })
+    }
+
+    console.log('Component assignment complete.')
   },
 }

@@ -8,7 +8,7 @@ import {
   afterAll,
   vi,
 } from 'vitest'
-import { Client } from 'pg'
+import { Client, QueryResult } from 'pg'
 
 // Mock before imports
 vi.mock('../../../src/schema/dataset.schema', () => ({
@@ -24,9 +24,20 @@ vi.mock('../../../src/helpers/get-or-create-year.helper', () => ({
   getOrCreateYear: vi.fn(),
 }))
 
+const mockQueryResult = (rows: Record<string, string>[] = []): QueryResult => ({
+  rows,
+  rowCount: rows.length,
+  command: '',
+  oid: 0,
+  fields: [],
+})
+
 import { cleanupWithRetry } from '../../test-helpers/database-cleanup'
 import { dbConfig } from '../../test-helpers/database-config'
-import { DatasetConfig } from '../../../src/seeds/configs/dataset.config'
+import {
+  componentAssignmentSQL,
+  DatasetConfig,
+} from '../../../src/seeds/configs/dataset.config'
 import { SeedRunner } from '../../../src/seeds/scripts/seed-runner'
 import {
   DatasetRecord,
@@ -78,10 +89,12 @@ describe('Dataset Config', () => {
     expect(datasetSeed?.dataPath).toBe('dataset')
     expect(datasetSeed?.alwaysFetch).toBe(true)
     expect(datasetSeed?.beforeSeed).toBeDefined()
+    expect(datasetSeed?.afterSeed).toBeDefined()
   })
 
   describe('beforeSeed', () => {
     let mockClient: Partial<Client>
+
     beforeEach(() => {
       mockClient = {
         query: vi.fn(),
@@ -107,7 +120,7 @@ describe('Dataset Config', () => {
           c_vintage: 1994,
           type: 'aggregate',
           dataset_id: 'CPSBASIC199406',
-          dataset_param: 'cps/basic/jun',
+          api_endpoint: 'cps/basic/jun',
         },
       ]
 
@@ -147,18 +160,18 @@ describe('Dataset Config', () => {
           c_vintage: 1994,
           type: 'aggregate',
           dataset_id: 'DATA1',
-          dataset_param: 'cps/basic/jun',
+          api_endpoint: 'cps/basic/jun',
         },
       ]
 
       vi.mocked(transformApiDatasetsData).mockReturnValue(transformedData)
       vi.mocked(TransformedDatasetsArraySchema.parse).mockImplementation(() => {
-        throw new Error('Validation failed: invalid dataset_param')
+        throw new Error('Validation failed: invalid api_endpoint')
       })
 
       await expect(
         DatasetConfig.beforeSeed!(mockClient as Client, rawApiData),
-      ).rejects.toThrow('Validation failed: invalid dataset_param')
+      ).rejects.toThrow('Validation failed: invalid api_endpoint')
 
       expect(getOrCreateYear).not.toHaveBeenCalled()
     })
@@ -190,7 +203,7 @@ describe('Dataset Config', () => {
           c_vintage: 1994,
           type: 'aggregate',
           dataset_id: 'DATA1',
-          dataset_param: 'cps/basic/jun',
+          api_endpoint: 'cps/basic/jun',
         },
         {
           name: 'Dataset 2',
@@ -198,7 +211,7 @@ describe('Dataset Config', () => {
           c_vintage: 2020,
           type: 'timeseries',
           dataset_id: 'DATA2',
-          dataset_param: 'acs/acs1',
+          api_endpoint: 'acs/acs1',
         },
       ]
 
@@ -240,7 +253,7 @@ describe('Dataset Config', () => {
           c_vintage: 1994,
           type: 'aggregate',
           dataset_id: 'DATA1',
-          dataset_param: 'cps/basic/jun',
+          api_endpoint: 'cps/basic/jun',
         },
       ]
 
@@ -263,9 +276,9 @@ describe('Dataset Config', () => {
       expect(processedDataset).toEqual({
         name: 'Dataset 1',
         description: 'Description 1',
+        api_endpoint: 'cps/basic/jun',
         type: 'aggregate',
         dataset_id: 'DATA1',
-        dataset_param: 'cps/basic/jun',
         temporal_start: null,
         temporal_end: null,
         year_id: 42,
@@ -290,7 +303,7 @@ describe('Dataset Config', () => {
           description: 'No vintage',
           type: 'microdata',
           dataset_id: 'DATANOVINTAGE',
-          dataset_param: 'acs/acs1',
+          api_endpoint: 'acs/acs1',
         },
       ]
 
@@ -307,7 +320,7 @@ describe('Dataset Config', () => {
 
       expect(getOrCreateYear).not.toHaveBeenCalled()
 
-      const processedDataset = rawApiData[0]
+      const processedDataset = rawApiData[0] as Partial<DatasetRecord>
       expect(processedDataset).not.toHaveProperty('year_id')
       expect(processedDataset).not.toHaveProperty('c_vintage')
     })
@@ -333,7 +346,7 @@ describe('Dataset Config', () => {
             c_vintage: 2020,
             type: 'aggregate',
             dataset_id: 'TEMPORAL1',
-            dataset_param: 'acs/acs1',
+            api_endpoint: 'acs/acs1',
             temporal: '2020/2023',
           },
         ]
@@ -374,7 +387,7 @@ describe('Dataset Config', () => {
             c_vintage: 2020,
             type: 'aggregate',
             dataset_id: 'TEMPORAL1',
-            dataset_param: 'acs/acs1',
+            api_endpoint: 'acs/acs1',
             temporal: '2020-01/2020-12',
           },
         ]
@@ -419,7 +432,7 @@ describe('Dataset Config', () => {
             c_vintage: 2020,
             type: 'aggregate',
             dataset_id: 'NOTEMPORAL',
-            dataset_param: 'acs/acs1',
+            api_endpoint: 'acs/acs1',
           },
         ]
 
@@ -467,7 +480,7 @@ describe('Dataset Config', () => {
             c_vintage: 2020,
             type: 'aggregate',
             dataset_id: 'DUPLICATE',
-            dataset_param: 'acs/acs1',
+            api_endpoint: 'acs/acs1',
           },
           {
             name: 'Dataset 2',
@@ -475,7 +488,7 @@ describe('Dataset Config', () => {
             c_vintage: 2021,
             type: 'timeseries',
             dataset_id: 'DUPLICATE',
-            dataset_param: 'acs/acs5',
+            api_endpoint: 'acs/acs5',
           },
         ]
 
@@ -535,7 +548,7 @@ describe('Dataset Config', () => {
             c_vintage: 2020,
             type: 'aggregate',
             dataset_id: 'VALID',
-            dataset_param: 'acs/acs1',
+            api_endpoint: 'acs/acs1',
           },
           {
             name: 'Invalid Dataset',
@@ -543,7 +556,7 @@ describe('Dataset Config', () => {
             c_vintage: 2021,
             type: 'timeseries',
             dataset_id: '',
-            dataset_param: 'acs/acs5',
+            api_endpoint: 'acs/acs5',
           },
         ]
 
@@ -591,7 +604,7 @@ describe('Dataset Config', () => {
             c_vintage: 2020,
             type: 'aggregate',
             dataset_id: 'DATA1',
-            dataset_param: 'acs/acs1',
+            api_endpoint: 'acs/acs1',
           },
           {
             name: 'Dataset 2',
@@ -599,7 +612,7 @@ describe('Dataset Config', () => {
             c_vintage: 2021,
             type: 'timeseries',
             dataset_id: 'DATA2',
-            dataset_param: 'acs/acs5',
+            api_endpoint: 'acs/acs5',
           },
         ]
 
@@ -656,7 +669,7 @@ describe('Dataset Config', () => {
             c_vintage: 2020,
             type: 'aggregate',
             dataset_id: 'VALID',
-            dataset_param: 'acs/acs1',
+            api_endpoint: 'acs/acs1',
           },
           {
             name: 'Dataset Without Type',
@@ -667,7 +680,7 @@ describe('Dataset Config', () => {
               | 'timeseries'
               | 'microdata',
             dataset_id: 'NOTYPE',
-            dataset_param: 'acs/acs5',
+            api_endpoint: 'acs/acs5',
           },
         ]
 
@@ -690,10 +703,10 @@ describe('Dataset Config', () => {
         expect(rawApiData).toHaveLength(1)
         expect(rawApiData[0]).toEqual({
           name: 'Valid Dataset',
+          api_endpoint: 'acs/acs1',
           description: 'Has type',
           type: 'aggregate',
           dataset_id: 'VALID',
-          dataset_param: 'acs/acs1',
           temporal_start: null,
           temporal_end: null,
           year_id: 1,
@@ -731,7 +744,7 @@ describe('Dataset Config', () => {
             c_vintage: 2020,
             type: undefined,
             dataset_id: 'NOTYPE1',
-            dataset_param: 'acs/acs1',
+            api_endpoint: 'acs/acs1',
           },
           {
             name: 'No Type 2',
@@ -739,7 +752,7 @@ describe('Dataset Config', () => {
             c_vintage: 2021,
             type: undefined,
             dataset_id: 'NOTYPE2',
-            dataset_param: 'acs/acs5',
+            api_endpoint: 'acs/acs5',
           },
         ]
 
@@ -764,6 +777,93 @@ describe('Dataset Config', () => {
 
         consoleWarnSpy.mockRestore()
       })
+    })
+  })
+
+  describe('afterSeed', () => {
+    let mockClient: Partial<Client>
+
+    beforeEach(() => {
+      mockClient = {
+        query: vi.fn(),
+      }
+    })
+
+    it('should run componentAssignmentSQL', async () => {
+      vi.mocked(mockClient.query!).mockResolvedValueOnce(
+        mockQueryResult() as never,
+      )
+      vi.mocked(mockClient.query!).mockResolvedValueOnce(
+        mockQueryResult() as never,
+      )
+
+      await DatasetConfig.afterSeed!(mockClient as Client)
+
+      expect(mockClient.query).toHaveBeenCalledTimes(2)
+      expect(vi.mocked(mockClient.query!).mock.calls[0][0]).toBe(
+        componentAssignmentSQL,
+      )
+      expect(vi.mocked(mockClient.query!).mock.calls[1][0]).toContain(
+        'WHERE component_id IS NULL',
+      )
+    })
+
+    it('should warn for orphaned datasets after assignment', async () => {
+      vi.mocked(mockClient.query!).mockResolvedValueOnce(
+        mockQueryResult() as never,
+      )
+      vi.mocked(mockClient.query!).mockResolvedValueOnce(
+        mockQueryResult([
+          { dataset_id: 'ORPHAN1', api_endpoint: 'unknown/path' },
+          { dataset_id: 'ORPHAN2', api_endpoint: 'another/unknown' },
+        ]) as never,
+      )
+
+      const consoleWarnSpy = vi
+        .spyOn(console, 'warn')
+        .mockImplementation(() => {})
+
+      await DatasetConfig.afterSeed!(mockClient as Client)
+
+      expect(vi.mocked(mockClient.query!).mock.calls[0][0]).toBe(
+        componentAssignmentSQL,
+      )
+      expect(vi.mocked(mockClient.query!).mock.calls[1][0]).toContain(
+        'WHERE component_id IS NULL',
+      )
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        'Dataset ORPHAN1 is an orphan: no matching component found for endpoint "unknown/path".',
+      )
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        'Dataset ORPHAN2 is an orphan: no matching component found for endpoint "another/unknown".',
+      )
+
+      consoleWarnSpy.mockRestore()
+    })
+
+    it('should not warn when all datasets are assigned', async () => {
+      vi.mocked(mockClient.query!).mockResolvedValueOnce(
+        mockQueryResult() as never,
+      )
+      vi.mocked(mockClient.query!).mockResolvedValueOnce(
+        mockQueryResult() as never,
+      )
+
+      const consoleWarnSpy = vi
+        .spyOn(console, 'warn')
+        .mockImplementation(() => {})
+
+      await DatasetConfig.afterSeed!(mockClient as Client)
+
+      expect(vi.mocked(mockClient.query!).mock.calls[0][0]).toBe(
+        componentAssignmentSQL,
+      )
+      expect(vi.mocked(mockClient.query!).mock.calls[1][0]).toContain(
+        'WHERE component_id IS NULL',
+      )
+      expect(consoleWarnSpy).not.toHaveBeenCalled()
+
+      consoleWarnSpy.mockRestore()
     })
   })
 })
