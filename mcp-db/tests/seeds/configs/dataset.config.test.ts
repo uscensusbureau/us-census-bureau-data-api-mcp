@@ -34,9 +34,9 @@ const mockQueryResult = (rows: Record<string, string>[] = []): QueryResult => ({
 
 import { cleanupWithRetry } from '../../test-helpers/database-cleanup'
 import { dbConfig } from '../../test-helpers/database-config'
-import { 
-  componentAssignmentSQL, 
-  DatasetConfig 
+import {
+  componentAssignmentSQL,
+  DatasetConfig,
 } from '../../../src/seeds/configs/dataset.config'
 import { SeedRunner } from '../../../src/seeds/scripts/seed-runner'
 import {
@@ -790,29 +790,47 @@ describe('Dataset Config', () => {
     })
 
     it('should run componentAssignmentSQL', async () => {
-      vi.mocked(mockClient.query!).mockResolvedValueOnce(mockQueryResult() as never)
-      vi.mocked(mockClient.query!).mockResolvedValueOnce(mockQueryResult() as never)
+      vi.mocked(mockClient.query!).mockResolvedValueOnce(
+        mockQueryResult() as never,
+      )
+      vi.mocked(mockClient.query!).mockResolvedValueOnce(
+        mockQueryResult() as never,
+      )
 
       await DatasetConfig.afterSeed!(mockClient as Client)
 
       expect(mockClient.query).toHaveBeenCalledTimes(2)
-      expect(vi.mocked(mockClient.query!).mock.calls[0][0]).toBe(componentAssignmentSQL)
-      expect(vi.mocked(mockClient.query!).mock.calls[1][0]).toContain('WHERE component_id IS NULL')
+      expect(vi.mocked(mockClient.query!).mock.calls[0][0]).toBe(
+        componentAssignmentSQL,
+      )
+      expect(vi.mocked(mockClient.query!).mock.calls[1][0]).toContain(
+        'WHERE component_id IS NULL',
+      )
     })
 
     it('should warn for orphaned datasets after assignment', async () => {
-      vi.mocked(mockClient.query!).mockResolvedValueOnce(mockQueryResult() as never)
-      vi.mocked(mockClient.query!).mockResolvedValueOnce(mockQueryResult([
-        { dataset_id: 'ORPHAN1', api_endpoint: 'unknown/path' },
-        { dataset_id: 'ORPHAN2', api_endpoint: 'another/unknown' },
-      ]) as never)
+      vi.mocked(mockClient.query!).mockResolvedValueOnce(
+        mockQueryResult() as never,
+      )
+      vi.mocked(mockClient.query!).mockResolvedValueOnce(
+        mockQueryResult([
+          { dataset_id: 'ORPHAN1', api_endpoint: 'unknown/path' },
+          { dataset_id: 'ORPHAN2', api_endpoint: 'another/unknown' },
+        ]) as never,
+      )
 
-      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      const consoleWarnSpy = vi
+        .spyOn(console, 'warn')
+        .mockImplementation(() => {})
 
       await DatasetConfig.afterSeed!(mockClient as Client)
 
-      expect(vi.mocked(mockClient.query!).mock.calls[0][0]).toBe(componentAssignmentSQL)
-      expect(vi.mocked(mockClient.query!).mock.calls[1][0]).toContain('WHERE component_id IS NULL')
+      expect(vi.mocked(mockClient.query!).mock.calls[0][0]).toBe(
+        componentAssignmentSQL,
+      )
+      expect(vi.mocked(mockClient.query!).mock.calls[1][0]).toContain(
+        'WHERE component_id IS NULL',
+      )
       expect(consoleWarnSpy).toHaveBeenCalledWith(
         'Dataset ORPHAN1 is an orphan: no matching component found for endpoint "unknown/path".',
       )
@@ -824,15 +842,25 @@ describe('Dataset Config', () => {
     })
 
     it('should not warn when all datasets are assigned', async () => {
-      vi.mocked(mockClient.query!).mockResolvedValueOnce(mockQueryResult() as never)
-      vi.mocked(mockClient.query!).mockResolvedValueOnce(mockQueryResult() as never)
+      vi.mocked(mockClient.query!).mockResolvedValueOnce(
+        mockQueryResult() as never,
+      )
+      vi.mocked(mockClient.query!).mockResolvedValueOnce(
+        mockQueryResult() as never,
+      )
 
-      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      const consoleWarnSpy = vi
+        .spyOn(console, 'warn')
+        .mockImplementation(() => {})
 
       await DatasetConfig.afterSeed!(mockClient as Client)
 
-      expect(vi.mocked(mockClient.query!).mock.calls[0][0]).toBe(componentAssignmentSQL)
-      expect(vi.mocked(mockClient.query!).mock.calls[1][0]).toContain('WHERE component_id IS NULL')
+      expect(vi.mocked(mockClient.query!).mock.calls[0][0]).toBe(
+        componentAssignmentSQL,
+      )
+      expect(vi.mocked(mockClient.query!).mock.calls[1][0]).toContain(
+        'WHERE component_id IS NULL',
+      )
       expect(consoleWarnSpy).not.toHaveBeenCalled()
 
       consoleWarnSpy.mockRestore()

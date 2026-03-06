@@ -11,12 +11,12 @@ export const SearchDataTablesArgsSchema = {
     label_query: {
       type: 'string',
       description:
-        'Natural language search phrase for the table label (e.g., "language spoken at home", "income by age"). Uses fuzzy similarity matching.',
+        'Natural language search phrase for the table label (e.g., "language spoken at home", "income by age"). Uses fuzzy similarity matching against Census label vocabulary — results are sensitive to phrasing. Prefer Census terminology over plain language when possible (e.g., "poverty" over "low income", "tenure" over "renting vs owning"). Imprecise or paraphrased queries may return poor or irrelevant matches.',
     },
     api_endpoint: {
       type: 'string',
       description:
-        'Scope results to a specific data API endpoint (e.g., "acs/acs1"). When provided, only tables belonging to that endpoint are returned.',
+        'Scope results to a specific data API endpoint (e.g., "acs/acs1"). Strongly recommended when the survey or dataset is already known — dramatically reduces noise and improves result quality. Use the datasets field from a prior search result, or the api_endpoint field from list-datasets, to identify valid values.',
     },
     limit: {
       type: 'number',

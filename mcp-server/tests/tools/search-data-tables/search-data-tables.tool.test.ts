@@ -245,8 +245,6 @@ describe('SearchDataTablesTool', () => {
         expect(table.component).toBe(
           'American Community Survey - ACS 1-Year Estimates',
         )
-
-        console.log(table)
         expect(table.datasets).toEqual({
           '2009': ['acs/acs1'],
           '2010': ['acs/acs1'],

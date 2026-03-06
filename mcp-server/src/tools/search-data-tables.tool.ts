@@ -12,8 +12,12 @@ import { DataTableSearchResultRow } from '../types/data-table.types.js'
 import { ToolContent } from '../types/base.types.js'
 
 export const toolDescription = `
-  Search for Census Bureau data tables by ID, label, or data API endpoint (e.g. acs/acs1). Use this tool when users reference a topic or variable category (e.g., "language spoken at home", "income by race") and need to identify the correct table ID before fetching data. Accepts a table ID prefix (e.g., "B16005"), a natural language label query, and an optional API endpoint scope. Returns a ranked list of matching tables with their canonical labels, component, and available years.
-  
+  Search for Census Bureau data tables by ID, label, or data API endpoint (e.g. acs/acs1). Use this tool when users reference a topic or variable category (e.g., "language spoken at home", "income by race") and need to identify the correct table ID before calling fetch-aggregate-data to retrieve the actual data. Accepts a table ID prefix (e.g., "B16005"), a natural language label query, and an optional API endpoint scope. Returns a ranked list of matching table metadata with their canonical labels, component, and available years.
+
+  Coverage: 32,000+ indexed tables, concentrated in ACS (~83%), CPS (~14%), and SIPP (~3%). Decennial Census, Population Estimates, and Decennial Census of Island Areas have limited coverage. Economic Census, Economic Surveys, Geography, Census Planning Database, and several other programs have no indexed tables — use variables with fetch-aggregate-data for those programs.
+
+  For best results, provide api_endpoint whenever the target survey or dataset is known. Scoping to a specific endpoint significantly improves ranking quality by eliminating cross-survey noise.
+
   Each result object includes:
   - data_table_id: maps to the get.group parameter in fetch-aggregate-data
   - label: canonical label for the data table

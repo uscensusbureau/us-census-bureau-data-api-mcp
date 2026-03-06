@@ -65,7 +65,13 @@ export const updatesSearchDataTablesSQL = `
       AND (
         p_api_endpoint IS NULL
         OR c.api_endpoint = p_api_endpoint
-        OR (c.id IS NULL AND d.api_endpoint = p_api_endpoint)
+        OR c.api_endpoint LIKE (p_api_endpoint || '/%')
+        OR p_api_endpoint LIKE (c.api_endpoint || '/%')
+        OR (c.id IS NULL AND (
+          d.api_endpoint = p_api_endpoint
+          OR d.api_endpoint LIKE (p_api_endpoint || '/%')
+          OR p_api_endpoint LIKE (d.api_endpoint || '/%')
+        ))
       )
       AND (
         p_label_query IS NULL
