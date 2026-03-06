@@ -1,8 +1,14 @@
 import { Tool } from '@modelcontextprotocol/sdk/types.js'
 import { z } from 'zod'
+import fetch from 'node-fetch'
 
 import { BaseTool } from './base.tool.js'
 import { buildCitation } from '../helpers/citation.js'
+import {
+  CacheDuration,
+  CacheDurationUnit,
+  QueryCacheService,
+} from '../services/queryCache.service.js'
 import {
   FetchAggregateDataToolSchema,
   TableArgs,
@@ -25,6 +31,9 @@ export class FetchAggregateDataTool extends BaseTool<TableArgs> {
   inputSchema: Tool['inputSchema'] = TableSchema as Tool['inputSchema']
   readonly requiresApiKey = true
 
+  private cacheService: QueryCacheService
+  private cacheDuration: CacheDuration
+
   get argsSchema() {
     return FetchAggregateDataToolSchema.superRefine((args, ctx) => {
       //Check that the correct tool is used to fetch data
@@ -45,6 +54,8 @@ export class FetchAggregateDataTool extends BaseTool<TableArgs> {
   constructor() {
     super()
     this.handler = this.handler.bind(this)
+    this.cacheService = QueryCacheService.getInstance()
+    this.cacheDuration = new CacheDuration(1, CacheDurationUnit.YEAR)
   }
 
   validateArgs(input: unknown) {
@@ -53,7 +64,7 @@ export class FetchAggregateDataTool extends BaseTool<TableArgs> {
 
   async toolHandler(
     args: TableArgs,
-    apiKey: string,
+    apiKey?: string,
   ): Promise<{ content: ToolContent[] }> {
     const baseUrl = `https://api.census.gov/data/${args.year}/${args.dataset}`
 
@@ -95,14 +106,40 @@ export class FetchAggregateDataTool extends BaseTool<TableArgs> {
     }
 
     const descriptive = args.descriptive?.toString() ?? 'false'
-
     query.append('descriptive', descriptive)
-    query.append('key', apiKey)
 
+    const variablesForDbQuery = args.get.variables || []
+    const geographySpecForDbQuery = JSON.stringify({
+      for: args.for || null,
+      in: args.in || null,
+    })
+
+    if (apiKey) {
+      query.append('key', apiKey)
+    }
     const url = `${baseUrl}?${query.toString()}`
 
+    const cacheParams = {
+      dataset: args.dataset,
+      group: args.get.group || null,
+      year: args.year,
+      variables: variablesForDbQuery,
+      geographySpec: geographySpecForDbQuery,
+    }
+
+    // Check cache
+    const cachedData = await this.cacheService.get(cacheParams)
+    if (cachedData) {
+      console.log(`Retrieving tool results from cache`)
+      const responseText = this.createSuccessResponseText(
+        cachedData,
+        args.dataset,
+        url,
+      )
+      return this.createSuccessResponse(responseText)
+    }
+
     try {
-      const fetch = (await import('node-fetch')).default
       const res = await fetch(url)
 
       console.log(`URL Attempted: ${url}`)
@@ -114,19 +151,36 @@ export class FetchAggregateDataTool extends BaseTool<TableArgs> {
       }
 
       const data = (await res.json()) as string[][]
-      const [headers, ...rows] = data
 
-      const output = rows
-        .map((row) => headers.map((h, i) => `${h}: ${row[i]}`).join(', '))
-        .join('\n')
+      void this.cacheService
+        .set(cacheParams, data, this.cacheDuration)
+        .catch((error: Error) => {
+          console.error('Cache write failed:', error)
+        })
 
-      const citation = buildCitation(url)
-
-      return this.createSuccessResponse(
-        `Response from ${args.dataset}:\n${output}\n${citation}`,
+      const responseText = this.createSuccessResponseText(
+        data,
+        args.dataset,
+        url,
       )
+      return this.createSuccessResponse(responseText)
     } catch (err) {
       return this.createErrorResponse(`Fetch failed: ${(err as Error).message}`)
     }
+  }
+
+  private createSuccessResponseText(
+    responseData: string[][],
+    dataset: string,
+    url: string,
+  ): string {
+    const [headers, ...rows] = responseData
+
+    const output = rows
+      .map((row) => headers.map((h, i) => `${h}: ${row[i]}`).join(', '))
+      .join('\n')
+
+    const citation = buildCitation(url)
+    return `Response from ${dataset}:\n${output}\n${citation}`
   }
 }

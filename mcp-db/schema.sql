@@ -4,8 +4,8 @@
 
 \restrict zUYl3szozuSYEu46e69gZTyAodO4pESFnfbayaH6Q4gupPnty1brXKHlIIqNlqp
 
--- Dumped from database version 16.11 (Debian 16.11-1.pgdg13+1)
--- Dumped by pg_dump version 16.11 (Debian 16.11-1.pgdg13+1)
+-- Dumped from database version 16.12 (Debian 16.12-1.pgdg13+1)
+-- Dumped by pg_dump version 16.12 (Debian 16.12-1.pgdg13+1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -30,6 +30,20 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA public;
 --
 
 COMMENT ON EXTENSION pg_trgm IS 'text similarity measurement and index searching based on trigrams';
+
+
+--
+-- Name: pgcrypto; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
+
+
+--
+-- Name: EXTENSION pgcrypto; Type: COMMENT; Schema: -; Owner: -
+--
+
+COMMENT ON EXTENSION pgcrypto IS 'cryptographic functions';
 
 
 --
@@ -66,16 +80,16 @@ CREATE FUNCTION public.cleanup_expired_cache() RETURNS integer
 
 
 --
--- Name: generate_cache_hash(text, integer, text[], jsonb); Type: FUNCTION; Schema: public; Owner: -
+-- Name: generate_cache_hash(text, text, integer, text[], jsonb); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION public.generate_cache_hash(dataset_code text, year integer, variables text[], geography_spec jsonb) RETURNS text
+CREATE FUNCTION public.generate_cache_hash(dataset_param text, "group" text, year integer, variables text[], geography_spec jsonb) RETURNS text
     LANGUAGE plpgsql IMMUTABLE
     AS $$
     BEGIN
         RETURN encode(
             digest(
-                dataset_code || year::TEXT || array_to_string(variables, ',') || geography_spec::TEXT,
+                dataset_param || "group" || year::TEXT || array_to_string(variables, ',') || geography_spec::TEXT,
                 'sha256'
             ),
             'hex'
@@ -354,16 +368,6 @@ CREATE FUNCTION public.update_updated_at_column() RETURNS trigger
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
-
---
--- Name: api_call_log; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.api_call_log (
-    url text NOT NULL,
-    last_called timestamp without time zone
-);
-
 
 --
 -- Name: census_data_cache; Type: TABLE; Schema: public; Owner: -
@@ -930,14 +934,6 @@ ALTER TABLE ONLY public.years ALTER COLUMN id SET DEFAULT nextval('public.years_
 
 
 --
--- Name: api_call_log api_call_log_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.api_call_log
-    ADD CONSTRAINT api_call_log_pkey PRIMARY KEY (url);
-
-
---
 -- Name: census_data_cache census_data_cache_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1451,13 +1447,6 @@ CREATE INDEX topics_parent_topic_id_index ON public.topics USING btree (parent_t
 
 
 --
--- Name: topics_topic_string_index; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX topics_topic_string_index ON public.topics USING btree (topic_string);
-
-
---
 -- Name: census_data_cache update_census_data_cache_accessed; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -1572,7 +1561,7 @@ ALTER TABLE ONLY public.geographies
 --
 
 ALTER TABLE ONLY public.topics
-    ADD CONSTRAINT topics_parent_topic_id_fkey FOREIGN KEY (parent_topic_id) REFERENCES public.topics(id) ON DELETE CASCADE;
+    ADD CONSTRAINT topics_parent_topic_id_fkey FOREIGN KEY (parent_topic_id) REFERENCES public.topics(id) ON DELETE SET NULL;
 
 
 --
