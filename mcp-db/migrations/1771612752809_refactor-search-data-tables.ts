@@ -1,32 +1,6 @@
 import { MigrationBuilder } from 'node-pg-migrate'
 
-/*
-REFACTOR STEPS
-
-1. Change search features to search by a Component's API Endpoint
-2. Update migrations to rename dataset_param to api_endpoint, instead of dropping the column
-3. Ensure the returned Type has an array of Datasets, with year and endpoint properties
-4. Rework fetch-aggregate-tool to use api_endpoint
-*/
-
 import { searchDataTablesSQL } from './1770926658900_add-data-tables-search-functions.js'
-
-export const componentAssignmentSQL = `
-  UPDATE datasets d
-  SET component_id = match.component_id
-  FROM (
-    SELECT DISTINCT ON (d2.id)
-      d2.id AS dataset_id,
-      c2.id AS component_id
-    FROM datasets d2
-    JOIN components c2
-      ON d2.dataset_param = c2.api_endpoint
-      OR d2.dataset_param LIKE (c2.api_endpoint || '/%')
-    ORDER BY d2.id, LENGTH(c2.api_endpoint) DESC
-  ) match
-  WHERE d.id = match.dataset_id
-  AND d.component_id IS NULL;
-`
 
 export const updatesSearchDataTablesSQL = `
   DROP FUNCTION IF EXISTS search_data_tables(TEXT, TEXT, TEXT, INTEGER);
@@ -125,8 +99,6 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
       onDelete: 'CASCADE',
     },
   })
-
-  pgm.sql(componentAssignmentSQL)
 
   pgm.createIndex('datasets', ['component_id'])
 

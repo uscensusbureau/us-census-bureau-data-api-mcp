@@ -11,6 +11,7 @@ import { Client } from 'pg'
 import fs from 'fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { z } from 'zod'
 
 import { cleanupWithRetry } from '../../test-helpers/database-cleanup'
 import { dbConfig } from '../../test-helpers/database-config'
@@ -21,7 +22,7 @@ import { SeedRunner } from '../../../src/seeds/scripts/seed-runner'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-interface YearRow extends YearSchema {
+interface YearRow extends z.infer<typeof YearSchema> {
   id: number
   created_at: Date
   updated_at: Date

@@ -1,7 +1,6 @@
 import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest'
 import { MigrationBuilder } from 'node-pg-migrate'
 import {
-  componentAssignmentSQL,
   updatesSearchDataTablesSQL,
   up,
   down,
@@ -54,10 +53,6 @@ describe('Migration - Assign Component IDs to Datasets', () => {
           onDelete: 'CASCADE',
         },
       })
-    })
-
-    it('runs the component assignment SQL', () => {
-      expect(sqlSpy).toHaveBeenCalledWith(componentAssignmentSQL)
     })
 
     it('creates an index on datasets.component_id', () => {

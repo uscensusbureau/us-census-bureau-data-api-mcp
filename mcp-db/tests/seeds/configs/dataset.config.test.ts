@@ -8,7 +8,7 @@ import {
   afterAll,
   vi,
 } from 'vitest'
-import { Client } from 'pg'
+import { Client, QueryResult } from 'pg'
 
 // Mock before imports
 vi.mock('../../../src/schema/dataset.schema', () => ({
@@ -24,23 +24,28 @@ vi.mock('../../../src/helpers/get-or-create-year.helper', () => ({
   getOrCreateYear: vi.fn(),
 }))
 
-vi.mock('../../../src/helpers/find-component-id.helper', () => ({
-  findComponentIdHelper: vi.fn(),
-}))
+const mockQueryResult = (rows: Record<string, string>[] = []): QueryResult => ({
+  rows,
+  rowCount: rows.length,
+  command: '',
+  oid: 0,
+  fields: [],
+})
 
 import { cleanupWithRetry } from '../../test-helpers/database-cleanup'
 import { dbConfig } from '../../test-helpers/database-config'
-import { DatasetConfig } from '../../../src/seeds/configs/dataset.config'
+import { 
+  componentAssignmentSQL, 
+  DatasetConfig 
+} from '../../../src/seeds/configs/dataset.config'
 import { SeedRunner } from '../../../src/seeds/scripts/seed-runner'
 import {
-  ApiDataset,
   DatasetRecord,
   parseTemporalRange,
   transformApiDatasetsData,
   TransformedDataset,
   TransformedDatasetsArraySchema,
 } from '../../../src/schema/dataset.schema'
-import { findComponentIdHelper } from '../../../src/helpers/find-component-id.helper'
 import { getOrCreateYear } from '../../../src/helpers/get-or-create-year.helper'
 
 describe('Dataset Config', () => {
@@ -64,7 +69,6 @@ describe('Dataset Config', () => {
     vi.mocked(parseTemporalRange).mockClear()
     vi.mocked(getOrCreateYear).mockClear()
     vi.mocked(TransformedDatasetsArraySchema.parse).mockClear()
-    vi.mocked(findComponentIdHelper).mockClear()
 
     runner = new SeedRunner(databaseUrl)
     await runner.connect()
@@ -85,16 +89,16 @@ describe('Dataset Config', () => {
     expect(datasetSeed?.dataPath).toBe('dataset')
     expect(datasetSeed?.alwaysFetch).toBe(true)
     expect(datasetSeed?.beforeSeed).toBeDefined()
+    expect(datasetSeed?.afterSeed).toBeDefined()
   })
 
   describe('beforeSeed', () => {
     let mockClient: Partial<Client>
+
     beforeEach(() => {
       mockClient = {
         query: vi.fn(),
       }
-
-      vi.mocked(findComponentIdHelper).mockResolvedValue(5)
     })
 
     it('should call transformApiDatasetsData and validate with schema', async () => {
@@ -230,60 +234,6 @@ describe('Dataset Config', () => {
       expect(getOrCreateYear).toHaveBeenNthCalledWith(2, mockClient, 2020)
     })
 
-    describe('findComponentIdHelper behavior', () => {
-      let rawApiData: ApiDataset[]
-
-      const transformedData: TransformedDataset[] = [
-        {
-          name: 'Dataset 1',
-          description: 'Description 1',
-          c_vintage: 1994,
-          type: 'aggregate',
-          dataset_id: 'DATA1',
-          api_endpoint: 'cps/basic/jun',
-        },
-      ]
-
-      beforeEach(() => {
-        rawApiData = [
-          {
-            c_vintage: 1994,
-            c_dataset: ['cps', 'basic', 'jun'],
-            c_isAggregate: true,
-            title: 'Dataset 1',
-            identifier: 'https://api.census.gov/data/id/DATA1',
-            description: 'Description 1',
-          },
-        ]
-
-        vi.mocked(transformApiDatasetsData).mockReturnValue(transformedData)
-        vi.mocked(TransformedDatasetsArraySchema.parse).mockReturnValue(
-          transformedData,
-        )
-        vi.mocked(parseTemporalRange).mockReturnValue({
-          temporal_start: null,
-          temporal_end: null,
-        })
-        vi.mocked(getOrCreateYear).mockResolvedValue(1)
-      })
-
-      it('should call findComponentIdHelper with the correct api_endpoint', async () => {
-        await DatasetConfig.beforeSeed!(mockClient as Client, rawApiData)
-
-        expect(findComponentIdHelper).toHaveBeenCalledWith(
-          mockClient,
-          'cps/basic/jun',
-        )
-      })
-
-      it('should assign the returned component_id to the processed record', async () => {
-        await DatasetConfig.beforeSeed!(mockClient as Client, rawApiData)
-
-        const processedDataset = rawApiData[0] as Partial<DatasetRecord>
-        expect(processedDataset.component_id).toBe(5)
-      })
-    })
-
     it('should remove c_vintage and add year_id to final data', async () => {
       const rawApiData = [
         {
@@ -332,7 +282,6 @@ describe('Dataset Config', () => {
         temporal_start: null,
         temporal_end: null,
         year_id: 42,
-        component_id: 5,
       })
       expect(processedDataset).not.toHaveProperty('c_vintage')
     })
@@ -374,7 +323,6 @@ describe('Dataset Config', () => {
       const processedDataset = rawApiData[0] as Partial<DatasetRecord>
       expect(processedDataset).not.toHaveProperty('year_id')
       expect(processedDataset).not.toHaveProperty('c_vintage')
-      expect(processedDataset.component_id).toBe(5)
     })
 
     describe('temporal data handling', () => {
@@ -762,7 +710,6 @@ describe('Dataset Config', () => {
           temporal_start: null,
           temporal_end: null,
           year_id: 1,
-          component_id: 5,
         })
 
         expect(consoleWarnSpy).toHaveBeenCalledWith(
@@ -830,6 +777,65 @@ describe('Dataset Config', () => {
 
         consoleWarnSpy.mockRestore()
       })
+    })
+  })
+
+  describe('afterSeed', () => {
+    let mockClient: Partial<Client>
+
+    beforeEach(() => {
+      mockClient = {
+        query: vi.fn(),
+      }
+    })
+
+    it('should run componentAssignmentSQL', async () => {
+      vi.mocked(mockClient.query!).mockResolvedValueOnce(mockQueryResult() as never)
+      vi.mocked(mockClient.query!).mockResolvedValueOnce(mockQueryResult() as never)
+
+      await DatasetConfig.afterSeed!(mockClient as Client)
+
+      expect(mockClient.query).toHaveBeenCalledTimes(2)
+      expect(vi.mocked(mockClient.query!).mock.calls[0][0]).toBe(componentAssignmentSQL)
+      expect(vi.mocked(mockClient.query!).mock.calls[1][0]).toContain('WHERE component_id IS NULL')
+    })
+
+    it('should warn for orphaned datasets after assignment', async () => {
+      vi.mocked(mockClient.query!).mockResolvedValueOnce(mockQueryResult() as never)
+      vi.mocked(mockClient.query!).mockResolvedValueOnce(mockQueryResult([
+        { dataset_id: 'ORPHAN1', api_endpoint: 'unknown/path' },
+        { dataset_id: 'ORPHAN2', api_endpoint: 'another/unknown' },
+      ]) as never)
+
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+      await DatasetConfig.afterSeed!(mockClient as Client)
+
+      expect(vi.mocked(mockClient.query!).mock.calls[0][0]).toBe(componentAssignmentSQL)
+      expect(vi.mocked(mockClient.query!).mock.calls[1][0]).toContain('WHERE component_id IS NULL')
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        'Dataset ORPHAN1 is an orphan: no matching component found for endpoint "unknown/path".',
+      )
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        'Dataset ORPHAN2 is an orphan: no matching component found for endpoint "another/unknown".',
+      )
+
+      consoleWarnSpy.mockRestore()
+    })
+
+    it('should not warn when all datasets are assigned', async () => {
+      vi.mocked(mockClient.query!).mockResolvedValueOnce(mockQueryResult() as never)
+      vi.mocked(mockClient.query!).mockResolvedValueOnce(mockQueryResult() as never)
+
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+      await DatasetConfig.afterSeed!(mockClient as Client)
+
+      expect(vi.mocked(mockClient.query!).mock.calls[0][0]).toBe(componentAssignmentSQL)
+      expect(vi.mocked(mockClient.query!).mock.calls[1][0]).toContain('WHERE component_id IS NULL')
+      expect(consoleWarnSpy).not.toHaveBeenCalled()
+
+      consoleWarnSpy.mockRestore()
     })
   })
 })

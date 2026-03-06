@@ -1,6 +1,4 @@
 import { Client } from 'pg'
-
-import { findComponentIdHelper } from '../../helpers/find-component-id.helper.js'
 import { getOrCreateYear } from '../../helpers/get-or-create-year.helper.js'
 import {
   DatasetRecord,
@@ -9,6 +7,23 @@ import {
   TransformedDatasetsArraySchema,
 } from '../../schema/dataset.schema.js'
 import { SeedConfig } from '../../schema/seed-config.schema.js'
+
+export const componentAssignmentSQL = `
+  UPDATE datasets d
+  SET component_id = match.component_id
+  FROM (
+    SELECT DISTINCT ON (d2.id)
+      d2.id AS dataset_id,
+      c2.id AS component_id
+    FROM datasets d2
+    JOIN components c2
+      ON d2.api_endpoint = c2.api_endpoint
+      OR d2.api_endpoint LIKE (c2.api_endpoint || '/%')
+    ORDER BY d2.id, LENGTH(c2.api_endpoint) DESC
+  ) match
+  WHERE d.id = match.dataset_id
+  AND d.component_id IS NULL;
+`
 
 export const DatasetConfig: SeedConfig = {
   url: 'https://api.census.gov/data/',
@@ -43,15 +58,6 @@ export const DatasetConfig: SeedConfig = {
           temporal_end = parsed.temporal_end
         }
 
-        const component_id = await findComponentIdHelper(client, api_endpoint)
-
-        if (component_id === null) {
-          console.warn(
-            `Seeding dataset ${record.dataset_id} as an orphan: no matching component found for endpoint "${api_endpoint}". ` +
-              `This dataset will have component_id = null; ensure this is expected or update components/endpoint mappings.`,
-          )
-        }
-
         if (c_vintage) {
           const yearId = await getOrCreateYear(client, c_vintage)
           return {
@@ -60,7 +66,6 @@ export const DatasetConfig: SeedConfig = {
             temporal_start,
             temporal_end,
             year_id: yearId,
-            component_id,
           }
         } else {
           console.warn(`No year found for dataset: ${record.dataset_id}`)
@@ -71,7 +76,6 @@ export const DatasetConfig: SeedConfig = {
           api_endpoint,
           temporal_start,
           temporal_end,
-          component_id,
         }
       }),
     )
@@ -104,5 +108,25 @@ export const DatasetConfig: SeedConfig = {
     )
     rawData.length = 0
     rawData.push(...deduped)
+  },
+  afterSeed: async (client: Client) => {
+    console.log('Assigning component IDs to datasets...')
+    await client.query(componentAssignmentSQL)
+
+    const orphans = await client.query(`
+      SELECT dataset_id, api_endpoint 
+      FROM datasets 
+      WHERE component_id IS NULL
+    `)
+
+    if (orphans.rowCount && orphans.rowCount > 0) {
+      orphans.rows.forEach((row) => {
+        console.warn(
+          `Dataset ${row.dataset_id} is an orphan: no matching component found for endpoint "${row.api_endpoint}".`,
+        )
+      })
+    }
+
+    console.log('Component assignment complete.')
   },
 }
