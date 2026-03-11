@@ -3,6 +3,7 @@ import { z } from 'zod'
 export const RawProgramSchema = z.object({
   PROGRAM_STRING: z.string(),
   PROGRAM_LABEL: z.string(),
+  PROGRAM_DESCRIPTION: z.string().optional(),
 })
 
 export const RawProgramsArraySchema = z.array(RawProgramSchema)
@@ -10,6 +11,7 @@ export const RawProgramsArraySchema = z.array(RawProgramSchema)
 export const ProgramRecordSchema = z.object({
   acronym: z.string(),
   label: z.string(),
+  description: z.string().optional(),
 })
 
 export type ProgramRecord = z.infer<typeof ProgramRecordSchema>
@@ -42,6 +44,7 @@ export function transformProgramData(rawData: unknown): {
       uniquePrograms.set(row.PROGRAM_STRING, {
         acronym: row.PROGRAM_STRING,
         label: row.PROGRAM_LABEL,
+        description: row.PROGRAM_DESCRIPTION,
       })
     }
   })
