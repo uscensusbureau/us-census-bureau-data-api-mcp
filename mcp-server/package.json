@@ -7,7 +7,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "inspect": "npx @modelcontextprotocol/inspector node dist/index.js",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx --ignore-pattern dist/ --ignore-pattern build/",
     "prepare": "npm run build",
     "test": "vitest --printConsoleTrace=true --silent=false",
     "test:coverage": "vitest --coverage",

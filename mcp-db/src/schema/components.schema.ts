@@ -6,6 +6,8 @@ export const RawComponentSchema = z.object({
   COMPONENT_DESCRIPTION: z.string(),
   API_SHORT_NAME: z.string(),
   PROGRAM_STRING: z.string(),
+  FREQUENCY: z.string().optional(),
+  FREQUENCY_NOTES: z.string().optional(),
 })
 
 export const RawComponentsArraySchema = z.array(RawComponentSchema)
@@ -16,6 +18,8 @@ export const ComponentRecordSchema = z.object({
   description: z.string(),
   api_endpoint: z.string(),
   program_id: z.number(),
+  frequency: z.string().optional(),
+  frequency_notes: z.string().optional(),
 })
 
 export type ComponentRecord = z.infer<typeof ComponentRecordSchema>
@@ -65,6 +69,8 @@ export function transformComponentData(
         description: row.COMPONENT_DESCRIPTION,
         api_endpoint: row.API_SHORT_NAME,
         program_id: programId,
+        frequency: row.FREQUENCY,
+        frequency_notes: row.FREQUENCY_NOTES,
       })
     }
   })

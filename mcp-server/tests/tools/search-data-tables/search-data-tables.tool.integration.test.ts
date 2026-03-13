@@ -11,17 +11,8 @@ import { Client } from 'pg'
 
 import { DatabaseService } from '../../../src/services/database.service'
 import { databaseConfig } from '../../helpers/database-config'
+import { getResponseText } from '../../helpers/get-response-text.js'
 import { SearchDataTablesTool } from '../../../src/tools/search-data-tables.tool'
-
-function getResponseText(
-  response: Awaited<ReturnType<SearchDataTablesTool['handler']>>,
-): string {
-  const item = response.content[0]
-  if (item.type !== 'text') {
-    throw new Error(`Expected text content, got "${item.type}"`)
-  }
-  return (item as { type: 'text'; text: string }).text
-}
 
 describe('SearchDataTablesTool - Integration Tests', () => {
   let testClient: Client

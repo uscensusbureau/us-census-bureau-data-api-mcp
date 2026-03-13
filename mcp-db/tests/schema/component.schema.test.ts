@@ -13,6 +13,18 @@ const validRawComponentData = {
     'ACS 1-Year Supplemental Estimates extend standard 1-year ACS coverage to smaller geographic areas.',
   API_SHORT_NAME: 'acs/acsse',
   PROGRAM_STRING: 'ACS',
+  FREQUENCY: 'Annual',
+  FREQUENCY_NOTES:
+    'Supplemental estimates released roughly one month after standard 1-year products.',
+}
+
+const validRawComponentDataNoOptionals = {
+  COMPONENT_STRING: 'ACSSE',
+  COMPONENT_LABEL: '1-Year Supplemental Estimates',
+  COMPONENT_DESCRIPTION:
+    'ACS 1-Year Supplemental Estimates extend standard 1-year ACS coverage to smaller geographic areas.',
+  API_SHORT_NAME: 'acs/acsse',
+  PROGRAM_STRING: 'ACS',
 }
 
 const invalidRawComponentData = {
@@ -28,6 +40,8 @@ const multipleRawComponents = [
     COMPONENT_DESCRIPTION: 'ACS 1-Year Supplemental Estimates.',
     API_SHORT_NAME: 'acs/acsse',
     PROGRAM_STRING: 'ACS',
+    FREQUENCY: 'Annual',
+    FREQUENCY_NOTES: '',
   },
   {
     COMPONENT_STRING: 'ACSDT5Y',
@@ -35,6 +49,8 @@ const multipleRawComponents = [
     COMPONENT_DESCRIPTION: 'ACS 5-Year Detailed Tables.',
     API_SHORT_NAME: 'acs/acs5',
     PROGRAM_STRING: 'ACS',
+    FREQUENCY: 'Annual',
+    FREQUENCY_NOTES: '',
   },
   {
     COMPONENT_STRING: 'ACSSE',
@@ -42,6 +58,8 @@ const multipleRawComponents = [
     COMPONENT_DESCRIPTION: 'ACS 1-Year Supplemental Estimates.',
     API_SHORT_NAME: 'acs/acsse',
     PROGRAM_STRING: 'ACS',
+    FREQUENCY: 'Annual',
+    FREQUENCY_NOTES: '',
   },
 ]
 
@@ -76,6 +94,13 @@ describe('ComponentsSchema', () => {
       expect(result.success).toBe(true)
     })
 
+    it('should validate without optional FREQUENCY and FREQUENCY_NOTES', () => {
+      const result = RawComponentSchema.safeParse(
+        validRawComponentDataNoOptionals,
+      )
+      expect(result.success).toBe(true)
+    })
+
     it('should invalidate missing COMPONENT_DESCRIPTION', () => {
       const result = RawComponentSchema.safeParse({
         ...validRawComponentData,
@@ -102,7 +127,20 @@ describe('ComponentsSchema', () => {
   })
 
   describe('ComponentRecordSchema', () => {
-    it('validates a complete record', () => {
+    it('validates a complete record with optional fields', () => {
+      const result = ComponentRecordSchema.safeParse({
+        component_id: 'ACSSE',
+        label: '1-Year Supplemental Estimates',
+        description: 'ACS 1-Year Supplemental Estimates.',
+        api_endpoint: 'acs/acsse',
+        program_id: 1,
+        frequency: 'Annual',
+        frequency_notes: 'Released roughly one month after standard products.',
+      })
+      expect(result.success).toBe(true)
+    })
+
+    it('validates a record without optional frequency fields', () => {
       const result = ComponentRecordSchema.safeParse({
         component_id: 'ACSSE',
         label: '1-Year Supplemental Estimates',
@@ -141,7 +179,7 @@ describe('ComponentsSchema', () => {
       expect(result).toHaveLength(2) // ACSSE and ACSDT5Y
     })
 
-    it('transforms data with correct field mappings', () => {
+    it('transforms data with correct field mappings including frequency fields', () => {
       const result = transformComponentData(
         [validRawComponentData],
         programIdMap,
@@ -153,7 +191,37 @@ describe('ComponentsSchema', () => {
           'ACS 1-Year Supplemental Estimates extend standard 1-year ACS coverage to smaller geographic areas.',
         api_endpoint: 'acs/acsse',
         program_id: 1,
+        frequency: 'Annual',
+        frequency_notes:
+          'Supplemental estimates released roughly one month after standard 1-year products.',
       })
+    })
+
+    it('maps frequency when present', () => {
+      const result = transformComponentData(
+        [validRawComponentData],
+        programIdMap,
+      )
+      expect(result[0].frequency).toBe('Annual')
+    })
+
+    it('maps frequency_notes when present', () => {
+      const result = transformComponentData(
+        [validRawComponentData],
+        programIdMap,
+      )
+      expect(result[0].frequency_notes).toBe(
+        'Supplemental estimates released roughly one month after standard 1-year products.',
+      )
+    })
+
+    it('omits frequency and frequency_notes when not present in source', () => {
+      const result = transformComponentData(
+        [validRawComponentDataNoOptionals],
+        programIdMap,
+      )
+      expect(result[0].frequency).toBeUndefined()
+      expect(result[0].frequency_notes).toBeUndefined()
     })
 
     it('deduplicates components by component_id', () => {

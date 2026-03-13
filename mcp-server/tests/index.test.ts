@@ -15,6 +15,12 @@ vi.mock('../src/tools/list-datasets.tool.js', () => ({
     .mockImplementation(() => ({ name: 'list-datasets' })),
 }))
 
+vi.mock('../src/tools/list-survey-programs.tool.js', () => ({
+  ListSurveyProgramsTool: vi
+    .fn()
+    .mockImplementation(() => ({ name: 'list-survey-programs' })),
+}))
+
 vi.mock('../src/tools/fetch-dataset-geography.tool.js', () => ({
   FetchDatasetGeographyTool: vi
     .fn()
@@ -75,7 +81,7 @@ describe('main', () => {
       name: 'population-prompt',
     })
 
-    expect(toolRegistrySpy).toHaveBeenCalledTimes(5)
+    expect(toolRegistrySpy).toHaveBeenCalledTimes(6)
 
     expect(toolRegistrySpy).toHaveBeenCalledWith({
       name: 'fetch-aggregate-data',
@@ -84,6 +90,11 @@ describe('main', () => {
     expect(toolRegistrySpy).toHaveBeenCalledWith({
       name: 'list-datasets',
     })
+
+    expect(toolRegistrySpy).toHaveBeenCalledWith({
+      name: 'list-survey-programs',
+    })
+
     expect(toolRegistrySpy).toHaveBeenCalledWith({
       name: 'fetch-dataset-geography',
     })
