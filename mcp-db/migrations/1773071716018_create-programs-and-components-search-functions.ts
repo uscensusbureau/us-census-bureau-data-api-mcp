@@ -56,8 +56,7 @@ export const listSurveyProgramsSQL = `
     program_label  TEXT,
     program_string VARCHAR(15),
     description    TEXT,
-    table_count    INT,
-    searchable     BOOLEAN
+    table_count    INT
   )
   LANGUAGE sql STABLE
   AS $$
@@ -78,8 +77,7 @@ export const listSurveyProgramsSQL = `
           LIMIT  1
         )
       )                                                          AS description,
-      COUNT(DISTINCT dt.id)::INT                                 AS table_count,
-      COUNT(DISTINCT dt.id) > 0                                  AS searchable
+      COUNT(DISTINCT dt.id)::INT                                 AS table_count
     FROM  programs p
     LEFT  JOIN components          c   ON c.program_id   = p.id
     LEFT  JOIN datasets            d   ON d.component_id = c.id
