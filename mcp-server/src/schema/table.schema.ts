@@ -10,7 +10,7 @@ export const baseProperties = {
   descriptive: {
     type: 'boolean',
     description: 'Add variable labels to the second row of the API results.',
-    examples: ['true', 'false'],
+    examples: [true, false],
   },
   predicates: {
     type: 'object',
