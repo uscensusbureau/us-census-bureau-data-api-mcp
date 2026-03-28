@@ -1,5 +1,6 @@
 import { Tool } from '@modelcontextprotocol/sdk/types.js'
 
+import { flattenResponse } from '../helpers/content-flattener.js'
 import { BaseTool } from './base.tool.js'
 import { DatabaseService } from '../services/database.service.js'
 import {
@@ -82,7 +83,10 @@ export class SearchDataTablesTool extends BaseTool<SearchDataTablesArgs> {
           content: [
             {
               type: 'text',
-              text: `Found ${results.length} Matching Data Table${results.length === 1 ? '' : 's'}:\n\n${JSON.stringify(results, null, 2)}`,
+              text: flattenResponse(
+                `Found ${results.length} Matching Data Table${results.length === 1 ? '' : 's'}:`,
+                results
+              ),
             },
           ],
         }
