@@ -17,6 +17,8 @@ import {
 
 export const toolDescription = `
   Fetches statistical data from U.S. Census Bureau datasets including population, demographics, income, housing, employment, and economic indicators. Use this tool when users request Census statistics, demographic breakdowns, or socioeconomic data for specific geographic areas. Requires a dataset identifier, year/vintage, geographic scope (state, county, tract, etc.), and specific variables or table groups. Returns structured data with proper citations for authoritative government statistics.
+
+  Important: ACS 1-year estimates (acs/acs1) are only available for geographic areas with populations of 65,000 or more. For smaller areas, use ACS 5-year estimates (acs/acs5) instead. See: https://www.census.gov/programs-surveys/acs/guidance/estimates.html
 `
 
 export class FetchAggregateDataTool extends BaseTool<TableArgs> {
@@ -108,6 +110,16 @@ export class FetchAggregateDataTool extends BaseTool<TableArgs> {
       console.log(`URL Attempted: ${url}`)
 
       if (!res.ok) {
+        if (res.status === 400 && isAcs1YearDataset(args.dataset)) {
+          return this.createErrorResponse(
+            `Census API error: ${res.status} ${res.statusText}. ` +
+            `Note: ACS 1-year estimates (acs/acs1) are only available for geographic areas ` +
+            `with populations of 65,000 or more. If the requested area has a smaller population, ` +
+            `try using ACS 5-year estimates instead by changing the dataset to "acs/acs5". ` +
+            `See: https://www.census.gov/programs-surveys/acs/guidance/estimates.html`,
+          )
+        }
+
         return this.createErrorResponse(
           `Census API error: ${res.status} ${res.statusText}`,
         )
@@ -129,4 +141,9 @@ export class FetchAggregateDataTool extends BaseTool<TableArgs> {
       return this.createErrorResponse(`Fetch failed: ${(err as Error).message}`)
     }
   }
+}
+
+function isAcs1YearDataset(dataset: string): boolean {
+  const normalized = dataset.toLowerCase().replace(/\s+/g, '')
+  return normalized.includes('acs/acs1') || normalized.includes('acs1')
 }
