@@ -1,5 +1,6 @@
 import { Tool } from '@modelcontextprotocol/sdk/types.js'
 
+import { flattenResponse } from '../helpers/content-flattener.js'
 import { BaseTool } from './base.tool.js'
 import { DatabaseService } from '../services/database.service.js'
 import {
@@ -103,7 +104,10 @@ export class ResolveGeographyFipsTool extends BaseTool<ResolveGeographyFipsArgs>
           content: [
             {
               type: 'text',
-              text: `Found ${result.length} Matching Geographies:\n\n${JSON.stringify(result, null, 2)}`,
+              text: flattenResponse(
+                `Found ${result.length} Matching Geographies:`,
+                result
+              ),
             },
           ],
         }
