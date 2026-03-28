@@ -1,5 +1,6 @@
 import { Tool } from '@modelcontextprotocol/sdk/types.js'
 
+import { flattenResponse } from '../helpers/content-flattener.js'
 import { BaseTool } from './base.tool.js'
 import { DatabaseService } from '../services/database.service.js'
 import {
@@ -220,7 +221,10 @@ export class FetchDatasetGeographyTool extends BaseTool<FetchDatasetGeographyArg
             content: [
               {
                 type: 'text',
-                text: `Available geographies for ${args.dataset}${args.year ? ` (${args.year})` : ''}:\n\n${JSON.stringify(parsedGeographyData, null, 2)}`,
+                text: flattenResponse(
+                  `Available geographies for ${args.dataset}${args.year ? ` (${args.year})` : ''}:`,
+                  parsedGeographyData
+                ),
               },
             ],
           }
