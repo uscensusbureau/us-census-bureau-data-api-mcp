@@ -1,5 +1,7 @@
 import { z } from 'zod'
 import 'dotenv/config'
+import { fileURLToPath } from 'url'
+import path from 'path'
 
 import { DATABASE_URL } from '../../helpers/database.helper.js'
 import {
@@ -165,7 +167,10 @@ export async function main(runSeedsFunction = runSeeds): Promise<void> {
 }
 
 // ES module equivalent of "if (require.main === module)"
-if (import.meta.url === `file://${process.argv[1]}`) {
+const currentModulePath = fileURLToPath(import.meta.url)
+const entryScriptPath = process.argv[1] ? path.resolve(process.argv[1]) : null
+
+if (entryScriptPath && currentModulePath.toLowerCase() === entryScriptPath.toLowerCase()) {
   main()
 }
 
