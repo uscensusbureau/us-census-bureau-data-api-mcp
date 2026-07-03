@@ -33,9 +33,10 @@ To get started, you will need:
 ## Using the MCP Server
 To use the U.S. Census Bureau Data API MCP server:
 1. Clone or download the project locally.
-2. In a terminal window, navigate to the project’s root directory and run `docker compose --profile prod run --rm census-mcp-db-init sh -c "npm run migrate:up && npm run seed"` to pull data from the Census Data API into the local database. *This is only required on first-time setup.*
-3. Configure your AI Assistant to use the MCP Server (see below).
-4. Start your AI Assistant.
+2. In the project's root directory, copy `sample.env` to `.env` and set `CENSUS_API_KEY` to your Census Bureau Data API key. Docker Compose reads this file automatically. *Most Census Data API endpoints used during seeding reject unauthenticated requests, so this is required.* (Note: this root-level `.env` is separate from the `.env` files in `mcp-server/` and `mcp-db/`, which are only used when running those subprojects directly, outside of Docker Compose — see [Testing](#testing).)
+3. In a terminal window, navigate to the project’s root directory and run `docker compose --profile prod run --rm census-mcp-db-init sh -c "npm run migrate:up && npm run seed"` to pull data from the Census Data API into the local database. *This is only required on first-time setup.*
+4. Configure your AI Assistant to use the MCP Server (see below).
+5. Start your AI Assistant.
 
 Here is an example configuration file that includes the appropriate scripts for launching the MCP Server:
 

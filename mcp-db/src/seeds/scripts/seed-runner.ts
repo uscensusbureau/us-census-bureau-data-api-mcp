@@ -191,7 +191,19 @@ export class SeedRunner {
   private async performFetch(url: string, retryCount = 0): Promise<any> {
     const urlObj = new URL(url)
 
-    console.log(`Making API request to: ${urlObj.toString()}`)
+    if (urlObj.hostname === 'api.census.gov') {
+      const apiKey = process.env.CENSUS_API_KEY
+
+      if (!apiKey) {
+        throw new Error(
+          'CENSUS_API_KEY environment variable is not set. A valid Census Bureau API key is required to fetch data from the Census API. Request one at https://api.census.gov/data/key_signup.html',
+        )
+      }
+
+      urlObj.searchParams.set('key', apiKey)
+    }
+
+    console.log(`Making API request to: ${this.redactApiKey(urlObj)}`)
 
     try {
       const response = await fetch(urlObj.toString())
@@ -222,6 +234,15 @@ export class SeedRunner {
 
       throw error
     }
+  }
+
+  // Redact the API key from a URL before logging it
+  private redactApiKey(urlObj: URL): string {
+    if (!urlObj.searchParams.has('key')) return urlObj.toString()
+
+    const redacted = new URL(urlObj.toString())
+    redacted.searchParams.set('key', 'REDACTED')
+    return redacted.toString()
   }
 
   // Check if an API endpoint has been called before
