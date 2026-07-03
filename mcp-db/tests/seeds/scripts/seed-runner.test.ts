@@ -511,6 +511,85 @@ describe('SeedRunner', () => {
     })
   })
 
+  describe('Census API Key Handling', () => {
+    beforeEach(async () => {
+      await runner.connect()
+      delete process.env.CENSUS_API_KEY
+    })
+
+    afterEach(() => {
+      delete process.env.CENSUS_API_KEY
+    })
+
+    it('should throw a clear error when CENSUS_API_KEY is not set for census.gov requests', async () => {
+      await expect(
+        runner.fetchFromApi(
+          'https://api.census.gov/data/2020/geoinfo?get=NAME&for=us:*',
+        ),
+      ).rejects.toThrow('CENSUS_API_KEY environment variable is not set')
+
+      expect(mockFetch).not.toHaveBeenCalled()
+    })
+
+    it('should attach the API key as a query param for census.gov requests', async () => {
+      process.env.CENSUS_API_KEY = 'test-key-123'
+
+      mockFetch.mockImplementation(() =>
+        Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({ data: ['test'] }),
+        } as Partial<Response> as Response),
+      )
+
+      await runner.fetchFromApi(
+        'https://api.census.gov/data/2020/geoinfo?get=NAME&for=us:*',
+      )
+
+      const requestedUrl = mockFetch.mock.calls[0][0] as string
+      expect(requestedUrl).toContain('key=test-key-123')
+    })
+
+    it('should not require or attach an API key for non-census.gov requests', async () => {
+      mockFetch.mockImplementation(() =>
+        Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({ data: ['test'] }),
+        } as Partial<Response> as Response),
+      )
+
+      await runner.fetchFromApi('https://api.example.com/data')
+
+      const requestedUrl = mockFetch.mock.calls[0][0] as string
+      expect(requestedUrl).not.toContain('key=')
+    })
+
+    it('should redact the API key when logging the request URL', async () => {
+      process.env.CENSUS_API_KEY = 'super-secret-key'
+      const consoleSpy = vi.spyOn(console, 'log')
+
+      mockFetch.mockImplementation(() =>
+        Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({ data: ['test'] }),
+        } as Partial<Response> as Response),
+      )
+
+      await runner.fetchFromApi(
+        'https://api.census.gov/data/2020/geoinfo?get=NAME&for=us:*',
+      )
+
+      const loggedRequestLine = consoleSpy.mock.calls
+        .map(([message]) => String(message))
+        .find((message) => message.includes('Making API request to:'))
+
+      expect(loggedRequestLine).toContain('key=REDACTED')
+      expect(loggedRequestLine).not.toContain('super-secret-key')
+    })
+  })
+
   describe('API Call Logging', () => {
     beforeEach(async () => {
       await runner.connect()
